@@ -1,6 +1,8 @@
 #ifndef ROBOTMAP_H
 #define ROBOTMAP_H
 
+using namespace std;
+
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
  * to a variable name. This provides flexibility changing wiring, makes checking
@@ -22,4 +24,13 @@ const int FRONTRIGHT = 4;
 const int BACKLEFT = 2;
 const int BACKRIGHT = 3;
 const int GEARSHIFTID = 0;
+
+const int STICK = 1;
+
+const int LOWGEAR_BUTTON = 4;
+const int HIGHGEAR_BUTTON = 6;
+const int GEARTOGGLEBUTTON = 1;
+const int FUELPUSHERBUTTON = 5;
+const int CLIMBERBUTTON = 3;
+
 #endif  // ROBOTMAP_H

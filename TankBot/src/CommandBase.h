@@ -7,6 +7,9 @@
 #include <Commands/Command.h>
 
 #include "OI.h"
+#include "Subsystems/DriveTrain.h"
+
+using namespace std;
 
 /**
  * The base for all commands. All atomic commands should subclass CommandBase.
@@ -19,7 +22,10 @@ public:
 	CommandBase(const std::string& name);
 	CommandBase() = default;
 
+	static void init();
+
 	// Create a single static instance of all of your subsystems
+	static std::shared_ptr<DriveTrain> driveTrain;
 	static std::unique_ptr<OI> oi;
 };
 

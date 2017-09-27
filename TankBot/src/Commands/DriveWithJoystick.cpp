@@ -1,4 +1,3 @@
-
 #include "DriveWithJoystick.h"
 #include "Subsystems/DriveTrain.h"
 #include "RobotMap.h"
@@ -51,6 +50,7 @@ void DriveWithJoystick::Execute()
 	} else {
 		zAxis = quadDeadband(zMinThreshold, zMinOutput, zAxis);
 	}
+	cout << xAxis << endl;
 	driveTrain.get()->Drive(xAxis, yAxis, zAxis);
 }
 
