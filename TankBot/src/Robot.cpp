@@ -12,6 +12,7 @@
 class Robot: public frc::IterativeRobot {
 public:
 	void RobotInit() override {
+		CommandBase::init();
 
 	}
 
