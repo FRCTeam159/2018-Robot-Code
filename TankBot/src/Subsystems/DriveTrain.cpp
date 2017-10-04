@@ -50,10 +50,8 @@ DriveTrain::DriveTrain() : Subsystem("DriveTrain"),
 	backRight.EnableControl();
 	frontLeft.EnableControl();
 
-
 	//frontRight.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
 	//backLeft.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
-
 
 	gearPneumatic = new DoubleSolenoid(GEARSHIFTID,0,1);
 	SetLowGear();
@@ -128,9 +126,6 @@ void DriveTrain::CustomArcade(float xAxis, float yAxis, float zAxis, bool square
 	frontRight.Set(-right);
 	backRight.Set(FRONTRIGHT);
 
-	cout << "left:"<<left<<" right:"<<right<<endl;
-
-
 	Publish(false);
 
 	m_safetyHelper->Feed();
@@ -148,6 +143,8 @@ float DriveTrain::coerce(float min, float max, float x) {
 }
 
 void DriveTrain::SetLowGear() {
+	cout << "SetLowGear"<<endl;
+
 	if(!inlowgear){
 		gearPneumatic->Set(DoubleSolenoid::kReverse);
 		cout << "Setting Low Gear"<<endl;
@@ -156,6 +153,7 @@ void DriveTrain::SetLowGear() {
 }
 
 void DriveTrain::SetHighGear() {
+	cout << "SetHighGear"<<endl;
 	if(inlowgear){
 		gearPneumatic->Set(DoubleSolenoid::kForward);
 		cout << "Setting High Gear"<<endl;

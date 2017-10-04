@@ -2,6 +2,8 @@
 #include "Subsystems/DriveTrain.h"
 #include "RobotMap.h"
 
+#define USE_GAMEPAD
+
 DriveWithJoystick::DriveWithJoystick()
 {
 	// Use Requires() here to declare subsystem dependencies
@@ -39,8 +41,14 @@ void DriveWithJoystick::Execute()
 	else if(stick->GetRawButton(HIGHGEAR_BUTTON)){
 		driveTrain->SetHighGear();
 	}
+#ifdef USE_GAMEPAD
+	float yAxis = -stick-> GetRawAxis(1);
+	float xAxis = -stick-> GetRawAxis(5);
+	driveTrain.get()->TankDrive(xAxis, yAxis);
+#else
 	float yAxis = stick-> GetY();
 	float xAxis = stick-> GetX();
+
 	float zAxis = stick-> GetZ();
 	// Run axis values through deadband
 	yAxis = quadDeadband(.3, .4, yAxis);
@@ -52,6 +60,8 @@ void DriveWithJoystick::Execute()
 	}
 	cout << xAxis << endl;
 	driveTrain.get()->Drive(xAxis, yAxis, zAxis);
+#endif
+
 }
 
 // Make this return true when this Command no longer needs to run execute()
