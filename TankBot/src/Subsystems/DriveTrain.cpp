@@ -121,10 +121,12 @@ void DriveTrain::CustomArcade(float xAxis, float yAxis, float zAxis, bool square
 	// Make sure values are between -1 and 1
 	left = coerce(-1, 1, left);
 	right = coerce(-1, 1, right);
-	frontLeft.Set(BACKLEFT);
 	backLeft.Set(left);
 	frontRight.Set(-right);
 	backRight.Set(FRONTRIGHT);
+	frontLeft.Set(BACKLEFT);
+
+
 
 	Publish(false);
 
@@ -224,6 +226,67 @@ void DriveTrain::TankDrive(float left, float right) { //Autonomous drive train c
 
 	m_safetyHelper->Feed();
 }
+/**
+ * Arcade drive implements single stick driving.
+ *
+ * This function lets you directly provide joystick values from any source.
+ *
+ * @param moveValue     The value to use for fowards/backwards
+ * @param rotateValue   The value to use for the rotate right/left
+ * @param squaredInputs If set, increases the sensitivity at low speeds
+ */
+void DriveTrain::ArcadeDrive(float moveValue, float rotateValue,
+		bool squaredInputs) {
+
+	// local variables to hold the computed PWM values for the motors
+	double leftMotorOutput;
+	double rightMotorOutput;
+
+	if (squaredInputs) {
+		// square the inputs (while preserving the sign) to increase fine control
+		// while permitting full power
+		if (moveValue >= 0.0) {
+			moveValue = (moveValue * moveValue);
+		} else {
+			moveValue = -(moveValue * moveValue);
+		}
+		if (rotateValue >= 0.0) {
+			rotateValue = (rotateValue * rotateValue);
+		} else {
+			rotateValue = -(rotateValue * rotateValue);
+		}
+	}
+
+	if (moveValue > 0.0) {
+		if (rotateValue > 0.0) {
+			leftMotorOutput = moveValue - rotateValue;
+			rightMotorOutput = std::max(moveValue, rotateValue);
+		} else {
+			leftMotorOutput = std::max(moveValue, -rotateValue);
+			rightMotorOutput = moveValue + rotateValue;
+		}
+	} else {
+		if (rotateValue > 0.0) {
+			leftMotorOutput = -std::max(-moveValue, rotateValue);
+			rightMotorOutput = moveValue + rotateValue;
+		} else {
+			leftMotorOutput = moveValue - rotateValue;
+			rightMotorOutput = -std::max(-moveValue, -rotateValue);
+		}
+	}
+	// Ramp values up
+	// Make sure values are between -1 and 1
+	leftMotorOutput  = coerce(-1, 1, leftMotorOutput);
+	rightMotorOutput = coerce(-1, 1, rightMotorOutput);
+	backLeft.Set(leftMotorOutput);
+	frontRight.Set(-rightMotorOutput);
+	backRight.Set(FRONTRIGHT);
+	frontLeft.Set(BACKLEFT);
+	Publish(false);
+
+	m_safetyHelper->Feed();
+}
+
 void DriveTrain::Enable() {
 	//backRight.Enable();
 	//frontLeft.Enable();

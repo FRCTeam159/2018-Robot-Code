@@ -2,7 +2,10 @@
 #include "Subsystems/DriveTrain.h"
 #include "RobotMap.h"
 
-#define USE_GAMEPAD
+#define TANK 1
+#define ARCADE2 2
+#define ARCADE3 3
+#define CONTROLMODE ARCADE2
 
 DriveWithJoystick::DriveWithJoystick()
 {
@@ -14,22 +17,11 @@ DriveWithJoystick::DriveWithJoystick()
 void DriveWithJoystick::Initialize()
 {
 	std::cout << "DriveWithJoystick::Initialize()" << std::endl;
-
-	frc::SmartDashboard::PutNumber("xMinThreshold", 0.7);
-	frc::SmartDashboard::PutNumber("xMinOutput", 0.8);
-
-	frc::SmartDashboard::PutNumber("zMinThreshold", 0.4);
-	frc::SmartDashboard::PutNumber("zMinOutput", 0.6);
 }
 
 // Called repeatedly when this Command is scheduled to run
 void DriveWithJoystick::Execute()
 {
-	double xMinThreshold = SmartDashboard::GetNumber("xMinThreshold",0.7);
-	double xMinOutput = SmartDashboard::GetNumber("xMinOutput",0.8);
-
-	double zMinThreshold = SmartDashboard::GetNumber("zMinThreshold",0.4);
-	double zMinOutput = SmartDashboard::GetNumber("zMinOutput",0.6);
 
 	// Get axis values
 	Joystick *stick = oi->GetJoystick();
@@ -41,14 +33,18 @@ void DriveWithJoystick::Execute()
 	else if(stick->GetRawButton(HIGHGEAR_BUTTON)){
 		driveTrain->SetHighGear();
 	}
-#ifdef USE_GAMEPAD
-	float yAxis = -stick-> GetRawAxis(1);
-	float xAxis = -stick-> GetRawAxis(5);
+	float yAxis=0,xAxis=0,zAxis=0;
+#if CONTROLMODE == ARCADE2
+	xAxis = stick-> GetRawAxis(1);
+	yAxis = -stick-> GetRawAxis(4);
+	driveTrain.get()->ArcadeDrive(xAxis, yAxis, false);
+#elif CONTROLMODE == TANK
+	yAxis = -stick-> GetRawAxis(5);
+	xAxis = -stick-> GetRawAxis(1);
 	driveTrain.get()->TankDrive(xAxis, yAxis);
-#else
+#else // ARCADE3
 	float yAxis = stick-> GetY();
 	float xAxis = stick-> GetX();
-
 	float zAxis = stick-> GetZ();
 	// Run axis values through deadband
 	yAxis = quadDeadband(.3, .4, yAxis);
@@ -58,8 +54,7 @@ void DriveWithJoystick::Execute()
 	} else {
 		zAxis = quadDeadband(zMinThreshold, zMinOutput, zAxis);
 	}
-	cout << xAxis << endl;
-	driveTrain.get()->Drive(xAxis, yAxis, zAxis);
+	driveTrain.get()->CustomArcade(xAxis, yAxis, zAxis,true);
 #endif
 
 }

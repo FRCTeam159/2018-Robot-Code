@@ -22,7 +22,6 @@ private:
 	ADXRS450_Gyro gyro;
 	bool inlowgear=false;
 	void InitDrive();
-	void CustomArcade(float xAxis, float yAxis, float zAxis, bool squaredInputs);
 	float coerce(float min, float max, float x);
 	void Publish(bool);
 public:
@@ -35,7 +34,8 @@ public:
 	void DisableDrive();
 	void EnableDrive();
 	void TankDrive(float xAxis, float yAxis);
-
+	void CustomArcade(float xAxis, float yAxis, float zAxis, bool squaredInputs);
+	void ArcadeDrive(float xAxis, float yAxis, bool squaredInputs);
 	// required MotorSafety functions
 	std::unique_ptr<MotorSafetyHelper> m_safetyHelper;
 	void SetExpiration(double timeout) override;
