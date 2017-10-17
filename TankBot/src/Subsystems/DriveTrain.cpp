@@ -15,8 +15,8 @@
 #else
 #define DRIVE_ENCODER_TICKS 900
 #endif
-#define WHEEL_DIAMETER 4.25
-#define GEAR_REDUCTION (3*38/22)
+#define WHEEL_DIAMETER 3
+#define GEAR_REDUCTION (1)
 
 #define TICKS_PER_INCH (DRIVE_ENCODER_TICKS*GEAR_REDUCTION/M_PI/WHEEL_DIAMETER)
 
@@ -50,8 +50,8 @@ DriveTrain::DriveTrain() : Subsystem("DriveTrain"),
 	backRight.EnableControl();
 	frontLeft.EnableControl();
 
-	//frontRight.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
-	//backLeft.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
+	frontRight.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
+	backLeft.ConfigEncoderCodesPerRev(DRIVE_ENCODER_TICKS);
 
 	gearPneumatic = new DoubleSolenoid(GEARSHIFTID,0,1);
 	SetLowGear();
@@ -315,8 +315,8 @@ void DriveTrain::Publish(bool init) {
 }
 
 double DriveTrain::GetDistance() {
-	double d1=-frontRight.GetPosition();
-	double d2=backLeft.GetPosition();
+	double d1=frontRight.GetPosition();
+	double d2=-backLeft.GetPosition();
 	double x=0.5*(d1+d2);
 	return ROUND(x);
 }

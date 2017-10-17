@@ -6,6 +6,7 @@
 #include <LiveWindow/LiveWindow.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SmartDashboard/SmartDashboard.h>
+#include "Commands/Autonomous.h"
 
 #include "CommandBase.h"
 
@@ -41,7 +42,11 @@ public:
 	 * to the if-else structure below with additional strings & commands.
 	 */
 	void AutonomousInit() override {
+		CommandGroup *autonomous=new Autonomous();
+		autonomousCommand.reset(autonomous);
 
+			if (autonomousCommand.get() != nullptr)
+				autonomousCommand->Start();
 	}
 
 	void AutonomousPeriodic() override {
