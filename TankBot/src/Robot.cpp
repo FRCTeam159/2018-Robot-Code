@@ -14,7 +14,8 @@ class Robot: public frc::IterativeRobot {
 public:
 	void RobotInit() override {
 		CommandBase::init();
-
+		CommandGroup *autonomous=new Autonomous();
+				autonomousCommand.reset(autonomous);
 	}
 
 	/**
@@ -42,8 +43,7 @@ public:
 	 * to the if-else structure below with additional strings & commands.
 	 */
 	void AutonomousInit() override {
-		CommandGroup *autonomous=new Autonomous();
-		autonomousCommand.reset(autonomous);
+
 
 			if (autonomousCommand.get() != nullptr)
 				autonomousCommand->Start();

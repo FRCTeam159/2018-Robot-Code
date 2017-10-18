@@ -1,24 +1,37 @@
 #include "DriveStraight.h"
 
-#define P 0.1
+#define P 1.0
 #define I 0.0
 #define D 0.0
+#define TOL 0.1
 
 DriveStraight::DriveStraight(double d)  : CommandBase("DriveStraight"),
 	pid(P,I,D,this,this)
 {
 	Requires(driveTrain.get());
 	distance=d;
+	tolerance=TOL;
     std::cout << "new DriveStraight("<<d<<")"<< std::endl;
+    frc::SmartDashboard::PutNumber("P",P);
+    frc::SmartDashboard::PutNumber("I",I);
+    frc::SmartDashboard::PutNumber("D",D);
+    frc::SmartDashboard::PutNumber("TOL",TOL);
 }
 
 // Called just before this Command runs the first time
 void DriveStraight::Initialize() {
+	double p = frc::SmartDashboard::GetNumber("P",P);
+	double i = frc::SmartDashboard::GetNumber("I",I);
+	double d = frc::SmartDashboard::GetNumber("D",D);
+	tolerance=frc::SmartDashboard::GetNumber("TOL",TOL);
+	last_ontarget=false;
+	pid.SetPID(p,i,d);
 	driveTrain->Reset();
   	pid.Reset();
 	pid.SetSetpoint(distance);
-	pid.SetAbsoluteTolerance(1);
+	pid.SetAbsoluteTolerance(tolerance);
 	pid.Enable();
+	//pid.SetToleranceBuffer(5);
 	driveTrain->Enable();
 	std::cout << "DriveStraight Started .."<< std::endl;
 }
@@ -27,9 +40,12 @@ void DriveStraight::Initialize() {
 void DriveStraight::Execute() {
 }
 
-// Make this return true when this Command no longer needs to run execute()
+// Make this return true when this Command n o longer needs to run execute()
 bool DriveStraight::IsFinished() {
-	return pid.OnTarget();
+	bool new_target=pid.OnTarget();
+	return new_target && last_ontarget;
+	last_ontarget=new_target;
+	return false;
 }
 
 // Called once after isFinished returns true

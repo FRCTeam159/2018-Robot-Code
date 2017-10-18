@@ -8,5 +8,5 @@
 //}
 Autonomous::Autonomous() {
 
-	AddSequential(new DriveStraight(30));
+	AddSequential(new DriveStraight(60));
 }

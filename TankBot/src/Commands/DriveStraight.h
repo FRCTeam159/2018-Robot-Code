@@ -6,6 +6,8 @@
 class DriveStraight : public CommandBase , public PIDSource, public PIDOutput{
 	PIDController pid;
 	double distance;
+	double tolerance;
+	bool last_ontarget=false;
 public:
 	DriveStraight(double d);
 	void Initialize();
