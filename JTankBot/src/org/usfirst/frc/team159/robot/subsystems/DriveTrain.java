@@ -99,7 +99,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 				rightMotorOutput = moveValue + rotateValue;
 			} else {
 				leftMotorOutput = moveValue - rotateValue;
-				rightMotorOutput = Math.max(-moveValue, -rotateValue);
+				rightMotorOutput = -Math.max(-moveValue, -rotateValue);
 			}
 		}
 		// Ramp values up

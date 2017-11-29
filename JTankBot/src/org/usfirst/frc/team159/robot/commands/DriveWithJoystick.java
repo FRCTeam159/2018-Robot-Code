@@ -26,8 +26,8 @@ public class DriveWithJoystick extends Command {
 	protected void execute() {
 		Joystick stick = OI.stick;
 		
-    	double yAxis = -stick.getRawAxis(1); // left stick - drive
-    	double xAxis = -stick.getRawAxis(3); // right stick - rotate
+    	double yAxis = stick.getRawAxis(1); // left stick - drive
+    	double xAxis = -stick.getRawAxis(4); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(yAxis, xAxis, true);
 	}
 
