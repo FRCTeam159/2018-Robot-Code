@@ -278,6 +278,7 @@ void DriveTrain::ArcadeDrive(float moveValue, float rotateValue,
 	// Make sure values are between -1 and 1
 	leftMotorOutput  = coerce(-1, 1, leftMotorOutput);
 	rightMotorOutput = coerce(-1, 1, rightMotorOutput);
+	//cout<<"left:"<<leftMotorOutput<<" right:"<<rightMotorOutput<<endl;
 	backLeft.Set(leftMotorOutput);
 	frontRight.Set(-rightMotorOutput);
 	backRight.Set(FRONTRIGHT);

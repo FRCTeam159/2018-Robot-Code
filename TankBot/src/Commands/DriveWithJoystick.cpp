@@ -17,6 +17,7 @@ DriveWithJoystick::DriveWithJoystick()
 void DriveWithJoystick::Initialize()
 {
 	std::cout << "DriveWithJoystick::Initialize()" << std::endl;
+	driveTrain->Enable();
 }
 
 // Called repeatedly when this Command is scheduled to run
@@ -25,7 +26,6 @@ void DriveWithJoystick::Execute()
 
 	// Get axis values
 	Joystick *stick = oi->GetJoystick();
-
 
 	if (stick->GetRawButton(LOWGEAR_BUTTON)){
 		driveTrain->SetLowGear();
@@ -37,6 +37,7 @@ void DriveWithJoystick::Execute()
 #if CONTROLMODE == ARCADE2
 	xAxis = stick-> GetRawAxis(1);
 	yAxis = -stick-> GetRawAxis(4);
+	cout<<"left:"<<xAxis<<" right:"<<yAxis<<endl;
 	driveTrain.get()->ArcadeDrive(xAxis, yAxis, false);
 #elif CONTROLMODE == TANK
 	yAxis = -stick-> GetRawAxis(5);

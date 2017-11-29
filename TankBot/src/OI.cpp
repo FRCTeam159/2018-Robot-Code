@@ -3,7 +3,7 @@
 #include <WPILib.h>
 
 OI::OI() {
-	stick = new Joystick(STICK);
+	stick = new Joystick(0);
 	// Process operator interface input here.
 }
 

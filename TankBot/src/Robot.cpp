@@ -62,7 +62,7 @@ public:
 	}
 
 	void TeleopPeriodic() override {
-		cout << "TeleopPeriodic" << endl;
+		//cout << "TeleopPeriodic" << endl;
 		frc::Scheduler::GetInstance()->Run();
 	}
 
