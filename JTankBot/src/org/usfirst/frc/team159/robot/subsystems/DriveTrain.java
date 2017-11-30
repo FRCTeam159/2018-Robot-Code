@@ -110,6 +110,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight.set(-rightMotorOutput);
 		backRight.set(RobotMap.FRONTRIGHT);
 		frontLeft.set(RobotMap.BACKLEFT);
+		safetyHelper.feed();
 	}
 
 	@Override
@@ -156,5 +157,20 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	public String getDescription() {
 		// TODO Auto-generated method stub
 		return "Robot Drive";
+	}
+
+	public double getDistance() {
+		double d1=getRightDistance();
+		double d2=getLeftDistance();
+		double x=0.5*(d1+d2);
+		return x;
+	}
+
+	private double getRightDistance() {
+		return frontRight.getPosition();
+	}
+
+	private double getLeftDistance() {
+		return -backLeft.getPosition();
 	}
 }
