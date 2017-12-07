@@ -20,6 +20,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private CANTalon frontRight;
 	private CANTalon backLeft;
 	private CANTalon backRight;
+	public int ticks=900;
 	
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 
@@ -41,6 +42,14 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 		frontLeft.changeControlMode(CANTalon.TalonControlMode.Follower);
 		backRight.changeControlMode(CANTalon.TalonControlMode.Follower);
+		frontRight.configEncoderCodesPerRev(ticks);
+		backLeft.configEncoderCodesPerRev(ticks);
+		
+		frontRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		frontRight.enableLimitSwitch(false, false);
+		backLeft.enableLimitSwitch(false, false);
+		//backLeft.setInverted(false);
 	}
 	
 	public void enable(){
@@ -50,7 +59,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	
 	public void tankDrive(double left, double right) {
 		backLeft.set(-left);
-		frontRight.set(-right);
+		frontRight.set(right);
 		backRight.set(RobotMap.FRONTRIGHT);
 		frontLeft.set(RobotMap.BACKLEFT);
 
