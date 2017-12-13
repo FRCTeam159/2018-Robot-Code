@@ -20,7 +20,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private CANTalon frontRight;
 	private CANTalon backLeft;
 	private CANTalon backRight;
-	public int ticks=900;
+	public static double wheel_diameter=4.0;
+	public static int ticks=900;
 	
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 
@@ -49,12 +50,24 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		frontRight.enableLimitSwitch(false, false);
 		backLeft.enableLimitSwitch(false, false);
-		//backLeft.setInverted(false);
+	
 	}
 	
 	public void enable(){
 		frontRight.enable();
 		backLeft.enable();
+	}
+	
+	public void reset(){
+		frontRight.reset();
+		backLeft.reset();
+		backLeft.setPosition(0);
+		frontRight.setPosition(0);
+	}
+	
+	public void disable(){
+		frontRight.disable();
+		backLeft.disable();
 	}
 	
 	public void tankDrive(double left, double right) {
@@ -175,11 +188,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		return x;
 	}
 
-	private double getRightDistance() {
+	public double getRightDistance() {
 		return frontRight.getPosition();
 	}
 
-	private double getLeftDistance() {
+	public double getLeftDistance() {
 		return -backLeft.getPosition();
 	}
 }
