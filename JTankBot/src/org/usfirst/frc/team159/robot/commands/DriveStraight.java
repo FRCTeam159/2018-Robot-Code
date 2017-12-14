@@ -19,7 +19,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 	double tolerance=0.1;
 	boolean last_ontarget=false;
 	PIDSourceType type=PIDSourceType.kDisplacement;
-	static public double P=1.0;
+	static public double P=0.5;
 	static public double I=0.0;
 	static public double D=0.0;
 	static public double TOL=0.05;

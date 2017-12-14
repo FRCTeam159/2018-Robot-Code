@@ -20,7 +20,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private CANTalon frontRight;
 	private CANTalon backLeft;
 	private CANTalon backRight;
-	public static double wheel_diameter=4.0;
+	public static double wheel_diameter=4.25;
 	public static int ticks=900;
 	
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
@@ -43,8 +43,10 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 		frontLeft.changeControlMode(CANTalon.TalonControlMode.Follower);
 		backRight.changeControlMode(CANTalon.TalonControlMode.Follower);
-		frontRight.configEncoderCodesPerRev(ticks);
-		backLeft.configEncoderCodesPerRev(ticks);
+		double feet_per_rev=wheel_diameter*Math.PI/12;
+		int ticks_per_foot=(int)(ticks/feet_per_rev);
+		frontRight.configEncoderCodesPerRev(ticks_per_foot);
+		backLeft.configEncoderCodesPerRev(ticks_per_foot);
 		
 		frontRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
