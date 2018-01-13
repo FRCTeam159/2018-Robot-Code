@@ -9,7 +9,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
+import org.usfirst.frc.team159.robot.subsystems.CubeHandeler;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
+import org.usfirst.frc.team159.robot.subsystems.Elevator;
+import org.usfirst.frc.team159.robot.subsystems.RampHandler;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -20,7 +23,13 @@ import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
  */
 public class Robot extends IterativeRobot {
 
+	public static final Elevator elevator = new Elevator();
+	public static final CubeHandeler cubehandeler = new CubeHandeler();
+	public static final RampHandler ramphandler = new RampHandler();
 	public static final DriveTrain driveTrain = new DriveTrain();
+
+
+
 	public static OI oi;
 
 	Command autonomousCommand;
@@ -33,9 +42,9 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		oi = new OI();
-		chooser.addDefault("Default Auto", new DriveWithJoystick());
+		//chooser.addDefault("Default Auto", new DriveWithJoystick());
 		// chooser.addObject("My Auto", new MyAutoCommand());
-		SmartDashboard.putData("Auto mode", chooser);
+		//SmartDashboard.putData("Auto mode", chooser);
 	}
 
 	/**
@@ -98,6 +107,7 @@ public class Robot extends IterativeRobot {
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
+		//Scheduler.getInstance().run();
 	}
 
 	/**

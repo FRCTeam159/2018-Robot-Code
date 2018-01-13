@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.command.Command;
 
 import org.usfirst.frc.team159.robot.OI;
 import org.usfirst.frc.team159.robot.Robot;
+import org.usfirst.frc.team159.robot.RobotMap;
 
 /**
  *
@@ -24,10 +25,10 @@ public class DriveWithJoystick extends Command {
 	// Called repeatedly when this Command is scheduled to run
 	@Override
 	protected void execute() {
-		Joystick stick = OI.stick;
+		Joystick stick = OI.driver_controller;
 		
-    	double yAxis = stick.getRawAxis(1); // left stick - drive
-    	double xAxis = -stick.getRawAxis(4); // right stick - rotate
+    	double yAxis = stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
+    	double xAxis = -stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(yAxis, xAxis, true);
 	}
 

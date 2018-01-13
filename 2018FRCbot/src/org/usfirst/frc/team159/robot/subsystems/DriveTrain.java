@@ -138,9 +138,10 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		// Make sure values are between -1 and 1
 		leftMotorOutput  = coerce(-1, 1, leftMotorOutput);
 		rightMotorOutput = coerce(-1, 1, rightMotorOutput);
-		System.out.printf("l:%d r:%d\n",
+		/*System.out.printf("l:%d r:%d\n",
 				frontRight.getSensorCollection().getQuadraturePosition(),
 				-backLeft.getSensorCollection().getQuadraturePosition());
+				*/
 		backLeft.set(leftMotorOutput);
 		frontRight.set(-rightMotorOutput);
 		safetyHelper.feed();
