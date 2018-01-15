@@ -24,6 +24,10 @@ public class RobotMap {
 	public static int RIGHTJOYSTICK=4;
 	public static int LEFTTRIGGER=2;
 	public static int RIGHTTRIGGER=3;
+	public static int LOWGEAR_BUTTON=5;
+	public static int HIGHGEAR_BUTTON=6;
+	//other
+	public static int GEARSHIFTID=0;
 	//Constants
 	public static final int INCODERLOOPTIME = 5;
 	public static final int timeoutMs = 10;

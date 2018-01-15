@@ -14,7 +14,7 @@ public class Elevator extends Subsystem {
 	private WPI_TalonSRX elevatormotor;
 	public Elevator () {
 		super();
-		//elevatormotor = new WPI_TalonSRX(RobotMap.ELEVATORMOTOR);
+		elevatormotor = new WPI_TalonSRX(RobotMap.ELEVATORMOTOR);
 		
 	}
     // Put methods for controlling this subsystem
@@ -25,8 +25,11 @@ public class Elevator extends Subsystem {
         setDefaultCommand(new ElevatorCommands());
     }
     public void set(double value) {
-    	//elevatormotor.set(value);
+    	elevatormotor.set(value);
     }
+    public void reset() {
+    }
+
 }
 
 

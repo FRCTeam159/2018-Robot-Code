@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
+import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandeler;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
@@ -23,12 +24,11 @@ import org.usfirst.frc.team159.robot.subsystems.RampHandler;
  */
 public class Robot extends IterativeRobot {
 
-	public static final Elevator elevator = new Elevator();
-	public static final CubeHandeler cubehandeler = new CubeHandeler();
-	public static final RampHandler ramphandler = new RampHandler();
-	public static final DriveTrain driveTrain = new DriveTrain();
-
-
+	public static Elevator elevator;
+	public static CubeHandeler cubehandeler;
+	public static RampHandler ramphandler;
+	public static DriveTrain driveTrain;
+	public static Cameras cameras;
 
 	public static OI oi;
 
@@ -41,6 +41,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		driveTrain = new DriveTrain();
+		elevator = new Elevator();
+		cubehandeler = new CubeHandeler();
+		ramphandler = new RampHandler();
+		cameras = new Cameras();
+
 		oi = new OI();
 		//chooser.addDefault("Default Auto", new DriveWithJoystick());
 		// chooser.addObject("My Auto", new MyAutoCommand());
@@ -104,10 +110,10 @@ public class Robot extends IterativeRobot {
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
 		driveTrain.reset();
+		elevator.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
-		//Scheduler.getInstance().run();
 	}
 
 	/**

@@ -12,7 +12,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.MotorSafetyHelper;
 import edu.wpi.first.wpilibj.command.Subsystem;
-
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 /**
  *
  */
@@ -28,9 +28,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	public static int ticks_per_rev=18654;
 	public static double feet_per_rev=Math.PI*wheel_diameter/12.0;
 	public static double ticks_per_foot= ticks_per_rev/feet_per_rev;
-	
+	private boolean inlowgear=false;
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
-
+	private DoubleSolenoid gearPneumatic;
 	public void initDefaultCommand() {
 		// Set the default command for a subsystem here.
 		// setDefaultCommand(new MySpecialCommand());
@@ -57,6 +57,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
 		//frontRight.enableLimitSwitch(false, false);
 		//backLeft.enableLimitSwitch(false, false);
+		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFTID,0,1);
 		reset();
 	}
 	
@@ -76,6 +77,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		//backLeft.reset();
 		backLeft.getSensorCollection().setQuadraturePosition(0, 5);
 		frontRight.getSensorCollection().setQuadraturePosition(0, 5);
+		setLowGear();
 	}
 	
 	public void disable(){
@@ -98,7 +100,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 	
 	public void arcadeDrive(double moveValue, double rotateValue,
-			boolean squaredInputs) {
+		boolean squaredInputs) {
 		double leftMotorOutput;
 		double rightMotorOutput;
 
@@ -210,5 +212,30 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		double ticks= -backLeft.getSensorCollection().getQuadraturePosition();
 		return ticks/ticks_per_foot;
 		//return -backLeft.getPosition();
+	}
+	public void setLowGear() {
+		//cout << "SetLowGear"<<endl;
+
+		if(!inlowgear){
+			gearPneumatic.set(DoubleSolenoid.Value.kReverse);
+			//cout << "Setting Low Gear"<<endl;
+			inlowgear=true;
+		}
+	}
+
+	public void setHighGear() {
+		//cout << "SetHighGear"<<endl;
+		if(inlowgear){
+			gearPneumatic.set(DoubleSolenoid.Value.kForward);
+			//cout << "Setting High Gear"<<endl;
+			inlowgear=false;
+		}
+	}
+	public boolean isInLowGear() {
+		if(inlowgear){
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

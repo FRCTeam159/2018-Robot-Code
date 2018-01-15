@@ -25,11 +25,12 @@ public class ElevatorCommands extends Command {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-		Joystick stick = OI.driver_controller;
-    	double Left = stick.getRawAxis(RobotMap.LEFTTRIGGER);
+		Joystick stick = OI.operator_controller;
+    	double Left = -stick.getRawAxis(RobotMap.LEFTTRIGGER);
     	double Right = stick.getRawAxis(RobotMap.RIGHTTRIGGER);
-		System.out.printf("L=%f R=%g", Left, Right);
-    		
+    	double value = Right + Left;
+		//System.out.printf("L=%f R=%f V=%f\n", Left, Right, value);	
+		Robot.elevator.set(value);
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -46,5 +47,7 @@ public class ElevatorCommands extends Command {
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+    	System.out.println("Elevator.interrupted");
+    	end();
     }
 }
