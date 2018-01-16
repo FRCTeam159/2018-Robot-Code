@@ -213,6 +213,19 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		return ticks/ticks_per_foot;
 		//return -backLeft.getPosition();
 	}
+	
+	public double getVelocity() {
+		return (getLeftVelocity()+getRightVelocity())/2;
+	}
+	
+	public double getLeftVelocity() {
+		return (-backLeft.getSensorCollection().getQuadratureVelocity())/ticks_per_foot;
+	}
+	
+	public double getRightVelocity() {
+		return (frontRight.getSensorCollection().getQuadratureVelocity())/ticks_per_foot;
+	}
+	
 	public void setLowGear() {
 		//cout << "SetLowGear"<<endl;
 

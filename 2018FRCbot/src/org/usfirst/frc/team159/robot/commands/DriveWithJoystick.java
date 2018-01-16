@@ -1,6 +1,7 @@
 package org.usfirst.frc.team159.robot.commands;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
 import org.usfirst.frc.team159.robot.OI;
@@ -11,7 +12,10 @@ import org.usfirst.frc.team159.robot.RobotMap;
  *
  */
 public class DriveWithJoystick extends Command {
+	Timer timer;
+	
 	public DriveWithJoystick() {
+		timer = new Timer();
 		// Use requires() here to declare subsystem dependencies
 		requires(Robot.driveTrain);
 	}
@@ -19,7 +23,8 @@ public class DriveWithJoystick extends Command {
 	// Called just before this Command runs the first time
 	@Override
 	protected void initialize() {
-		
+		timer.start();
+		timer.reset();
 	}
 
 	// Called repeatedly when this Command is scheduled to run
@@ -41,6 +46,12 @@ public class DriveWithJoystick extends Command {
     	double yAxis = stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
     	double xAxis = -stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(yAxis, xAxis, true);
+		System.out.format("%f %f %f %f %f\n", 
+				timer.get(),
+				Robot.driveTrain.getLeftDistance(), 
+				Robot.driveTrain.getRightDistance(), 
+				Robot.driveTrain.getLeftVelocity(),
+				Robot.driveTrain.getRightVelocity());
 	}
 
 	// Make this return true when this Command no longer needs to run execute()
