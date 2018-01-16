@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.command.Command;
 
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
-import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.Trajectory.Segment;
+import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.DistanceFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
@@ -17,9 +17,9 @@ import jaci.pathfinder.modifiers.TankModifier;
  */
 public class DrivePath extends Command {
 	double TIME_STEP=0.02;
-	double MAX_VEL=2.1;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	double MAX_ACC=2.0;
-	double MAX_JRK=2.0;
+	double MAX_VEL=2.0;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	double MAX_ACC=3.0;
+	double MAX_JRK=1.0;
 	double KP=0.5;
 	double KI=0.0;
 	double KD=0.0;
@@ -35,14 +35,13 @@ public class DrivePath extends Command {
 	Trajectory.Config config;
 	TankModifier modifier;
 	Timer mytimer;
-	static public boolean plot_path=true;
-	static public boolean plot_trajectory=true;
+	static public boolean plot_path=false;
+	static public boolean plot_trajectory=false;
 	static public boolean use_gyro=false;
 	static public boolean debug_command=true;
 
 	double runtime=0;
-	Waypoint[] points = new Waypoint[] {
-		 
+	Waypoint[] points = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
 		    new Waypoint(2, 0, 0),
 		};
@@ -52,10 +51,14 @@ public class DrivePath extends Command {
 		mytimer=new Timer();
     	mytimer.start();
     	mytimer.reset();
+    	
+    	System.out.println(System.getProperty("java.library.path"));
+    	System.out.println(wheelbase);
 
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
 				TIME_STEP, MAX_VEL, MAX_ACC,MAX_JRK);
 		trajectory = Pathfinder.generate(points, config);
+		
 		if(trajectory == null) {
 			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
 			return;
@@ -120,14 +123,15 @@ public class DrivePath extends Command {
  
     	double turn=0;
 
-    	//double gh = Robot.driveTrain.getHeading();    // Assuming the gyro is giving a value in degrees
-    	//double th = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
-    	//double herr = th - gh;
-    	//if(use_gyro) 
-    	//	turn = GFACT * (-1.0/180.0) * herr;
-    	//if(debug_command) 
-    	//	System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
-    	
+    	double gh = Robot.driveTrain.getHeading();    // Assuming the gyro is giving a value in degrees
+    	double th = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
+    	double herr = th - gh;
+    	if(use_gyro) 
+    		turn = GFACT * (-1.0/180.0) * herr;
+    	if(debug_command) 
+    		System.out.format("%f %f %f %f %f\n", mytimer.get(), ld, rd,l+turn,r-turn);
+    	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
+
     	Robot.driveTrain.tankDrive(l+turn,r-turn);
     }
 

@@ -238,4 +238,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 			return false;
 		}
 	}
+
+	public double getHeading() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
