@@ -13,6 +13,7 @@ import org.usfirst.frc.team159.robot.RobotMap;
  */
 public class DriveWithJoystick extends Command {
 	Timer timer;
+	private double lastVelocity = 0;
 	
 	public DriveWithJoystick() {
 		timer = new Timer();
@@ -46,12 +47,16 @@ public class DriveWithJoystick extends Command {
     	double yAxis = stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
     	double xAxis = -stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(yAxis, xAxis, true);
-		System.out.format("%f %f %f %f %f\n", 
+		double newVelocity = (Robot.driveTrain.getLeftVelocity() * 10) * 0.3048; // in m/s
+		double deltaVelocity = (newVelocity - lastVelocity)/0.02;
+		System.out.format("%f %f %f %f %f %f\n", 
 				timer.get(),
 				Robot.driveTrain.getLeftDistance(), 
 				Robot.driveTrain.getRightDistance(), 
 				Robot.driveTrain.getLeftVelocity(),
-				Robot.driveTrain.getRightVelocity());
+				Robot.driveTrain.getRightVelocity(),
+				deltaVelocity);
+		lastVelocity = newVelocity;
 	}
 
 	// Make this return true when this Command no longer needs to run execute()

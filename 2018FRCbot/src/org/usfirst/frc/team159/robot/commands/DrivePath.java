@@ -17,9 +17,9 @@ import jaci.pathfinder.modifiers.TankModifier;
  */
 public class DrivePath extends Command {
 	double TIME_STEP=0.02;
-	double MAX_VEL=2.0;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	double MAX_ACC=3.0;
-	double MAX_JRK=1.0;
+	double MAX_VEL=2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	double MAX_ACC=14.75;
+	double MAX_JRK=160.0;
 	double KP=0.5;
 	double KI=0.0;
 	double KD=0.0;
