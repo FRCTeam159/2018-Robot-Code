@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
-import org.usfirst.frc.team159.robot.subsystems.CubeHandeler;
+import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 import org.usfirst.frc.team159.robot.subsystems.RampHandler;
@@ -25,8 +25,8 @@ import org.usfirst.frc.team159.robot.subsystems.RampHandler;
 public class Robot extends IterativeRobot {
 
 	public static Elevator elevator;
-	public static CubeHandeler cubehandeler;
-	public static RampHandler ramphandler;
+	public static CubeHandler cubeHandler;
+	public static RampHandler rampHandler;
 	public static DriveTrain driveTrain;
 	public static Cameras cameras;
 
@@ -43,8 +43,8 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		driveTrain = new DriveTrain();
 		elevator = new Elevator();
-		cubehandeler = new CubeHandeler();
-		ramphandler = new RampHandler();
+		cubeHandler = new CubeHandler();
+		rampHandler = new RampHandler();
 		cameras = new Cameras();
 
 		oi = new OI();

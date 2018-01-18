@@ -15,21 +15,21 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class DriveStraight extends Command implements PIDSource, PIDOutput {
 	PIDController pid;
+	PIDSourceType type = PIDSourceType.kDisplacement;
 	double distance;
 	double tolerance = 0.1;
 	boolean last_ontarget = false;
+	boolean started = false;
 	static public boolean debug = true;
-	PIDSourceType type = PIDSourceType.kDisplacement;
 	static public double P = 0.25;
 	static public double I = 0.002;
 	static public double D = 0.0;
 	static public double TOL = 0.05;
 	static public double intime = 0.025;
-	boolean started = false;
-	Timer mytimer;
+	Timer timer;
 
 	public DriveStraight(double d) {
-		mytimer = new Timer();
+		timer = new Timer();
 		distance = d;
 		pid = new PIDController(P, I, D, this, this);
 		// Use requires() here to declare subsystem dependencies
@@ -47,13 +47,13 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		Robot.driveTrain.reset();
 		pid.disable();
 		started = false;
-		mytimer.start();
+		timer.start();
 
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		if (started == false && mytimer.get() > intime && !pid.isEnabled()) {
+		if (started == false && timer.get() > intime && !pid.isEnabled()) {
 			pid.reset();
 			pid.enable();
 			started = true;
@@ -62,7 +62,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-		if (mytimer.get() > 3.0) {
+		if (timer.get() > 3.0) {
 			System.out.println("timer expired");
 			return true;
 		}
@@ -98,7 +98,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		if (!started)
 			return 0;
 		if (debug) {
-			double timeval = mytimer.get();
+			double timeval = timer.get();
 			System.out.printf("tm=%f l=%g r=%g d=%g\n", timeval * 1000, Robot.driveTrain.getLeftDistance(),
 					Robot.driveTrain.getRightDistance(), Robot.driveTrain.getDistance());
 		}

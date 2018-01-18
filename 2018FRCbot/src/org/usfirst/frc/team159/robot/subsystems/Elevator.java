@@ -12,24 +12,25 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  */
 public class Elevator extends Subsystem {
 	private WPI_TalonSRX elevatormotor;
-	public Elevator () {
+
+	public Elevator() {
 		super();
 		elevatormotor = new WPI_TalonSRX(RobotMap.ELEVATORMOTOR);
-		
-	}
-    // Put methods for controlling this subsystem
-    // here. Call these from Commands.
 
-    public void initDefaultCommand() {
-        // Set the default command for a subsystem here.
-        setDefaultCommand(new ElevatorCommands());
-    }
-    public void set(double value) {
-    	elevatormotor.set(value);
-    }
-    public void reset() {
-    }
+	}
+	// Put methods for controlling this subsystem
+	// here. Call these from Commands.
+
+	public void initDefaultCommand() {
+		// Set the default command for a subsystem here.
+		setDefaultCommand(new ElevatorCommands());
+	}
+
+	public void set(double value) {
+		elevatormotor.set(value);
+	}
+
+	public void reset() {
+	}
 
 }
-
-

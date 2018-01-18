@@ -9,19 +9,18 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  */
 public class Cameras extends Subsystem {
 
-	public Cameras () {
-		CameraServer server=CameraServer.getInstance();
-		UsbCamera cam1=server.startAutomaticCapture("Driver",0);
-		UsbCamera cam2=server.startAutomaticCapture("Elevator",1);
+	public Cameras() {
+		CameraServer server = CameraServer.getInstance();
+		UsbCamera cam1 = server.startAutomaticCapture("Driver", 0);
+		UsbCamera cam2 = server.startAutomaticCapture("Elevator", 1);
 		cam1.setFPS(10);
 		cam2.setFPS(10);
 	}
-    // Put methods for controlling this subsystem
-    // here. Call these from Commands.
+	// Put methods for controlling this subsystem
+	// here. Call these from Commands.
 
-    public void initDefaultCommand() {
-        // Set the default command for a subsystem here.
-        //setDefaultCommand(new MySpecialCommand());
-    }
+	public void initDefaultCommand() {
+		// Set the default command for a subsystem here.
+		// setDefaultCommand(new MySpecialCommand());
+	}
 }
-

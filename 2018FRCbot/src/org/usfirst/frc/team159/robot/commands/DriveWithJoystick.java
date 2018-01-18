@@ -31,17 +31,17 @@ public class DriveWithJoystick extends Command {
 	// Called repeatedly when this Command is scheduled to run
 	@Override
 	protected void execute() {
-		Joystick stick = OI.driver_controller;
+		Joystick stick = OI.driverController;
 		// Get axis values
 		double Left = stick.getRawAxis(RobotMap.LEFTTRIGGER);
     	double Right = stick.getRawAxis(RobotMap.RIGHTTRIGGER);	
-    	boolean left_trigger=Left>0.5?true:false;
-    	boolean right_trigger=Right>0.5?true:false;
+    	boolean leftTrigger = Left>0.5?true:false;
+    	boolean rightTrigger = Right>0.5?true:false;
 
-		if (left_trigger || stick.getRawButton(RobotMap.LOWGEAR_BUTTON)){
+		if (leftTrigger || stick.getRawButton(RobotMap.LOWGEAR_BUTTON)){
 			Robot.driveTrain.setLowGear();
 		}
-		else if(right_trigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
+		else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
     	double yAxis = stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
@@ -75,6 +75,6 @@ public class DriveWithJoystick extends Command {
 	// subsystems is scheduled to run
 	@Override
 	protected void interrupted() {
-		
+
 	}
 }

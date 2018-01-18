@@ -16,17 +16,17 @@ import jaci.pathfinder.modifiers.TankModifier;
  *
  */
 public class DrivePath extends Command {
-	double TIME_STEP=0.02;
-	double MAX_VEL=2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	double MAX_ACC=14.75;
-	double MAX_JRK=160.0;
-	double KP=0.5;
-	double KI=0.0;
-	double KD=0.0;
-	double KV=1.0/MAX_VEL;
-	double KA=0.0;
-	double GFACT=5.0;
-	double wheelbase=metersPerInch(26);
+	double TIME_STEP = 0.02;
+	double MAX_VEL = 2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	double MAX_ACC = 14.75;
+	double MAX_JRK = 160.0;
+	double KP = 0.5;
+	double KI = 0.0;
+	double KD = 0.0;
+	double KV = 1.0/MAX_VEL;
+	double KA = 0.0;
+	double GFACT = 5.0;
+	double wheelbase = metersPerInch(26);
 	Trajectory trajectory;
 	Trajectory leftTrajectory;
 	Trajectory rightTrajectory;
@@ -34,36 +34,42 @@ public class DrivePath extends Command {
 	DistanceFollower rightFollower;
 	Trajectory.Config config;
 	TankModifier modifier;
-	Timer mytimer;
-	static public boolean plot_path=false;
-	static public boolean plot_trajectory=false;
-	static public boolean use_gyro=false;
-	static public boolean debug_command=true;
+	Timer timer;
+	static public boolean plotPath = true;
+	static public boolean plotTrajectory = false;
+	static public boolean useGyro = false;
+	static public boolean debugCommand = true;
 
 	double runtime=0;
-	Waypoint[] points = new Waypoint[] {		 
+	Waypoint[] straightPoints = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
 		    new Waypoint(2, 0, 0),
+		};
+	Waypoint[] hookPoints = new Waypoint[] {		 
+		    new Waypoint(0, 0, 0),
+		    new Waypoint(0.5, 0, 0),
+		    new Waypoint(1.5, 0, Pathfinder.d2r(45)),
+		    new Waypoint(2, 2, 0)
 		};
 
     public DrivePath() {
 		requires(Robot.driveTrain);
-		mytimer=new Timer();
-    	mytimer.start();
-    	mytimer.reset();
+		timer=new Timer();
+    	timer.start();
+    	timer.reset();
     	
     	System.out.println(System.getProperty("java.library.path"));
     	System.out.println(wheelbase);
 
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
 				TIME_STEP, MAX_VEL, MAX_ACC,MAX_JRK);
-		trajectory = Pathfinder.generate(points, config);
+		trajectory = Pathfinder.generate(hookPoints, config);
 		
 		if(trajectory == null) {
 			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
 			return;
 		}
-		runtime=trajectory.length()*TIME_STEP;
+		runtime = trajectory.length()*TIME_STEP;
 		// Create the Modifier Object
 		TankModifier modifier = new TankModifier(trajectory);
 
@@ -78,9 +84,9 @@ public class DrivePath extends Command {
 		leftFollower.configurePIDVA(KP, KI, KD, KV, KA);
 		rightFollower=new DistanceFollower(rightTrajectory);
 		rightFollower.configurePIDVA(KP, KI, KD, KV, KA);
-	    System.out.format("trajectory length:%d runtime:%f calctime:%f\n", trajectory.length(),runtime,mytimer.get());
+	    System.out.format("trajectory length:%d runtime:%f calctime:%f\n", trajectory.length(),runtime,timer.get());
 
-		if(plot_path) {
+		if(plotPath) {
 			double t=0;
 			for (int i = 0; i < trajectory.length(); i++) {
 			    Segment s = trajectory.get(i);
@@ -88,7 +94,7 @@ public class DrivePath extends Command {
 			    t+=s.dt;
 			}
 		}
-		if(plot_trajectory) {
+		if(plotTrajectory) {
 			double t=0;
 			for (int i = 0; i < trajectory.length(); i++) {
 			    Segment s = trajectory.get(i);
@@ -108,16 +114,16 @@ public class DrivePath extends Command {
     	leftFollower.reset();
     	rightFollower.reset();
     	Robot.driveTrain.reset();
-    	mytimer.start();
-    	mytimer.reset();
+    	timer.start();
+    	timer.reset();
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
     	if(trajectory==null)
     		return;
-    	double ld=feet2meters(Robot.driveTrain.getLeftDistance());
-    	double rd=feet2meters(Robot.driveTrain.getRightDistance());
+    	double ld=feetToMeters(Robot.driveTrain.getLeftDistance());
+    	double rd=feetToMeters(Robot.driveTrain.getRightDistance());
     	double l = leftFollower.calculate(ld);
     	double r = rightFollower.calculate(rd);
  
@@ -126,10 +132,10 @@ public class DrivePath extends Command {
     	double gh = Robot.driveTrain.getHeading();    // Assuming the gyro is giving a value in degrees
     	double th = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
     	double herr = th - gh;
-    	if(use_gyro) 
+    	if(useGyro) 
     		turn = GFACT * (-1.0/180.0) * herr;
-    	if(debug_command) 
-    		System.out.format("%f %f %f %f %f\n", mytimer.get(), ld, rd,l+turn,r-turn);
+    	if(debugCommand) 
+    		System.out.format("%f %f %f %f %f\n", timer.get(), ld, rd,l+turn,r-turn);
     	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
 
     	Robot.driveTrain.tankDrive(l+turn,r-turn);
@@ -139,7 +145,7 @@ public class DrivePath extends Command {
     protected boolean isFinished() {
     	if(trajectory==null)
     		return true;
-    	if(mytimer.get()-runtime>0.5)
+    	if(timer.get()-runtime>0.5)
     		return true;
     	if(leftFollower.isFinished() && rightFollower.isFinished())
     		return true;
@@ -157,7 +163,7 @@ public class DrivePath extends Command {
     protected void interrupted() {
     	end();
     }
-    double feet2meters(double feet) {
+    double feetToMeters(double feet) {
     	return 2.54*12*feet/100;
     }
     double metersPerInch(double inches) {
