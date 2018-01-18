@@ -12,7 +12,7 @@ public class CubeCommands extends Command {
     public CubeCommands() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
-    	requires(Robot.cubehandeler);
+    	requires(Robot.cubeHandler);
     }
 
     // Called just before this Command runs the first time

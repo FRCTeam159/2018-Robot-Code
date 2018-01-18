@@ -10,24 +10,25 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 /**
  *
  */
-public class CubeHandeler extends Subsystem {
+public class CubeHandler extends Subsystem {
 
-    // Put methods for controlling this subsystem
-    // here. Call these from Commands.
+	// Put methods for controlling this subsystem
+	// here. Call these from Commands.
 	private WPI_TalonSRX left;
 	private WPI_TalonSRX right;
-	public CubeHandeler() {
+
+	public CubeHandler() {
 		super();
 		left = new WPI_TalonSRX(RobotMap.LEFTCUBEMOTOR);
 		right = new WPI_TalonSRX(RobotMap.RIGHTCUBEMOTOR);
 	}
-    public void initDefaultCommand() {
-        // Set the default command for a subsystem here.
-        setDefaultCommand(new CubeCommands());
-    }
-    public void spinWheels(double speed) {
-    	
-    }
+
+	public void initDefaultCommand() {
+		// Set the default command for a subsystem here.
+		setDefaultCommand(new CubeCommands());
+	}
+
+	public void spinWheels(double speed) {
+
+	}
 }
-
-

@@ -29,8 +29,8 @@ public class RobotMap {
 	//other
 	public static int GEARSHIFTID=0;
 	//Constants
-	public static final int INCODERLOOPTIME = 5;
-	public static final int timeoutMs = 10;
+	public static final int ENCODERLOOPTIME = 5;
+	public static final int TIMEOUT = 10;
 	
 	// For example to map the left and right motors, you could define the
 	// following variables to use with your drivetrain subsystem.
