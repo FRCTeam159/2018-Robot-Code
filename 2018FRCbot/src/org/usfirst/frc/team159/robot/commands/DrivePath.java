@@ -25,7 +25,7 @@ public class DrivePath extends Command {
 	double KD = 0.0;
 	double KV = 1.0/MAX_VEL;
 	double KA = 0.0;
-	double GFACT = 5.0;
+	double GFACT = 2.0;
 	double wheelbase = metersPerInch(26);
 	Trajectory trajectory;
 	Trajectory leftTrajectory;
@@ -37,7 +37,7 @@ public class DrivePath extends Command {
 	Timer timer;
 	static public boolean plotPath = true;
 	static public boolean plotTrajectory = false;
-	static public boolean useGyro = false;
+	static public boolean useGyro = true;
 	static public boolean debugCommand = true;
 
 	double runtime=0;
@@ -47,8 +47,8 @@ public class DrivePath extends Command {
 		};
 	Waypoint[] hookPoints = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
-		    new Waypoint(0.5, 0, 0),
-		    new Waypoint(1.5, 0, Pathfinder.d2r(45)),
+		   //new Waypoint(0.5, 0, 0),
+		    new Waypoint(1, 1, Pathfinder.d2r(45)),
 		    new Waypoint(2, 2, 0)
 		};
 
@@ -131,11 +131,13 @@ public class DrivePath extends Command {
 
     	double gh = Robot.driveTrain.getHeading();    // Assuming the gyro is giving a value in degrees
     	double th = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
+    	
+    	th = th > 180? 360 - th : th;
     	double herr = th - gh;
     	if(useGyro) 
     		turn = GFACT * (-1.0/180.0) * herr;
     	if(debugCommand) 
-    		System.out.format("%f %f %f %f %f\n", timer.get(), ld, rd,l+turn,r-turn);
+    		System.out.format("%f %f %f %f %f %f %f\n", timer.get(), ld, rd,th,gh,l+turn,r-turn);
     	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
 
     	Robot.driveTrain.tankDrive(l+turn,r-turn);
