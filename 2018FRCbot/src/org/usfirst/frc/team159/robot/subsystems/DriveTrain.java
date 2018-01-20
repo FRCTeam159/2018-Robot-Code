@@ -5,6 +5,7 @@ import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.MotorSafety;
@@ -46,6 +47,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight = new WPI_TalonSRX(RobotMap.FRONTRIGHT);
 		backLeft = new WPI_TalonSRX(RobotMap.BACKLEFT);
 		backRight = new WPI_TalonSRX(RobotMap.BACKRIGHT);
+		
+		frontRight.configVelocityMeasurementWindow(16, 10);
+		backLeft.configVelocityMeasurementWindow(16, 10);
 
 		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , 10)
 		frontRight.set(ControlMode.PercentOutput, 0);
@@ -233,11 +237,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getLeftVelocity() {
-		return (-backLeft.getSensorCollection().getQuadratureVelocity()) / ticksPerFoot;
+		return (-backLeft.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public double getRightVelocity() {
-		return (frontRight.getSensorCollection().getQuadratureVelocity()) / ticksPerFoot;
+		return (frontRight.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public void setLowGear() {

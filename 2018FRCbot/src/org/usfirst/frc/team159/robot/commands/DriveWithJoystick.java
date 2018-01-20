@@ -15,6 +15,7 @@ public class DriveWithJoystick extends Command {
 	Timer timer;
 	private double lastVelocity = 0;
 	private boolean debug = false;
+	private static final double powerScale = 0.75;
 	
 	public DriveWithJoystick() {
 		timer = new Timer();
@@ -45,10 +46,10 @@ public class DriveWithJoystick extends Command {
 		else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
-    	double yAxis = stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
-    	double xAxis = -stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
+    	double yAxis = powerScale*stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
+    	double xAxis = powerScale*-stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(yAxis, xAxis, true);
-		double newVelocity = (Robot.driveTrain.getLeftVelocity() * 10) * 0.3048; // in m/s
+		double newVelocity = (Robot.driveTrain.getLeftVelocity()) * 0.3048; // in m/s
 		double deltaVelocity = (newVelocity - lastVelocity)/0.02;
 		if(debug)
 		System.out.format("%f %f %f %f %f %f %f\n", 

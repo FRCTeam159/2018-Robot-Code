@@ -1,10 +1,15 @@
 package org.usfirst.frc.team159.robot.commands;
 
+import java.util.Random;
+
+import org.usfirst.frc.team159.robot.PhysicalConstants;
 import org.usfirst.frc.team159.robot.Robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
-
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Trajectory.Segment;
@@ -15,11 +20,14 @@ import jaci.pathfinder.modifiers.TankModifier;
 /**
  *
  */
-public class DrivePath extends Command {
+public class DrivePath extends Command implements PhysicalConstants {
 	double TIME_STEP = 0.02;
-	double MAX_VEL = 2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	double MAX_ACC = 14.75;
-	double MAX_JRK = 160.0;
+	double MAX_VEL = 5.5 * 0.3048; //1.8
+	double MAX_ACC = 8.6 * 0.3048; //14
+	double MAX_JRK = 64; //116
+	//double MAX_VEL = 2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	//double MAX_ACC = 14.75;
+	//double MAX_JRK = 160.0;
 	double KP = 0.5;
 	double KI = 0.0;
 	double KD = 0.0;
@@ -35,24 +43,47 @@ public class DrivePath extends Command {
 	Trajectory.Config config;
 	TankModifier modifier;
 	Timer timer;
-	static public boolean plotPath = true;
+	static public boolean plotPath = false;
 	static public boolean plotTrajectory = false;
-	static public boolean useGyro = true;
-	static public boolean debugCommand = true;
+	static public boolean useGyro = false;
+	static public boolean debugCommand = false;
+	private static final boolean debugPath = true;
+	
+	private int pathIndex = 0;
+	
+	private static final int LEFT_POSITION = 0;
+	private static final int CENTER_POSITION = 1;
+	private static final int RIGHT_POSITION = 2;
 
 	double runtime=0;
-	Waypoint[] straightPoints = new Waypoint[] {		 
+	private static Waypoint[] straightPoints = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
-		    new Waypoint(2, 0, 0),
-		};
-	Waypoint[] hookPoints = new Waypoint[] {		 
+		    new Waypoint(78, 0, 0),
+	};
+	private static Waypoint[] hookPoints = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
-		   //new Waypoint(0.5, 0, 0),
-		    new Waypoint(1, 1, Pathfinder.d2r(45)),
-		    new Waypoint(2, 2, 0)
-		};
-
+		    new Waypoint(SWITCH_HOOK_TURN_X, 0, 0),
+		    new Waypoint(SWITCH_HOOK_TURN_X, SWITCH_HOOK_TURN_Y, Pathfinder.d2r(45)),
+		    new Waypoint(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE, Pathfinder.d2r(90))
+	};
+	private static Waypoint[] switchCurvePoints = {
+		new Waypoint(0, 0, 0),
+		new Waypoint(ROBOT_CENTER_X_TURN_POINT, ROBOT_CENTER_Y_TURN_POINT, Pathfinder.d2r(45)),
+		new Waypoint(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE, 0)
+	};
+	private static Waypoint[] scalePoints = {
+		new Waypoint(0, 0, 0),
+		new Waypoint(999999999, 0, 0),
+	};
+	
     public DrivePath() {
+    	SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) SmartDashboard.getData("Position");
+    	String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+    	if(gameMessage.equals("")) {
+    		gameMessage = generateFMSData();
+    	}
+    	SmartDashboard.putString("FMS Data", gameMessage);
+    	
 		requires(Robot.driveTrain);
 		timer=new Timer();
     	timer.start();
@@ -63,7 +94,12 @@ public class DrivePath extends Command {
 
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
 				TIME_STEP, MAX_VEL, MAX_ACC,MAX_JRK);
-		trajectory = Pathfinder.generate(hookPoints, config);
+		//trajectory = Pathfinder.generate(calculatePath(gameMessage, robotPosition.getSelected()), config);
+		Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 48);
+		for(Waypoint waypoint : waypoints) {
+			System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
+		}
+		trajectory = Pathfinder.generate(waypointsInchesToMeters(waypoints), config);
 		
 		if(trajectory == null) {
 			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
@@ -79,6 +115,7 @@ public class DrivePath extends Command {
 
 		leftTrajectory  = modifier.getLeftTrajectory();       // Get the Left Side
 		rightTrajectory = modifier.getRightTrajectory();      // Get the Right Side
+		Segment seg=leftTrajectory.segments[0];
 		
 		leftFollower=new DistanceFollower(leftTrajectory);
 		leftFollower.configurePIDVA(KP, KI, KD, KV, KA);
@@ -104,6 +141,126 @@ public class DrivePath extends Command {
 			    t+=s.dt;
 			}
 		}
+    }
+    
+    private Waypoint[] calculateHookPoints(double x, double y) { // 129.5, 32.125
+    	Waypoint[] waypoints = new Waypoint[4];
+    	waypoints[0] = new Waypoint(0, 0, 0);
+		waypoints[1] = new Waypoint(x - Math.abs(y), 0, 0);
+    	if(y < 0) {
+    		waypoints[2] = new Waypoint(x - Math.abs(y/2), y + Math.abs(y/2), Pathfinder.d2r(-45));
+    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(90));
+    	} else {
+    		waypoints[2] = new Waypoint(x - (y/2), y - (y/2), Pathfinder.d2r(45));
+    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(-90));
+    	}
+    	return waypoints;
+    }
+    
+    private Waypoint[] mirrorWaypoints(Waypoint[] waypoints) {
+    	Waypoint[] newWaypoints = new Waypoint[waypoints.length];
+		for(int i = 0; i < waypoints.length; i++) {
+			newWaypoints[i] = new Waypoint(waypoints[i].x, -waypoints[i].y, -waypoints[i].angle);
+		}
+		return newWaypoints;
+    }
+    
+    private Waypoint[] waypointsInchesToMeters(Waypoint[] waypoints) {
+    	Waypoint[] newWaypoints = new Waypoint[waypoints.length];
+    	for(int i = 0; i < waypoints.length; i++) {
+    		newWaypoints[i] = new Waypoint(inchesToMeters(waypoints[i].x), inchesToMeters(waypoints[i].y), waypoints[i].angle);
+    	}
+    	return newWaypoints;
+    }
+    
+    private boolean isScalePreferredOverSwitch() {
+    	return SmartDashboard.getBoolean("Prefer Scale", true);
+    }
+    
+    private boolean isStraightPathForced() {
+    	return SmartDashboard.getBoolean("Force Straight Path", false);
+    }
+    
+    private Waypoint[] calculatePath(String gameData, int robotPosition) {
+    	Waypoint[] returnWaypoints = null;
+    	if(robotPosition == CENTER_POSITION) {
+    		if(gameData.charAt(0) == 'R') {
+    			returnWaypoints = switchCurvePoints;
+    		} else {
+    			returnWaypoints = mirrorWaypoints(switchCurvePoints);
+    		}
+    	} else if(robotPosition == RIGHT_POSITION) {
+    		if(!isStraightPathForced()) {
+	    		if(gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
+	    			if(isScalePreferredOverSwitch()) {
+	    				returnWaypoints = scalePoints;
+	    			} else {
+	    				returnWaypoints = hookPoints;
+	    			}
+	    		}
+		    	if(gameData.charAt(0) == 'R') {
+		    		returnWaypoints = hookPoints;
+		    	} else {
+		    		returnWaypoints = straightPoints;
+		    	}
+    		} else {
+    			returnWaypoints = straightPoints;
+    		}
+    	} else if(robotPosition == LEFT_POSITION) {
+    		if(!isStraightPathForced()) {
+	    		if(gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
+	    			if(isScalePreferredOverSwitch()) {
+	    				returnWaypoints = mirrorWaypoints(scalePoints);
+	    			} else {
+	    				returnWaypoints = mirrorWaypoints(hookPoints);
+	    			}
+	    		}
+		    	if(gameData.charAt(0) == 'L') {
+		    		returnWaypoints = mirrorWaypoints(hookPoints);
+		    	} else {
+		    		returnWaypoints = straightPoints;
+		    	}
+    		} else {
+    			returnWaypoints = straightPoints;
+    		}
+    	}
+    	return waypointsInchesToMeters(returnWaypoints);
+    }
+    
+    private String generateFMSData() {
+    	Random random = new Random();
+    	String data = "";
+    	while(data.length() < 3) {
+    		if(random.nextInt(2) == 0) {
+    			data += "R";
+    		} else {
+    			data += "L";
+    		}
+    	}
+    	return data;
+	}
+    
+    private double inchesToMeters(double inches) {
+    	return inches * 0.0254;
+    }
+    
+    private double metersToInches(double meters) {
+    	return meters / 0.0254;
+    }
+    
+    private void debugPathError() {
+     	double leftDistance = 12*(Robot.driveTrain.getLeftDistance());
+    	double rightDistance = 12*(Robot.driveTrain.getRightDistance());
+    	Segment segment = leftTrajectory.segments[pathIndex];
+    	double leftTarget = metersToInches(segment.position);
+    	segment = rightTrajectory.segments[pathIndex];
+    	double rightTarget = metersToInches(segment.position);
+    	double headingTarget = Pathfinder.r2d(segment.heading);
+    	double currentHeading = Robot.driveTrain.getHeading();
+    	
+    	System.out.format("%f %f %f %f %f\n", timer.get(), leftDistance, leftTarget, rightDistance, rightTarget);
+    	
+    	pathIndex++;
     }
 
     // Called just before this Command runs the first time
@@ -136,11 +293,16 @@ public class DrivePath extends Command {
     	double herr = th - gh;
     	if(useGyro) 
     		turn = GFACT * (-1.0/180.0) * herr;
-    	if(debugCommand) 
-    		System.out.format("%f %f %f %f %f %f %f\n", timer.get(), ld, rd,th,gh,l+turn,r-turn);
+    	if(debugCommand) {
+    		System.out.format("%f %f %f %f %f %f %f\n", timer.get(), ld, rd,th,gh,r+turn,l-turn);
+    	}
+    	
+    	if(debugPath) {
+    		debugPathError();
+    	}
     	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
 
-    	Robot.driveTrain.tankDrive(l+turn,r-turn);
+    	Robot.driveTrain.tankDrive(r+turn,l-turn); // TODO this is reversed because we found it to be reversed, don't change unless you know what you're doing
     }
 
     // Make this return true when this Command no longer needs to run execute()
