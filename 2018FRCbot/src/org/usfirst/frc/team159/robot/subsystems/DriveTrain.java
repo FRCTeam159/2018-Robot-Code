@@ -5,11 +5,14 @@ import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.MotorSafetyHelper;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 /**
@@ -30,6 +33,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private boolean inLowGear = false;
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 	private DoubleSolenoid gearPneumatic;
+	ADXRS450_Gyro gyro;
 
 	public void initDefaultCommand() {
 		// Set the default command for a subsystem here.
@@ -43,6 +47,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight = new WPI_TalonSRX(RobotMap.FRONTRIGHT);
 		backLeft = new WPI_TalonSRX(RobotMap.BACKLEFT);
 		backRight = new WPI_TalonSRX(RobotMap.BACKRIGHT);
+		
+		frontRight.configVelocityMeasurementWindow(16, 10);
+		backLeft.configVelocityMeasurementWindow(16, 10);
 
 		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , 10)
 		frontRight.set(ControlMode.PercentOutput, 0);
@@ -58,12 +65,15 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		// frontRight.enableLimitSwitch(false, false);
 		// backLeft.enableLimitSwitch(false, false);
 		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFTID, 0, 1);
+		
+		gyro = new ADXRS450_Gyro();
 		reset();
 	}
 
 	public void enable() {
 		frontRight.set(ControlMode.PercentOutput, 0);
 		backLeft.set(ControlMode.PercentOutput, 0);
+		log();
 	}
 
 	public void reset() {
@@ -82,6 +92,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.getSensorCollection().setQuadraturePosition(0, 5);
 		frontRight.getSensorCollection().setQuadraturePosition(0, 5);
 		setLowGear();
+		gyro.reset();
+
 	}
 
 	public void disable() {
@@ -93,6 +105,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.set(-left);
 		frontRight.set(right);
 		safetyHelper.feed();
+		log();
 	}
 
 	double coerce(double min, double max, double x) {
@@ -151,6 +164,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.set(leftMotorOutput);
 		frontRight.set(-rightMotorOutput);
 		safetyHelper.feed();
+		log();
 	}
 
 	@Override
@@ -223,11 +237,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getLeftVelocity() {
-		return (-backLeft.getSensorCollection().getQuadratureVelocity()) / ticksPerFoot;
+		return (-backLeft.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public double getRightVelocity() {
-		return (frontRight.getSensorCollection().getQuadratureVelocity()) / ticksPerFoot;
+		return (frontRight.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public void setLowGear() {
@@ -258,7 +272,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getHeading() {
-		// TODO Auto-generated method stub
-		return 0;
+		return gyro.getAngle();
+	}
+	void log() {
+		SmartDashboard.putNumber("Heading", getHeading());
 	}
 }

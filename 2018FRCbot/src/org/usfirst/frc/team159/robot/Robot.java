@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
@@ -33,7 +34,7 @@ public class Robot extends IterativeRobot {
 	public static OI oi;
 
 	Command autonomousCommand;
-	SendableChooser<Command> chooser = new SendableChooser<>();
+	SendableChooser<Integer> chooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -48,6 +49,13 @@ public class Robot extends IterativeRobot {
 		cameras = new Cameras();
 
 		oi = new OI();
+		chooser.addObject("Left", new Integer(0));
+		chooser.addDefault("Center", new Integer(1));
+		chooser.addObject("Right", new Integer(2));
+		SmartDashboard.putData("Position", chooser);
+		SmartDashboard.putBoolean("Prefer Scale", true);
+		SmartDashboard.putBoolean("Force Straight Path", false);
+		SmartDashboard.putString("FMS Data", "???");
 		//chooser.addDefault("Default Auto", new DriveWithJoystick());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		//SmartDashboard.putData("Auto mode", chooser);
@@ -83,6 +91,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		//autonomousCommand = chooser.getSelected();
 		autonomousCommand = new Autonomous();
+		driveTrain.reset();
 		/*
 		 * String autoSelected = SmartDashboard.getString("Auto Selector",
 		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
