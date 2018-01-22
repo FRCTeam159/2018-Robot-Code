@@ -8,26 +8,29 @@ package org.usfirst.frc.team159.robot;
  */
 public class RobotMap {
 	//Controller IDs
-	public static int DRIVER = 0;
-	public static int OPERATOR = 1;
-	//Motor IDs
-	public static int FRONTLEFT = 1;
-	public static int FRONTRIGHT = 4;
-	public static int BACKLEFT = 2;
-	public static int BACKRIGHT = 3;
+	public static final int DRIVER = 0;
+	public static final int OPERATOR = 1;
 	
-	public static int LEFTCUBEMOTOR=5;
-	public static int RIGHTCUBEMOTOR=6;
-	public static int ELEVATORMOTOR=7;
+	//Motor IDs
+	public static final int FRONTLEFT = 1;
+	public static final int FRONTRIGHT = 4;
+	public static final int BACKLEFT = 2;
+	public static final int BACKRIGHT = 3;
+	public static final int LEFTCUBEMOTOR=5;
+	public static final int RIGHTCUBEMOTOR=6;
+	public static final int ELEVATORMOTOR=7;
+	
 	// Button IDs
-	public static int LEFTJOYSTICK=1;
-	public static int RIGHTJOYSTICK=4;
-	public static int LEFTTRIGGER=2;
-	public static int RIGHTTRIGGER=3;
-	public static int LOWGEAR_BUTTON=5;
-	public static int HIGHGEAR_BUTTON=6;
+	public static final int LEFTJOYSTICK=1;
+	public static final int RIGHTJOYSTICK=4;
+	public static final int LEFTTRIGGER=2;
+	public static final int RIGHTTRIGGER=3;
+	public static final int LOWGEAR_BUTTON=5;
+	public static final int HIGHGEAR_BUTTON=6;
+	
 	//other
-	public static int GEARSHIFTID=0;
+	public static final int GEARSHIFTID=0;
+	
 	//Constants
 	public static final int ENCODERLOOPTIME = 5;
 	public static final int TIMEOUT = 10;
