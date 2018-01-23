@@ -102,8 +102,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public void tankDrive(double left, double right) {
-		backLeft.set(-left);
-		frontRight.set(right);
+		backLeft.set(left);
+		frontRight.set(-right);
 		safetyHelper.feed();
 		log();
 	}
@@ -161,8 +161,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		 * frontRight.getSensorCollection().getQuadraturePosition(),
 		 * -backLeft.getSensorCollection().getQuadraturePosition());
 		 */
-		backLeft.set(leftMotorOutput);
-		frontRight.set(-rightMotorOutput);
+		backLeft.set(-leftMotorOutput);
+		frontRight.set(rightMotorOutput);
 		safetyHelper.feed();
 		log();
 	}
@@ -221,13 +221,13 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getRightDistance() {
-		double ticks = frontRight.getSensorCollection().getQuadraturePosition();
+		double ticks = -frontRight.getSensorCollection().getQuadraturePosition();
 		return ticks / ticksPerFoot;
 		// return frontRight.getPosition();
 	}
 
 	public double getLeftDistance() {
-		double ticks = -backLeft.getSensorCollection().getQuadraturePosition();
+		double ticks = backLeft.getSensorCollection().getQuadraturePosition();
 		return ticks / ticksPerFoot;
 		// return -backLeft.getPosition();
 	}
@@ -237,11 +237,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getLeftVelocity() {
-		return (-backLeft.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
+		return (backLeft.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public double getRightVelocity() {
-		return (frontRight.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
+		return (-frontRight.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
 	}
 
 	public void setLowGear() {

@@ -149,10 +149,10 @@ public class DrivePath extends Command implements PhysicalConstants {
 		waypoints[1] = new Waypoint(x - Math.abs(y), 0, 0);
     	if(y < 0) {
     		waypoints[2] = new Waypoint(x - Math.abs(y/2), y + Math.abs(y/2), Pathfinder.d2r(-45));
-    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(90));
+    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(-90));
     	} else {
     		waypoints[2] = new Waypoint(x - (y/2), y - (y/2), Pathfinder.d2r(45));
-    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(-90));
+    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(90));
     	}
     	return waypoints;
     }
@@ -277,7 +277,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	if(trajectory==null)
+    	if(trajectory == null)
     		return;
     	double ld=feetToMeters(Robot.driveTrain.getLeftDistance());
     	double rd=feetToMeters(Robot.driveTrain.getRightDistance());
@@ -302,12 +302,12 @@ public class DrivePath extends Command implements PhysicalConstants {
     	}
     	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
 
-    	Robot.driveTrain.tankDrive(r+turn,l-turn); // TODO this is reversed because we found it to be reversed, don't change unless you know what you're doing
+    	Robot.driveTrain.tankDrive(l+turn,r-turn); // TODO this is reversed because we found it to be reversed, don't change unless you know what you're doing
     }
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-    	if(trajectory==null)
+    	if(trajectory == null)
     		return true;
     	if(timer.get()-runtime>0.5)
     		return true;

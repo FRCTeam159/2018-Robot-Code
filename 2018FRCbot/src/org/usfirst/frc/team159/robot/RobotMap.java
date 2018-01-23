@@ -11,10 +11,11 @@ public class RobotMap {
 	public static int DRIVER = 0;
 	public static int OPERATOR = 1;
 	//Motor IDs
-	public static int FRONTLEFT = 1;
-	public static int FRONTRIGHT = 4;
-	public static int BACKLEFT = 2;
-	public static int BACKRIGHT = 3;
+	public static int FRONTLEFT = 3;
+	public static int BACKLEFT = 4;
+
+	public static int FRONTRIGHT = 2;	
+	public static int BACKRIGHT = 1;
 	
 	public static int LEFTCUBEMOTOR=5;
 	public static int RIGHTCUBEMOTOR=6;
