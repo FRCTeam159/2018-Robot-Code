@@ -5,7 +5,6 @@ import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.MotorSafety;
@@ -262,6 +261,12 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 			inLowGear = false;
 		}
 	}
+	
+	public void setRaw(double left, double right) {
+		backLeft.set(left);
+		frontRight.set(right);
+		safetyHelper.feed();
+	}
 
 	public boolean isInLowGear() {
 		if (inLowGear) {
@@ -274,6 +279,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	public double getHeading() {
 		return gyro.getAngle();
 	}
+							
 	void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
 	}
