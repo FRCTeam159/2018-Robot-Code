@@ -56,6 +56,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final int RIGHT_POSITION = 2;
 
 	double runtime=0;
+	private static final Double[] hookEndPoint = new Double[] {129.5, -32.125};
+	private static final double straightEndPoint = 78;
+	
 	private static Waypoint[] straightPoints = new Waypoint[] {		 
 		    new Waypoint(0, 0, 0),
 		    new Waypoint(78, 0, 0),
@@ -157,6 +160,10 @@ public class DrivePath extends Command implements PhysicalConstants {
     	return waypoints;
     }
     
+    private Waypoint[] calculateStraightPoints(double x) {
+    	return new Waypoint[] {new Waypoint(0, 0, 0), new Waypoint(x, 0, 0)};
+    }
+    
     private Waypoint[] mirrorWaypoints(Waypoint[] waypoints) {
     	Waypoint[] newWaypoints = new Waypoint[waypoints.length];
 		for(int i = 0; i < waypoints.length; i++) {
@@ -195,16 +202,16 @@ public class DrivePath extends Command implements PhysicalConstants {
 	    			if(isScalePreferredOverSwitch()) {
 	    				returnWaypoints = scalePoints;
 	    			} else {
-	    				returnWaypoints = hookPoints;
+	    				returnWaypoints = calculateHookPoints(hookEndPoint[0], hookEndPoint[1]);
 	    			}
 	    		}
 		    	if(gameData.charAt(0) == 'R') {
-		    		returnWaypoints = hookPoints;
+		    		returnWaypoints = calculateHookPoints(hookEndPoint[0], hookEndPoint[1]);
 		    	} else {
-		    		returnWaypoints = straightPoints;
+		    		returnWaypoints = calculateStraightPoints(straightEndPoint);
 		    	}
     		} else {
-    			returnWaypoints = straightPoints;
+    			returnWaypoints = calculateStraightPoints(straightEndPoint);
     		}
     	} else if(robotPosition == LEFT_POSITION) {
     		if(!isStraightPathForced()) {
@@ -212,16 +219,16 @@ public class DrivePath extends Command implements PhysicalConstants {
 	    			if(isScalePreferredOverSwitch()) {
 	    				returnWaypoints = mirrorWaypoints(scalePoints);
 	    			} else {
-	    				returnWaypoints = mirrorWaypoints(hookPoints);
+	    				returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint[0], hookEndPoint[1]));
 	    			}
 	    		}
 		    	if(gameData.charAt(0) == 'L') {
-		    		returnWaypoints = mirrorWaypoints(hookPoints);
+		    		returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint[0], hookEndPoint[1]));
 		    	} else {
-		    		returnWaypoints = straightPoints;
+		    		returnWaypoints = calculateStraightPoints(straightEndPoint);
 		    	}
     		} else {
-    			returnWaypoints = straightPoints;
+    			returnWaypoints = calculateStraightPoints(straightEndPoint);
     		}
     	}
     	return waypointsInchesToMeters(returnWaypoints);
@@ -302,7 +309,7 @@ public class DrivePath extends Command implements PhysicalConstants {
     	}
     	//    		System.out.format("%f %f %f %f %f %f %f %f\n", mytimer.get(), ld, rd,gh,th,herr,l+turn,r-turn);
 
-    	Robot.driveTrain.tankDrive(r+turn,l-turn); // TODO this is reversed because we found it to be reversed, don't change unless you know what you're doing
+    	Robot.driveTrain.tankDrive(r+turn,l-turn);
     }
 
     // Make this return true when this Command no longer needs to run execute()
