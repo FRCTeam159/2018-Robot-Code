@@ -18,26 +18,31 @@ public class Calibrate extends Command {
 	
 	private ArrayList<Double[]> velocityList = new ArrayList<>();
 	
-	private static final double runtime = 5;
+	private static final double runtime = 1;
 
     public Calibrate() {
     	requires(Robot.driveTrain);
+    	runTimer.start();
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
     	rollingAverageList.clear();
     	Robot.driveTrain.reset();
-    	runTimer.reset();
-    	runTimer.start();
+    	Robot.driveTrain.disable();
     	System.out.println("Calibrate.initialize()");
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
+    	if(velocityList.size() == 0) {
+        	runTimer.reset();
+        	Robot.driveTrain.enable();
+    	}
     	Robot.driveTrain.setRaw(speed, speed);
-    	double averageVelocity = getRollingAverage(feetToMeters(Robot.driveTrain.getVelocity()), 10);
+    	double averageVelocity = getRollingAverage(feetToMeters(Robot.driveTrain.getVelocity()), 2);
     	velocityList.add(new Double[] {averageVelocity, runTimer.get()});
+    	System.out.format("%f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
     }
 
     // Make this return true when this Command no longer needs to run execute()

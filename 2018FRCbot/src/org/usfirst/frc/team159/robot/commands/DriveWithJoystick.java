@@ -46,7 +46,7 @@ public class DriveWithJoystick extends Command {
 		else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
-    	double moveAxis = powerScale*stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
+    	double moveAxis = -powerScale*stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
     	double turnAxis = powerScale*stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
 		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, true);
 		double newVelocity = (Robot.driveTrain.getLeftVelocity()) * 0.3048; // in m/s
