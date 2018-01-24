@@ -91,9 +91,15 @@ public class DrivePath extends Command implements PhysicalConstants {
     	
     	System.out.println(System.getProperty("java.library.path"));
     	System.out.println(wheelbase);
-
+    	
+    	double maxVelocity = SmartDashboard.getNumber("Max Velocity", 1);
+    	double maxAcceleration = SmartDashboard.getNumber("Max Acceleration", 1);
+    	double maxJerk = SmartDashboard.getNumber("Max Jerk", 1);
+    	
+    	KV = 1/maxVelocity;
+    	
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
-				TIME_STEP, MAX_VEL, MAX_ACC,MAX_JRK);
+				TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
 		//trajectory = Pathfinder.generate(calculatePath(gameMessage, robotPosition.getSelected()), config);
 		Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 60);
 		for(Waypoint waypoint : waypoints) {

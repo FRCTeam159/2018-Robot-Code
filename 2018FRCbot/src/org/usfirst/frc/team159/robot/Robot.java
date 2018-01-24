@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 import org.usfirst.frc.team159.robot.commands.Autonomous;
+import org.usfirst.frc.team159.robot.commands.Calibrate;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
@@ -58,6 +59,10 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Prefer Scale", true);
 		SmartDashboard.putBoolean("Force Straight Path", false);
 		SmartDashboard.putString("FMS Data", "???");
+		SmartDashboard.putNumber("Max Velocity", 1.5);
+		SmartDashboard.putNumber("Max Acceleration", 22.25);
+		SmartDashboard.putNumber("Max Jerk", 30);
+		SmartDashboard.putBoolean("Calibrate", false);
 		//chooser.addDefault("Default Auto", new DriveWithJoystick());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		//SmartDashboard.putData("Auto mode", chooser);
@@ -92,7 +97,11 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		//autonomousCommand = chooser.getSelected();
-		autonomousCommand = new Autonomous();
+		if(SmartDashboard.getBoolean("Calibrate", false)) {
+			autonomousCommand = new Calibrate();
+		} else {
+			autonomousCommand = new Autonomous();
+		}
 		driveTrain.reset();
 		/*
 		 * String autoSelected = SmartDashboard.getString("Auto Selector",
