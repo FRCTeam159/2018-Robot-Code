@@ -14,7 +14,8 @@ public class Calibrate extends Command {
 	private Timer runTimer = new Timer();
 	private ArrayList<Double> rollingAverageList = new ArrayList<>();
 	private double rollingAverageTotal = 0;
-	private double speed = 0.7;
+	private double speed = 1;
+	private int count = 0;
 	
 	private ArrayList<Double[]> velocityList = new ArrayList<>();
 	
@@ -28,21 +29,27 @@ public class Calibrate extends Command {
     // Called just before this Command runs the first time
     protected void initialize() {
     	rollingAverageList.clear();
+    	runTimer.reset();
     	Robot.driveTrain.reset();
-    	Robot.driveTrain.disable();
+    	Robot.driveTrain.enable();
     	System.out.println("Calibrate.initialize()");
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	if(velocityList.size() == 0) {
-        	runTimer.reset();
-        	Robot.driveTrain.enable();
+    	if(count == 0) {
+    		//System.out.format("Skipping %f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
+    		runTimer.reset();
+        	count++;
+        	return;
     	}
-    	Robot.driveTrain.setRaw(speed, speed);
+    	if(runTimer.get() >= 0.25) {
+    		Robot.driveTrain.setRaw(Robot.scale*speed, Robot.scale*speed);
+    	}
     	double averageVelocity = getRollingAverage(feetToMeters(Robot.driveTrain.getVelocity()), 2);
     	velocityList.add(new Double[] {averageVelocity, runTimer.get()});
-    	System.out.format("%f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
+    	//System.out.format("%f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
+    	count++;
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -60,11 +67,12 @@ public class Calibrate extends Command {
     	double lastVelocity = 0;
     	double lastTime = 0;
     	
+    	
     	for(Double[] data : velocityList) {
     		double velocity = data[0];
     		double time = data[1];
-    		double acceleration = getSlope(lastTime, lastVelocity, time, velocity)/(time - lastTime);
-    		double jerk = getSlope(lastTime, lastAcceleration, time, acceleration)/(time - lastTime);;
+    		double acceleration = (velocity - lastVelocity)/(time - lastTime);
+    		double jerk = (acceleration - lastAcceleration)/(time - lastTime);;
     		
     		if(velocity > maxVelocity) {
     			maxVelocity = velocity;
@@ -75,6 +83,8 @@ public class Calibrate extends Command {
     		if(jerk > maxJerk) {
     			maxJerk = jerk;
     		}
+    		
+    		System.out.format("%f %f %f\n", time, velocity, acceleration);
     		
     		lastAcceleration = acceleration;
     		lastVelocity = velocity;

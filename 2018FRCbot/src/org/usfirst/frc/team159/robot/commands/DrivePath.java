@@ -22,13 +22,13 @@ import jaci.pathfinder.modifiers.TankModifier;
  */
 public class DrivePath extends Command implements PhysicalConstants {
 	double TIME_STEP = 0.02;
-	double MAX_VEL = 5.5 * 0.3048; //1.8
-	double MAX_ACC = 8.6 * 0.3048; //14
-	double MAX_JRK = 64; //116
-	//double MAX_VEL = 2.15;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	//double MAX_ACC = 14.75;
-	//double MAX_JRK = 160.0;
-	double KP = 0.5;
+//	double MAX_VEL = 1.3635; //1.8
+//	double MAX_ACC = 18.7; //14
+//	double MAX_JRK = 497.9; //116
+	double MAX_VEL = 1.5;  //2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	double MAX_ACC = 22.25;
+	double MAX_JRK = 30;
+	double KP = 1;
 	double KI = 0.0;
 	double KD = 0.0;
 	double KV = 1.0/MAX_VEL;
@@ -44,7 +44,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	TankModifier modifier;
 	Timer timer;
 	static public boolean plotPath = false;
-	static public boolean plotTrajectory = false;
+	static public boolean plotTrajectory = true;
 	static public boolean useGyro = false;
 	static public boolean debugCommand = false;
 	private static final boolean debugPath = true;
@@ -95,7 +95,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
 				TIME_STEP, MAX_VEL, MAX_ACC,MAX_JRK);
 		//trajectory = Pathfinder.generate(calculatePath(gameMessage, robotPosition.getSelected()), config);
-		Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 48);
+		Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 60);
 		for(Waypoint waypoint : waypoints) {
 			System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
 		}
@@ -144,15 +144,13 @@ public class DrivePath extends Command implements PhysicalConstants {
     }
     
     private Waypoint[] calculateHookPoints(double x, double y) { // 129.5, 32.125
-    	Waypoint[] waypoints = new Waypoint[4];
+    	Waypoint[] waypoints = new Waypoint[3];
     	waypoints[0] = new Waypoint(0, 0, 0);
 		waypoints[1] = new Waypoint(x - Math.abs(y), 0, 0);
     	if(y < 0) {
-    		waypoints[2] = new Waypoint(x - Math.abs(y/2), y + Math.abs(y/2), Pathfinder.d2r(-45));
-    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(-90));
+    		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(-90));
     	} else {
-    		waypoints[2] = new Waypoint(x - (y/2), y - (y/2), Pathfinder.d2r(45));
-    		waypoints[3] = new Waypoint(x, y, Pathfinder.d2r(90));
+    		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
     	}
     	return waypoints;
     }
@@ -281,8 +279,8 @@ public class DrivePath extends Command implements PhysicalConstants {
     		return;
     	double ld=feetToMeters(Robot.driveTrain.getLeftDistance());
     	double rd=feetToMeters(Robot.driveTrain.getRightDistance());
-    	double l = leftFollower.calculate(ld);
-    	double r = rightFollower.calculate(rd);
+    	double r = Robot.scale*leftFollower.calculate(ld);
+    	double l = Robot.scale*rightFollower.calculate(rd);
  
     	double turn=0;
 

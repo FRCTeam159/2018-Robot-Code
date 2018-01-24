@@ -32,6 +32,8 @@ public class Robot extends IterativeRobot {
 	public static Cameras cameras;
 
 	public static OI oi;
+	
+	public static double scale = 0.7;
 
 	Command autonomousCommand;
 	SendableChooser<Integer> chooser = new SendableChooser<>();
