@@ -80,6 +80,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public void reset() {
+		log();
 		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, 10);
 		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, 10);
 		// int s1=
@@ -286,5 +287,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 							
 	void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
+		SmartDashboard.putNumber("Left wheels", backLeft.get());
+		SmartDashboard.putNumber("Right wheels", frontRight.get());
 	}
 }
