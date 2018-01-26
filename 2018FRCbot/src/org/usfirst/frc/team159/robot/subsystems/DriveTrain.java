@@ -288,6 +288,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
 		SmartDashboard.putNumber("Left wheels", backLeft.get());
-		SmartDashboard.putNumber("Right wheels", frontRight.get());
+		SmartDashboard.putNumber("Right wheels", -frontRight.get());
 	}
 }

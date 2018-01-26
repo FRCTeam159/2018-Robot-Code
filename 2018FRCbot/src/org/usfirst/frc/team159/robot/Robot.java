@@ -37,7 +37,7 @@ public class Robot extends IterativeRobot {
 	public static double scale = 0.7;
 
 	Command autonomousCommand;
-	SendableChooser<Integer> chooser = new SendableChooser<>();
+	SendableChooser<Integer> chooser = new SendableChooser<Integer>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -63,6 +63,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 30);
 		SmartDashboard.putBoolean("Calibrate", false);
+		SmartDashboard.putNumber("P", 1);
 		//chooser.addDefault("Default Auto", new DriveWithJoystick());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		//SmartDashboard.putData("Auto mode", chooser);

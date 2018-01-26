@@ -2,6 +2,7 @@ package org.usfirst.frc.team159.robot.commands;
 
 import java.util.Random;
 
+import org.usfirst.frc.team159.Point;
 import org.usfirst.frc.team159.robot.PhysicalConstants;
 import org.usfirst.frc.team159.robot.Robot;
 
@@ -56,31 +57,22 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final int RIGHT_POSITION = 2;
 
 	double runtime=0;
-	private static Waypoint[] straightPoints = new Waypoint[] {		 
-		    new Waypoint(0, 0, 0),
-		    new Waypoint(78, 0, 0),
-	};
-	private static Waypoint[] hookPoints = new Waypoint[] {		 
-		    new Waypoint(0, 0, 0),
-		    new Waypoint(SWITCH_HOOK_TURN_X, 0, 0),
-		    new Waypoint(SWITCH_HOOK_TURN_X, SWITCH_HOOK_TURN_Y, Pathfinder.d2r(45)),
-		    new Waypoint(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE, Pathfinder.d2r(90))
-	};
-	private static Waypoint[] switchCurvePoints = {
-		new Waypoint(0, 0, 0),
-		new Waypoint(ROBOT_CENTER_X_TURN_POINT, ROBOT_CENTER_Y_TURN_POINT, Pathfinder.d2r(45)),
-		new Waypoint(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE, 0)
-	};
-	private static Waypoint[] scalePoints = {
-		new Waypoint(0, 0, 0),
-		new Waypoint(999999999, 0, 0),
-	};
+	
+	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
+	
+	private static final Point switchCurveEndPoint = new Point(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE);
+	private static final double straightEndPoint = 78;
+	private static final double scaleEndPoint = ROBOT_Y_TO_SCALE;
 	
     public DrivePath() {
     	SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) SmartDashboard.getData("Position");
     	String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
     	if(gameMessage.equals("")) {
-    		gameMessage = generateFMSData();
+    		if(SmartDashboard.getString("FMS Data", "none").equals("none")) {
+    			gameMessage = generateFMSData();
+    		} else {
+    			gameMessage = SmartDashboard.getString("FMS Data", "LLL");
+    		}
     	}
     	SmartDashboard.putString("FMS Data", gameMessage);
     	
@@ -97,15 +89,17 @@ public class DrivePath extends Command implements PhysicalConstants {
     	double maxJerk = SmartDashboard.getNumber("Max Jerk", 1);
     	
     	KV = 1/maxVelocity;
+    	KP = SmartDashboard.getNumber("P", 1);
     	
 		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 
 				TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
 		//trajectory = Pathfinder.generate(calculatePath(gameMessage, robotPosition.getSelected()), config);
-		Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 60);
+		Waypoint[] waypoints = calculatePath(gameMessage, robotPosition.getSelected());
+		//Waypoint[] waypoints = calculateHookPoints(ROBOT_TO_SWITCH_CENTER, 60);
 		for(Waypoint waypoint : waypoints) {
 			System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
 		}
-		trajectory = Pathfinder.generate(waypointsInchesToMeters(waypoints), config);
+		trajectory = Pathfinder.generate(waypoints, config);
 		
 		if(trajectory == null) {
 			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
@@ -149,7 +143,15 @@ public class DrivePath extends Command implements PhysicalConstants {
 		}
     }
     
-    private Waypoint[] calculateHookPoints(double x, double y) { // 129.5, 32.125
+    private Waypoint[] calculateScalePoints(double y) {
+    	Waypoint[] waypoints = new Waypoint[3];
+    	waypoints[0] = new Waypoint(0, 0, 0);
+    	waypoints[1] = new Waypoint(NULL_ZONE_EDGE_TO_WALL, 0, Pathfinder.d2r(45));
+    	waypoints[2] = new Waypoint(ROBOT_X_TO_SCALE, y, Pathfinder.d2r(90));
+    	return waypoints;
+    }
+    
+    private Waypoint[] calculateHookPoints(double x, double y) {
     	Waypoint[] waypoints = new Waypoint[3];
     	waypoints[0] = new Waypoint(0, 0, 0);
 		waypoints[1] = new Waypoint(x - Math.abs(y), 0, 0);
@@ -158,6 +160,26 @@ public class DrivePath extends Command implements PhysicalConstants {
     	} else {
     		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
     	}
+    	return waypoints;
+    }
+    
+    private Waypoint[] calculateStraightPoints(double x) {
+    	Waypoint[] waypoints = new Waypoint[] {
+    		new Waypoint(0, 0, 0),
+    		new Waypoint(x, 0, 0)
+    	};
+    	return waypoints;
+    }
+    
+    private Waypoint[] calculateSwitchCurvePoints(double x, double y) {
+    	Waypoint[] waypoints = new Waypoint[3];
+    	waypoints[0] = new Waypoint(0, 0, 0);
+    	if(y < 0) {
+    		waypoints[1] = new Waypoint(x/2, y/2, Pathfinder.d2r(-45));
+    	} else {
+    		waypoints[1] = new Waypoint(x/2, y/2, Pathfinder.d2r(45));
+    	}
+    	waypoints[2] = new Waypoint(x, y, 0);
     	return waypoints;
     }
     
@@ -189,43 +211,43 @@ public class DrivePath extends Command implements PhysicalConstants {
     	Waypoint[] returnWaypoints = null;
     	if(robotPosition == CENTER_POSITION) {
     		if(gameData.charAt(0) == 'R') {
-    			returnWaypoints = switchCurvePoints;
+    			returnWaypoints = calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y);
     		} else {
-    			returnWaypoints = mirrorWaypoints(switchCurvePoints);
+    			returnWaypoints = mirrorWaypoints(calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y));
     		}
     	} else if(robotPosition == RIGHT_POSITION) {
     		if(!isStraightPathForced()) {
 	    		if(gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
 	    			if(isScalePreferredOverSwitch()) {
-	    				returnWaypoints = scalePoints;
+	    				returnWaypoints = calculateScalePoints(scaleEndPoint);
 	    			} else {
-	    				returnWaypoints = hookPoints;
+	    				returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
 	    			}
 	    		}
 		    	if(gameData.charAt(0) == 'R') {
-		    		returnWaypoints = hookPoints;
+		    		returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
 		    	} else {
-		    		returnWaypoints = straightPoints;
+		    		returnWaypoints = calculateStraightPoints(straightEndPoint);
 		    	}
     		} else {
-    			returnWaypoints = straightPoints;
+    			returnWaypoints = calculateStraightPoints(straightEndPoint);
     		}
     	} else if(robotPosition == LEFT_POSITION) {
     		if(!isStraightPathForced()) {
 	    		if(gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
 	    			if(isScalePreferredOverSwitch()) {
-	    				returnWaypoints = mirrorWaypoints(scalePoints);
+	    				returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
 	    			} else {
-	    				returnWaypoints = mirrorWaypoints(hookPoints);
+	    				returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
 	    			}
 	    		}
 		    	if(gameData.charAt(0) == 'L') {
-		    		returnWaypoints = mirrorWaypoints(hookPoints);
+		    		returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
 		    	} else {
-		    		returnWaypoints = straightPoints;
+		    		returnWaypoints = calculateStraightPoints(straightEndPoint);
 		    	}
     		} else {
-    			returnWaypoints = straightPoints;
+    			returnWaypoints = calculateStraightPoints(straightEndPoint);
     		}
     	}
     	return waypointsInchesToMeters(returnWaypoints);
