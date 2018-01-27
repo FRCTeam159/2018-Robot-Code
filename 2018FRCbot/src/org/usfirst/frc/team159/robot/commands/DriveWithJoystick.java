@@ -12,14 +12,12 @@ import org.usfirst.frc.team159.robot.RobotMap;
  *
  */
 public class DriveWithJoystick extends Command {
-	Timer timer;
+	Timer timer = new Timer();
 	private double lastVelocity = 0;
 	private boolean debug = false;
 	private static final double powerScale = 0.75;
 	
 	public DriveWithJoystick() {
-		timer = new Timer();
-		// Use requires() here to declare subsystem dependencies
 		requires(Robot.driveTrain);
 	}
 
@@ -35,23 +33,22 @@ public class DriveWithJoystick extends Command {
 	protected void execute() {
 		Joystick stick = OI.driverController;
 		// Get axis values
-		double Left = stick.getRawAxis(RobotMap.LEFTTRIGGER);
-    	double Right = stick.getRawAxis(RobotMap.RIGHTTRIGGER);	
-    	boolean leftTrigger = Left>0.5?true:false;
-    	boolean rightTrigger = Right>0.5?true:false;
+		double leftStick = stick.getRawAxis(RobotMap.LEFTTRIGGER);
+    	double rightStick = stick.getRawAxis(RobotMap.RIGHTTRIGGER);	
+    	boolean leftTrigger = leftStick > 0.5 ? true : false;
+    	boolean rightTrigger = rightStick > 0.5 ? true : false;
 
 		if (leftTrigger || stick.getRawButton(RobotMap.LOWGEAR_BUTTON)){
 			Robot.driveTrain.setLowGear();
-		}
-		else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
+		} else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
     	double moveAxis = -powerScale*stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
     	double turnAxis = powerScale*stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
-		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, true);
 		double newVelocity = (Robot.driveTrain.getLeftVelocity()) * 0.3048; // in m/s
 		double deltaVelocity = (newVelocity - lastVelocity)/0.02;
-		if(debug)
+		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, true);
+		if(debug) {
 		System.out.format("%f %f %f %f %f %f %f %f %f\n", 
 				timer.get(),
 				moveAxis,
@@ -62,6 +59,7 @@ public class DriveWithJoystick extends Command {
 				Robot.driveTrain.getRightVelocity(),
 				deltaVelocity,
 				Robot.driveTrain.getHeading());
+		}
 		lastVelocity = newVelocity;
 	}
 

@@ -2,6 +2,7 @@ package org.usfirst.frc.team159.robot.commands;
 
 import java.util.ArrayList;
 
+import org.usfirst.frc.team159.Point;
 import org.usfirst.frc.team159.robot.Robot;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -32,7 +33,7 @@ public class Calibrate extends Command {
     	runTimer.reset();
     	Robot.driveTrain.reset();
     	Robot.driveTrain.enable();
-    	System.out.println("Calibrate.initialize()");
+    	printInitializeMessage();
     }
 
     // Called repeatedly when this Command is scheduled to run
@@ -48,8 +49,9 @@ public class Calibrate extends Command {
     	}
     	double averageVelocity = getRollingAverage(feetToMeters(Robot.driveTrain.getVelocity()), 2);
     	velocityList.add(new Double[] {averageVelocity, runTimer.get()});
-    	//System.out.format("%f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
     	count++;
+    	
+    	//System.out.format("%f %f %f\n", runTimer.get(), feetToMeters(Robot.driveTrain.getDistance()), feetToMeters(Robot.driveTrain.getVelocity()));
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -71,8 +73,10 @@ public class Calibrate extends Command {
     	for(Double[] data : velocityList) {
     		double velocity = data[0];
     		double time = data[1];
-    		double acceleration = (velocity - lastVelocity)/(time - lastTime);
-    		double jerk = (acceleration - lastAcceleration)/(time - lastTime);;
+    		double acceleration = getSlope(new Point(lastTime, lastVelocity), new Point(time, velocity));
+    		double jerk = getSlope(new Point(lastTime, lastAcceleration), new Point(time, acceleration));
+    		//double acceleration = (velocity - lastVelocity)/(time - lastTime);
+    		//double jerk = (acceleration - lastAcceleration)/(time - lastTime);;
     		
     		if(velocity > maxVelocity) {
     			maxVelocity = velocity;
@@ -92,7 +96,7 @@ public class Calibrate extends Command {
     	}
     	
     	Robot.driveTrain.disable();
-    	System.out.println("Calibrate.end()\n");
+    	printEndMessage();
     	System.out.println("Maximum velocity: " + maxVelocity);
     	System.out.println("Maximum acceleration: " + maxAcceleration);
     	System.out.println("Maximum jerk: " + maxJerk);
@@ -101,7 +105,7 @@ public class Calibrate extends Command {
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
-    	System.out.println("Calibrate.interrupted()");
+    	printInterruptedMessage();
     }
     
     /*
@@ -124,7 +128,19 @@ public class Calibrate extends Command {
     	return feet * 0.3048;
     }
     
-    private double getSlope(double x1, double y1, double x2, double y2) {
-    	return (y2-y1)/(x2-x1);
+    private double getSlope(Point point1, Point point2) {
+    	return (point2.y - point1.y)/(point2.x - point1.x);
+    }
+    
+    private void printInterruptedMessage() {
+    	System.out.println("Calibrate.interrupted()");
+    }
+    
+    private void printEndMessage() {
+    	System.out.println("Calibrate.end()\n");
+    }
+    
+    private void printInitializeMessage() {
+    	System.out.println("Calibrate.initialize()");
     }
 }

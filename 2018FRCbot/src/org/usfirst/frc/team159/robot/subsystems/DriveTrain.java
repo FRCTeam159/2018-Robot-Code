@@ -5,7 +5,6 @@ import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.MotorSafety;
@@ -26,10 +25,10 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private WPI_TalonSRX frontRight;
 	private WPI_TalonSRX backLeft;
 	private WPI_TalonSRX backRight;
-	public static double wheel_diameter = 4.25;
-	public static int ticksPerRev = 18654;
-	public static double feetPerRev = Math.PI * wheel_diameter / 12.0;
-	public static double ticksPerFoot = ticksPerRev / feetPerRev;
+	public static final double wheel_diameter = 4.25;
+	public static final int ticksPerRev = 18654;
+	public static final double feetPerRev = Math.PI * wheel_diameter / 12.0;
+	public static final double ticksPerFoot = ticksPerRev / feetPerRev;
 	private boolean inLowGear = false;
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 	private DoubleSolenoid gearPneumatic;
@@ -47,13 +46,14 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight = new WPI_TalonSRX(RobotMap.FRONTRIGHT);
 		backLeft = new WPI_TalonSRX(RobotMap.BACKLEFT);
 		backRight = new WPI_TalonSRX(RobotMap.BACKRIGHT);
-		
+
 		frontRight.configVelocityMeasurementWindow(4, 10);
 		backLeft.configVelocityMeasurementWindow(4, 10);
-		
-		//frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 10);
-		//backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 10);
-	
+
+		// frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms,
+		// 10);
+		// backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 10);
+
 		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , 10)
 		frontRight.set(ControlMode.PercentOutput, 0);
 		backLeft.set(ControlMode.PercentOutput, 0);
@@ -68,7 +68,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		// frontRight.enableLimitSwitch(false, false);
 		// backLeft.enableLimitSwitch(false, false);
 		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFTID, 0, 1);
-		
+
 		gyro = new ADXRS450_Gyro();
 		reset();
 	}
@@ -95,8 +95,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		// backLeft.reset();
 		backLeft.getSensorCollection().setQuadraturePosition(0, 5);
 		frontRight.getSensorCollection().setQuadraturePosition(0, 5);
-		setLowGear();
 		gyro.reset();
+
+		setLowGear();
 
 	}
 
@@ -112,12 +113,13 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		log();
 	}
 
-	double coerce(double min, double max, double x) {
-		if (x < min)
-			x = min;
-		else if (x > max)
-			x = max;
-		return x;
+	double coerce(double min, double max, double value) {
+		if (value < min) {
+			value = min;
+		} else if (value > max) {
+			value = max;
+		}
+		return value;
 	}
 
 	public void arcadeDrive(double moveValue, double rotateValue, boolean squaredInputs) {
@@ -173,25 +175,21 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	@Override
 	public void setExpiration(double timeout) {
-		// TODO Auto-generated method stub
 		safetyHelper.setExpiration(timeout);
 	}
 
 	@Override
 	public double getExpiration() {
-		// TODO Auto-generated method stub
 		return safetyHelper.getExpiration();
 	}
 
 	@Override
 	public boolean isAlive() {
-		// TODO Auto-generated method stub
 		return safetyHelper.isAlive();
 	}
 
 	@Override
 	public void stopMotor() {
-		// TODO Auto-generated method stub
 		frontLeft.stopMotor();
 		frontRight.stopMotor();
 		backLeft.stopMotor();
@@ -201,19 +199,16 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	@Override
 	public void setSafetyEnabled(boolean enabled) {
-		// TODO Auto-generated method stub
 		safetyHelper.setSafetyEnabled(enabled);
 	}
 
 	@Override
 	public boolean isSafetyEnabled() {
-		// TODO Auto-generated method stub
 		return safetyHelper.isSafetyEnabled();
 	}
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return "Robot Drive";
 	}
 
@@ -249,24 +244,19 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public void setLowGear() {
-		// cout << "SetLowGear"<<endl;
-
 		if (!inLowGear) {
 			gearPneumatic.set(DoubleSolenoid.Value.kReverse);
-			// cout << "Setting Low Gear"<<endl;
 			inLowGear = true;
 		}
 	}
 
 	public void setHighGear() {
-		// cout << "SetHighGear"<<endl;
 		if (inLowGear) {
 			gearPneumatic.set(DoubleSolenoid.Value.kForward);
-			// cout << "Setting High Gear"<<endl;
 			inLowGear = false;
 		}
 	}
-	
+
 	public void setRaw(double left, double right) {
 		backLeft.set(left);
 		frontRight.set(-right);
@@ -284,7 +274,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	public double getHeading() {
 		return gyro.getAngle();
 	}
-							
+
 	void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
 		SmartDashboard.putNumber("Left wheels", backLeft.get());

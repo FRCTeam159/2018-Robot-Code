@@ -20,15 +20,15 @@ public class ElevatorCommands extends Command {
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
-		System.out.println("Elevator.initialize");
+		printInitializeMessage();
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
 		Joystick stick = OI.operatorController;
-		double Left = -stick.getRawAxis(RobotMap.LEFTTRIGGER);
-		double Right = stick.getRawAxis(RobotMap.RIGHTTRIGGER);
-		double value = Right + Left;
+		double leftStick = -stick.getRawAxis(RobotMap.LEFTTRIGGER);
+		double rightStick = stick.getRawAxis(RobotMap.RIGHTTRIGGER);
+		double value = rightStick + leftStick;
 		// System.out.printf("L=%f R=%f V=%f\n", Left, Right, value);
 		Robot.elevator.set(value);
 	}
@@ -40,14 +40,26 @@ public class ElevatorCommands extends Command {
 
 	// Called once after isFinished returns true
 	protected void end() {
-		System.out.println("Elevator.end");
+		printEndMessage();
 
 	}
 
 	// Called when another command which requires one or more of the same
 	// subsystems is scheduled to run
 	protected void interrupted() {
-		System.out.println("Elevator.interrupted");
+		printInterruptedMessage();
 		end();
+	}
+	
+	private void printInitializeMessage() {
+		System.out.println("Elevator.initialize");
+	}
+	
+	private void printEndMessage() {
+		System.out.println("Elevator.end");
+	}
+	
+	private void printInterruptedMessage() {
+		System.out.println("Elevator.interrupted");
 	}
 }

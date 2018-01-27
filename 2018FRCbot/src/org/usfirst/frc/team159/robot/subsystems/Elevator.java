@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  *
  */
 public class Elevator extends Subsystem {
-	private WPI_TalonSRX elevatormotor;
+	private WPI_TalonSRX elevatorMotor;
 
 	public Elevator() {
 		super();
-		elevatormotor = new WPI_TalonSRX(RobotMap.ELEVATORMOTOR);
+		elevatorMotor = new WPI_TalonSRX(RobotMap.ELEVATORMOTOR);
 
 	}
 	// Put methods for controlling this subsystem
@@ -27,10 +27,11 @@ public class Elevator extends Subsystem {
 	}
 
 	public void set(double value) {
-		elevatormotor.set(value);
+		elevatorMotor.set(value);
 	}
 
 	public void reset() {
+
 	}
 
 }

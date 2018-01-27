@@ -11,10 +11,10 @@ public class Cameras extends Subsystem {
 
 	public Cameras() {
 		CameraServer server = CameraServer.getInstance();
-		UsbCamera cam1 = server.startAutomaticCapture("Driver", 0);
-		UsbCamera cam2 = server.startAutomaticCapture("Elevator", 1);
-		cam1.setFPS(10);
-		cam2.setFPS(10);
+		UsbCamera driverCamera = server.startAutomaticCapture("Driver", 0);
+		UsbCamera elevatorCamera = server.startAutomaticCapture("Elevator", 1);
+		driverCamera.setFPS(10);
+		elevatorCamera.setFPS(10);
 	}
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.

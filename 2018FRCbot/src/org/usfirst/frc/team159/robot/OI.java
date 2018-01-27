@@ -18,7 +18,9 @@ public class OI {
 	public static Button elevatorUp = new JoystickButton(operatorController, 7);
 	public static Button lowGear = new JoystickButton(driverController, 4);
 	public static Button highGear = new JoystickButton(driverController, 5);
-	public static Button intake = new JoystickButton(operatorController, 0);
+	public static Button cubeIntake = new JoystickButton(operatorController, 0);
+	
+	
 	//// CREATING BUTTONS
 	// One type of button is a joystick button which is any button on a
 	//// joystick.

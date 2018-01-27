@@ -25,26 +25,23 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 	static public double D = 0.0;
 	static public double TOL = 0.05;
 	static public double intime = 0.025;
-	Timer timer;
+	Timer timer = new Timer();;
 
-	public DriveStraight(double d) {
-		timer = new Timer();
-		distance = d;
+	public DriveStraight(double distance) {
+		this.distance = distance;
 		pid = new PIDController(P, I, D, this, this);
-		// Use requires() here to declare subsystem dependencies
-		// eg. requires(chassis);
-		requires(Robot.driveTrain);
 		pid.setAbsoluteTolerance(TOL);
+		requires(Robot.driveTrain);
 	}
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
-		System.out.printf("divestraight.initialize d=%f\n", distance);
+		System.out.printf("divestraight.initialize distance = %f\n", distance);
 		pid.reset();
 		pid.setSetpoint(distance);
+		pid.disable();
 		Robot.driveTrain.enable();
 		Robot.driveTrain.reset();
-		pid.disable();
 		started = false;
 		timer.start();
 
@@ -62,7 +59,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
 		if (timer.get() > 3.0) {
-			System.out.println("timer expired");
+			printFinishedMessage();
 			return true;
 		}
 		return pid.onTarget();
@@ -70,10 +67,11 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	// Called once after isFinished returns true
 	protected void end() {
-		System.out.println("drivestraight.end");
 		Robot.driveTrain.disable();
 		pid.disable();
 		started = false;
+		
+		printEndMessage();
 	}
 
 	// Called when another command which requires one or more of the same
@@ -94,8 +92,9 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	@Override
 	public double pidGet() {
-		if (!started)
+		if (!started) {
 			return 0;
+		}
 		if (debug) {
 			double timeval = timer.get();
 			System.out.printf("tm=%f l=%g r=%g d=%g\n", timeval * 1000, Robot.driveTrain.getLeftDistance(),
@@ -106,7 +105,16 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	@Override
 	public void pidWrite(double output) {
-		if (started)
+		if (started) {
 			Robot.driveTrain.tankDrive(output, output);
+		}
+	}
+	
+	private void printEndMessage() {
+		System.out.println("drivestraight.end");
+	}
+	
+	private void printFinishedMessage() {
+		System.out.println("timer expired");
 	}
 }

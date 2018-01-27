@@ -52,21 +52,10 @@ public class Robot extends IterativeRobot {
 		cameras = new Cameras();
 
 		oi = new OI();
-		chooser.addObject("Left", new Integer(0));
-		chooser.addDefault("Center", new Integer(1));
-		chooser.addObject("Right", new Integer(2));
-		SmartDashboard.putData("Position", chooser);
-		SmartDashboard.putBoolean("Prefer Scale", true);
-		SmartDashboard.putBoolean("Force Straight Path", false);
-		SmartDashboard.putString("FMS Data", "???");
-		SmartDashboard.putNumber("Max Velocity", 1.5);
-		SmartDashboard.putNumber("Max Acceleration", 22.25);
-		SmartDashboard.putNumber("Max Jerk", 30);
-		SmartDashboard.putBoolean("Calibrate", false);
-		SmartDashboard.putNumber("P", 1);
-		//chooser.addDefault("Default Auto", new DriveWithJoystick());
-		// chooser.addObject("My Auto", new MyAutoCommand());
-		//SmartDashboard.putData("Auto mode", chooser);
+		
+		putValuesOnSmartDashboard();
+		
+		System.out.println(new SendableChooser<Integer>());
 	}
 
 	/**
@@ -97,23 +86,17 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		//autonomousCommand = chooser.getSelected();
 		if(SmartDashboard.getBoolean("Calibrate", false)) {
 			autonomousCommand = new Calibrate();
 		} else {
 			autonomousCommand = new Autonomous();
 		}
+		
 		driveTrain.reset();
-		/*
-		 * String autoSelected = SmartDashboard.getString("Auto Selector",
-		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-		 * = new MyAutoCommand(); break; case "Default Auto": default:
-		 * autonomousCommand = new ExampleCommand(); break; }
-		 */
-
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null)
+		
+		if (autonomousCommand != null) {
 			autonomousCommand.start();
+		}
 	}
 
 	/**
@@ -126,12 +109,13 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		driveTrain.reset();
+		elevator.reset();
+		
 		// This makes sure that the autonomous stops running when
 		// teleop starts running. If you want the autonomous to
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
-		driveTrain.reset();
-		elevator.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -151,5 +135,20 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void testPeriodic() {
 		LiveWindow.run();
+	}
+	
+	private void putValuesOnSmartDashboard() {
+		chooser.addObject("Left", new Integer(0));
+		chooser.addDefault("Center", new Integer(1));
+		chooser.addObject("Right", new Integer(2));
+		SmartDashboard.putData("Position", chooser);
+		SmartDashboard.putBoolean("Prefer Scale", true);
+		SmartDashboard.putBoolean("Force Straight Path", false);
+		SmartDashboard.putString("FMS Data", "???");
+		SmartDashboard.putNumber("Max Velocity", 1.5);
+		SmartDashboard.putNumber("Max Acceleration", 22.25);
+		SmartDashboard.putNumber("Max Jerk", 30);
+		SmartDashboard.putBoolean("Calibrate", false);
+		SmartDashboard.putNumber("P", 1);
 	}
 }

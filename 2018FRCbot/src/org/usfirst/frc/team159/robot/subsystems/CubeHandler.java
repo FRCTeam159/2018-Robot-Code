@@ -14,13 +14,13 @@ public class CubeHandler extends Subsystem {
 
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
-	private WPI_TalonSRX left;
-	private WPI_TalonSRX right;
+	private WPI_TalonSRX leftIntakeMotor;
+	private WPI_TalonSRX rightIntakeMotor;
 
 	public CubeHandler() {
 		super();
-		left = new WPI_TalonSRX(RobotMap.LEFTCUBEMOTOR);
-		right = new WPI_TalonSRX(RobotMap.RIGHTCUBEMOTOR);
+		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFTCUBEMOTOR);
+		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHTCUBEMOTOR);
 	}
 
 	public void initDefaultCommand() {
