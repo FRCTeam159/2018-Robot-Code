@@ -19,8 +19,8 @@ public class CubeHandler extends Subsystem {
 
 	public CubeHandler() {
 		super();
-		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFTCUBEMOTOR);
-		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHTCUBEMOTOR);
+		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
+		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
 	}
 
 	public void initDefaultCommand() {

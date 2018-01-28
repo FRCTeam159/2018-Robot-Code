@@ -13,30 +13,30 @@ public class RobotMap {
 	
 	//Motor IDs
 
-	public static int FRONTLEFT = 3;
-	public static int BACKLEFT = 4;
+	public static final int FRONT_LEFT = 3;
+	public static final int BACK_LEFT = 4;
 
-	public static int FRONTRIGHT = 2;	
-	public static int BACKRIGHT = 1;
+	public static final int FRONT_RIGHT = 2;	
+	public static final int BACK_RIGHT = 1;
 
 
-	public static final int LEFTCUBEMOTOR=5;
-	public static final int RIGHTCUBEMOTOR=6;
-	public static final int ELEVATORMOTOR=7;
+	public static final int LEFT_INTAKE_MOTOR=5;
+	public static final int RIGHT_INTAKE_MOTOR=6;
+	public static final int ELEVATOR_MOTOR=7;
 	
 	// Button IDs
-	public static final int LEFTJOYSTICK=1;
-	public static final int RIGHTJOYSTICK=4;
-	public static final int LEFTTRIGGER=2;
-	public static final int RIGHTTRIGGER=3;
+	public static final int LEFT_JOYSTICK=1;
+	public static final int RIGHT_JOYSTICK=4;
+	public static final int LEFT_TRIGGER=2;
+	public static final int RIGHT_TRIGGER=3;
 	public static final int LOWGEAR_BUTTON=5;
 	public static final int HIGHGEAR_BUTTON=6;
 	
 	//other
-	public static final int GEARSHIFTID=0;
+	public static final int GEARSHIFT_ID=0;
 	
 	//Constants
-	public static final int ENCODERLOOPTIME = 5;
+	public static final int ENCODER_LOOP_TIME = 5;
 	public static final int TIMEOUT = 10;
 	
 	// For example to map the left and right motors, you could define the

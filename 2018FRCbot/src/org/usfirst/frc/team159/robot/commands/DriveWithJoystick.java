@@ -33,8 +33,8 @@ public class DriveWithJoystick extends Command {
 	protected void execute() {
 		Joystick stick = OI.driverController;
 		// Get axis values
-		double leftStick = stick.getRawAxis(RobotMap.LEFTTRIGGER);
-    	double rightStick = stick.getRawAxis(RobotMap.RIGHTTRIGGER);	
+		double leftStick = stick.getRawAxis(RobotMap.LEFT_TRIGGER);
+    	double rightStick = stick.getRawAxis(RobotMap.RIGHT_TRIGGER);	
     	boolean leftTrigger = leftStick > 0.5 ? true : false;
     	boolean rightTrigger = rightStick > 0.5 ? true : false;
 
@@ -43,8 +43,8 @@ public class DriveWithJoystick extends Command {
 		} else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
-    	double moveAxis = -powerScale*stick.getRawAxis(RobotMap.LEFTJOYSTICK); // left stick - drive
-    	double turnAxis = powerScale*stick.getRawAxis(RobotMap.RIGHTJOYSTICK); // right stick - rotate
+    	double moveAxis = -powerScale*stick.getRawAxis(RobotMap.LEFT_JOYSTICK); // left stick - drive
+    	double turnAxis = powerScale*stick.getRawAxis(RobotMap.RIGHT_JOYSTICK); // right stick - rotate
 		double newVelocity = (Robot.driveTrain.getLeftVelocity()) * 0.3048; // in m/s
 		double deltaVelocity = (newVelocity - lastVelocity)/0.02;
 		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, true);

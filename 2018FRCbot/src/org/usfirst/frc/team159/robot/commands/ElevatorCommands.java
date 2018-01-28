@@ -26,8 +26,8 @@ public class ElevatorCommands extends Command {
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
 		Joystick stick = OI.operatorController;
-		double leftStick = -stick.getRawAxis(RobotMap.LEFTTRIGGER);
-		double rightStick = stick.getRawAxis(RobotMap.RIGHTTRIGGER);
+		double leftStick = -stick.getRawAxis(RobotMap.LEFT_TRIGGER);
+		double rightStick = stick.getRawAxis(RobotMap.RIGHT_TRIGGER);
 		double value = rightStick + leftStick;
 		// System.out.printf("L=%f R=%f V=%f\n", Left, Right, value);
 		Robot.elevator.set(value);
