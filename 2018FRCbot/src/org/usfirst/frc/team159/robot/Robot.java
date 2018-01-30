@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.Calibrate;
+import org.usfirst.frc.team159.robot.commands.DrivePath;
 import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
@@ -34,7 +35,7 @@ public class Robot extends IterativeRobot {
 
 	public static OI oi;
 	
-	public static double scale = 0.7;
+	public static double scale = 0.6;
 
 	Command autonomousCommand;
 	SendableChooser<Integer> chooser = new SendableChooser<Integer>();
@@ -149,6 +150,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 30);
 		SmartDashboard.putBoolean("Calibrate", false);
-		SmartDashboard.putNumber("P", 1);
+		SmartDashboard.putNumber("P", DrivePath.KP);
 	}
 }

@@ -27,11 +27,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 	// double MAX_VEL = 1.3635; //1.8
 	// double MAX_ACC = 18.7; //14
 	// double MAX_JRK = 497.9; //116
-	double MAX_VEL = 1.5; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when
+	double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when
 							// turning
-	double MAX_ACC = 22.25;
-	double MAX_JRK = 30;
-	double KP = 1;
+	double MAX_ACC = 26.7;
+	double MAX_JRK = 10;
+	public static double KP = 4;
 	double KI = 0.0;
 	double KD = 0.0;
 	double KV = 1.0 / MAX_VEL;
@@ -47,7 +47,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	TankModifier modifier;
 	Timer timer;
 	static public boolean plotPath = false;
-	static public boolean plotTrajectory = true;
+	static public boolean plotTrajectory = false;
 	static public boolean useGyro = false;
 	static public boolean debugCommand = false;
 	private static final boolean debugPath = true;
@@ -89,12 +89,15 @@ public class DrivePath extends Command implements PhysicalConstants {
 		//System.out.println(System.getProperty("java.library.path"));
 		//System.out.println(wheelbase);
 
-		double maxVelocity = getNumberOnDashboard("Max Velocity", 1);
-		double maxAcceleration = getNumberOnDashboard("Max Acceleration", 1);
-		double maxJerk = getNumberOnDashboard("Max Jerk", 1);
+		double maxVelocity = MAX_VEL;
+		double maxAcceleration = MAX_ACC;
+		double maxJerk = MAX_JRK;
+		//double maxVelocity = getNumberOnDashboard("Max Velocity", 1);
+		//double maxAcceleration = getNumberOnDashboard("Max Acceleration", 1);
+		//double maxJerk = getNumberOnDashboard("Max Jerk", 1);
 
 		KV = 1 / maxVelocity;
-		KP = getNumberOnDashboard("P", 1);
+		KP = getNumberOnDashboard("P", KP);
 		
 		trajectory = calculateTrajectory(gameMessage, robotPosition.getSelected(), maxVelocity, maxAcceleration, maxJerk);
 		
@@ -378,7 +381,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		SmartDashboard.putString(name, data);
 	}
 	
-	private double getNumberOnDashboard(String name, int defaultValue) {
+	private double getNumberOnDashboard(String name, double defaultValue) {
 		return SmartDashboard.getNumber(name, defaultValue);
 	}
 	

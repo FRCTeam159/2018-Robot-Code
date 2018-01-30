@@ -20,7 +20,7 @@ public class Calibrate extends Command {
 	
 	private ArrayList<Double[]> velocityList = new ArrayList<>();
 	
-	private static final double runtime = 1;
+	private static final double runtime = 3;
 
     public Calibrate() {
     	requires(Robot.driveTrain);

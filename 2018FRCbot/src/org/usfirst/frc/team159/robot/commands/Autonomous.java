@@ -9,8 +9,8 @@ public class Autonomous extends CommandGroup {
 
     public Autonomous() {
     	//addSequential(new Calibrate());
-    	//addSequential(new DrivePath());
+    	addSequential(new DrivePath());
     	//addSequential(new DriveStraight(5));
-    	addSequential(new Test());
+    	//addSequential(new Test());
     }
 }

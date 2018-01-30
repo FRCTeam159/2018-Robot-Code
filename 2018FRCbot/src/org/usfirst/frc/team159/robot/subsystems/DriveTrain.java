@@ -25,9 +25,9 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private WPI_TalonSRX frontRight;
 	private WPI_TalonSRX backLeft;
 	private WPI_TalonSRX backRight;
-	private static final double wheelDiameter = 4.25;
-	private static final double gearRatio = (38/22)*3;
-	private static final double encoderTicks = 900;
+	private static final double wheelDiameter = 6.1; //4.25
+	private static final double gearRatio = 1; //(38/22)*3
+	private static final double encoderTicks = 1024; //900
 	private static final double encoderEdges = 4;
 	public static final double ticksPerRevolution = gearRatio * encoderTicks * encoderEdges;
 	public static final double feetPerRev = Math.PI * wheelDiameter / 12.0;
