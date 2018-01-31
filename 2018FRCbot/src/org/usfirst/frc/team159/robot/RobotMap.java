@@ -38,6 +38,10 @@ public class RobotMap {
 	//Constants
 	public static final int ENCODER_LOOP_TIME = 5;
 	public static final int TIMEOUT = 10;
+	public static final int ENCODER_TIMEOUT = 5;
+	public static final int SOLENOID_FORWARD = 0;
+	public static final int SOLENOID_REVERSE = 1;
+	public static final int ENCODER_WINDOW_SIZE = 4;
 	
 	// For example to map the left and right motors, you could define the
 	// following variables to use with your drivetrain subsystem.

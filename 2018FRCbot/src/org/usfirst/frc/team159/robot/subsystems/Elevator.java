@@ -22,7 +22,7 @@ public class Elevator extends Subsystem {
 	public Elevator() {
 		super();
 		elevatorMotor = new WPI_TalonSRX(RobotMap.ELEVATOR_MOTOR);
-		elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 10);
+		elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotMap.TIMEOUT);
 	}
 	
 	// Put methods for controlling this subsystem

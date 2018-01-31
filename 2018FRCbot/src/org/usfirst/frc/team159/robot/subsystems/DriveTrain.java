@@ -49,8 +49,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft = new WPI_TalonSRX(RobotMap.BACK_LEFT);
 		backRight = new WPI_TalonSRX(RobotMap.BACK_RIGHT);
 
-		frontRight.configVelocityMeasurementWindow(4, 10);
-		backLeft.configVelocityMeasurementWindow(4, 10);
+		frontRight.configVelocityMeasurementWindow(RobotMap.ENCODER_WINDOW_SIZE, RobotMap.TIMEOUT);
+		backLeft.configVelocityMeasurementWindow(RobotMap.ENCODER_WINDOW_SIZE, RobotMap.TIMEOUT);
 
 		// frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms,
 		// 10);
@@ -65,11 +65,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		// frontRight.configEncoderCodesPerRev(ticks_per_foot);
 		// backLeft.configEncoderCodesPerRev(ticks_per_foot);
 
-		frontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
-		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		frontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
+		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
 		// frontRight.enableLimitSwitch(false, false);
 		// backLeft.enableLimitSwitch(false, false);
-		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFT_ID, 0, 1);
+		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFT_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 
 		gyro = new ADXRS450_Gyro();
 		reset();
@@ -83,8 +83,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public void reset() {
 		log();
-		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, 10);
-		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, 10);
+		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, RobotMap.TIMEOUT);
+		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, RobotMap.TIMEOUT);
 		// int s1=
 		// frontRight.getStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_1_General,
 		// 10);
@@ -95,8 +95,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 		// frontRight.reset();
 		// backLeft.reset();
-		backLeft.getSensorCollection().setQuadraturePosition(0, 5);
-		frontRight.getSensorCollection().setQuadraturePosition(0, 5);
+		backLeft.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
+		frontRight.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
 		gyro.reset();
 
 		setLowGear();
