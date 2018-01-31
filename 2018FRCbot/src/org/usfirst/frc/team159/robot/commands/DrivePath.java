@@ -23,33 +23,32 @@ import jaci.pathfinder.modifiers.TankModifier;
  *
  */
 public class DrivePath extends Command implements PhysicalConstants {
-	double TIME_STEP = 0.02;
+	private static final double TIME_STEP = 0.02;
 	// double MAX_VEL = 1.3635; //1.8
 	// double MAX_ACC = 18.7; //14
 	// double MAX_JRK = 497.9; //116
-	double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when
-							// turning
-	double MAX_ACC = 26.7;
-	double MAX_JRK = 10;
+	private static final double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
+	private static final double MAX_ACC = 26.7;
+	private static final double MAX_JRK = 10;
 	public static double KP = 4;
-	double KI = 0.0;
-	double KD = 0.0;
-	double KV = 1.0 / MAX_VEL;
-	double KA = 0.0;
-	double GFACT = 2.0;
-	double wheelbase = metersPerInch(26);
-	Trajectory trajectory;
-	Trajectory leftTrajectory;
-	Trajectory rightTrajectory;
-	DistanceFollower leftFollower;
-	DistanceFollower rightFollower;
-	Trajectory.Config config;
+	private static final double KI = 0.0;
+	private static final double KD = 0.0;
+	private static double KV = 1.0 / MAX_VEL;
+	private static final double KA = 0.0;
+	private static final double GFACT = 2.0;
+	private final double wheelbase = metersPerInch(26);
+	private Trajectory trajectory;
+	private Trajectory leftTrajectory;
+	private Trajectory rightTrajectory;
+	private DistanceFollower leftFollower;
+	private DistanceFollower rightFollower;
+	private Trajectory.Config config;
 	TankModifier modifier;
-	Timer timer;
-	static public boolean plotPath = false;
-	static public boolean plotTrajectory = false;
-	static public boolean useGyro = false;
-	static public boolean debugCommand = false;
+	private Timer timer;
+	private static final boolean plotPath = false;
+	private static final boolean plotTrajectory = false;
+	private static final boolean useGyro = false;
+	private static final boolean debugCommand = false;
 	private static final boolean debugPath = true;
 
 	private int pathIndex = 0;
@@ -58,7 +57,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final int CENTER_POSITION = 1;
 	private static final int RIGHT_POSITION = 2;
 
-	double runtime = 0;
+	private final double runtime;
 
 	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
 
@@ -66,7 +65,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final double straightEndPoint = 78;
 	private static final double scaleEndPoint = ROBOT_Y_TO_SCALE;
 
-	public DrivePath() {
+	DrivePath() {
 		requires(Robot.driveTrain);
 		
 		Sendable position = SmartDashboard.getData("Position");
@@ -105,10 +104,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 		TankModifier modifier = new TankModifier(trajectory);
 		modifier.modify(wheelbase);
 		runtime = trajectory.length() * TIME_STEP;
-		
-		/*for (Waypoint waypoint : waypoints) {
-			System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
-		}*/
 
 		// Generate the Left and Right trajectories using the original trajectory as the center
 
@@ -193,18 +188,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-		if (trajectory == null) {
-			return true;
-		}
-		if (timer.get() - runtime > 0.5) {
-			return true;
-		}
-		if (leftFollower.isFinished() && rightFollower.isFinished()) {
-			return true;
-		}
+        return trajectory == null || timer.get() - runtime > 0.5 || leftFollower.isFinished() && rightFollower.isFinished();
 
-		return false;
-	}
+    }
 
 	// Called once after isFinished returns true
 	protected void end() {
@@ -239,8 +225,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}
 
 	private Waypoint[] calculateStraightPoints(double x) {
-		Waypoint[] waypoints = new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
-		return waypoints;
+        return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
 	}
 
 	private Waypoint[] calculateSwitchCurvePoints(double x, double y) {
@@ -280,69 +265,73 @@ public class DrivePath extends Command implements PhysicalConstants {
 		
 		if (calculatedTrajectory == null) {
 			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
-			return null;
 		}
 		return calculatedTrajectory;
 	}
 
 	private Waypoint[] calculatePathWaypoints(String gameData, int robotPosition) {
 		Waypoint[] returnWaypoints = null;
-		if (robotPosition == CENTER_POSITION) {
-			if (gameData.charAt(0) == 'R') {
-				returnWaypoints = calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y);
-			} else {
-				returnWaypoints = mirrorWaypoints(
-						calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y));
-			}
-		} else if (robotPosition == RIGHT_POSITION) {
-			if (!isStraightPathForced()) {
-				if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
-					if (isScalePreferredOverSwitch()) {
-						returnWaypoints = calculateScalePoints(scaleEndPoint);
-					} else {
-						returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
-					}
-				}
-				if (gameData.charAt(0) == 'R') {
-					returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
-				} else {
-					returnWaypoints = calculateStraightPoints(straightEndPoint);
-				}
-			} else {
-				returnWaypoints = calculateStraightPoints(straightEndPoint);
-			}
-		} else if (robotPosition == LEFT_POSITION) {
-			if (!isStraightPathForced()) {
-				if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
-					if (isScalePreferredOverSwitch()) {
-						returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
-					} else {
-						returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
-					}
-				}
-				if (gameData.charAt(0) == 'L') {
-					returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
-				} else {
-					returnWaypoints = calculateStraightPoints(straightEndPoint);
-				}
-			} else {
-				returnWaypoints = calculateStraightPoints(straightEndPoint);
-			}
-		}
-		return waypointsInchesToMeters(returnWaypoints);
+        switch (robotPosition) {
+            case CENTER_POSITION:
+                if (gameData.charAt(0) == 'R') {
+                    returnWaypoints = calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y);
+                } else {
+                    returnWaypoints = mirrorWaypoints(
+                            calculateSwitchCurvePoints(switchCurveEndPoint.x, switchCurveEndPoint.y));
+                }
+                break;
+            case RIGHT_POSITION:
+                if (!isStraightPathForced()) {
+                    if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
+                        if (isScalePreferredOverSwitch()) {
+                            returnWaypoints = calculateScalePoints(scaleEndPoint);
+                        } else {
+                            returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
+                        }
+                    }
+                    if (gameData.charAt(0) == 'R') {
+                        returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
+                    } else {
+                        returnWaypoints = calculateStraightPoints(straightEndPoint);
+                    }
+                } else {
+                    returnWaypoints = calculateStraightPoints(straightEndPoint);
+                }
+                break;
+            case LEFT_POSITION:
+                if (!isStraightPathForced()) {
+                    if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
+                        if (isScalePreferredOverSwitch()) {
+                            returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
+                        } else {
+                            returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
+                        }
+                    }
+                    if (gameData.charAt(0) == 'L') {
+                        returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
+                    } else {
+                        returnWaypoints = calculateStraightPoints(straightEndPoint);
+                    }
+                } else {
+                    returnWaypoints = calculateStraightPoints(straightEndPoint);
+                }
+                break;
+        }
+        assert returnWaypoints != null;
+        return waypointsInchesToMeters(returnWaypoints);
 	}
 
 	private String generateFMSData() {
 		Random random = new Random();
-		String data = "";
+		StringBuilder data = new StringBuilder();
 		while (data.length() < 3) {
 			if (random.nextInt(2) == 0) {
-				data += "R";
+				data.append("R");
 			} else {
-				data += "L";
+				data.append("L");
 			}
 		}
-		return data;
+		return data.toString();
 	}
 
 	private double inchesToMeters(double inches) {
@@ -369,11 +358,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 		pathIndex++;
 	}
 	
-	double feetToMeters(double feet) {
+	private double feetToMeters(double feet) {
 		return 2.54 * 12 * feet / 100;
 	}
 
-	double metersPerInch(double inches) {
+	private double metersPerInch(double inches) {
 		return 2.54 * inches / 100;
 	}
 	

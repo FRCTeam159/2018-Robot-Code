@@ -12,9 +12,9 @@ import org.usfirst.frc.team159.robot.RobotMap;
  *
  */
 public class DriveWithJoystick extends Command {
-	Timer timer = new Timer();
+	private Timer timer = new Timer();
 	private double lastVelocity = 0;
-	private boolean debug = false;
+	private static final boolean debug = false;
 	private static final double powerScale = 0.75;
 	
 	public DriveWithJoystick() {
@@ -35,12 +35,12 @@ public class DriveWithJoystick extends Command {
 		// Get axis values
 		double leftStick = stick.getRawAxis(RobotMap.LEFT_TRIGGER);
     	double rightStick = stick.getRawAxis(RobotMap.RIGHT_TRIGGER);	
-    	boolean leftTrigger = leftStick > 0.5 ? true : false;
-    	boolean rightTrigger = rightStick > 0.5 ? true : false;
+    	boolean leftTrigger = leftStick > 0.5;
+    	boolean rightTrigger = rightStick > 0.5;
 
-		if (leftTrigger || stick.getRawButton(RobotMap.LOWGEAR_BUTTON)){
+		if (leftTrigger || stick.getRawButton(RobotMap.LOW_GEAR_BUTTON)){
 			Robot.driveTrain.setLowGear();
-		} else if(rightTrigger || stick.getRawButton(RobotMap.HIGHGEAR_BUTTON)){
+		} else if(rightTrigger || stick.getRawButton(RobotMap.HIGH_GEAR_BUTTON)){
 			Robot.driveTrain.setHighGear();
 		}
     	double moveAxis = -powerScale*stick.getRawAxis(RobotMap.LEFT_JOYSTICK); // left stick - drive

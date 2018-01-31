@@ -18,8 +18,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
  *
  */
 public class DriveTrain extends Subsystem implements MotorSafety {
-	// Put methods for controlling this subsystem
-	// here. Call these from Commands.
+	// Put methods for controlling this subsystems here. Call these from Commands.
 
 	private WPI_TalonSRX frontLeft;
 	private WPI_TalonSRX frontRight;
@@ -29,13 +28,13 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private static final double gearRatio = 1; //(38/22)*3
 	private static final double encoderTicks = 1024; //900
 	private static final double encoderEdges = 4;
-	public static final double ticksPerRevolution = gearRatio * encoderTicks * encoderEdges;
-	public static final double feetPerRev = Math.PI * wheelDiameter / 12.0;
-	public static final double ticksPerFoot = ticksPerRevolution / feetPerRev;
+	private static final double ticksPerRevolution = gearRatio * encoderTicks * encoderEdges;
+	private static final double feetPerRev = Math.PI * wheelDiameter / 12.0;
+	private static final double ticksPerFoot = ticksPerRevolution / feetPerRev;
 	private boolean inLowGear = false;
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 	private DoubleSolenoid gearPneumatic;
-	ADXRS450_Gyro gyro;
+	private ADXRS450_Gyro gyro;
 
 	public void initDefaultCommand() {
 		// Set the default command for a subsystem here.
@@ -117,7 +116,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		log();
 	}
 
-	double coerce(double min, double max, double value) {
+	private double coerce(double min, double max, double value) {
 		if (value < min) {
 			value = min;
 		} else if (value > max) {
@@ -220,8 +219,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	public double getDistance() {
 		double d1 = getRightDistance();
 		double d2 = getLeftDistance();
-		double x = 0.5 * (d1 + d2);
-		return x;
+		return 0.5 * (d1 + d2);
 	}
 
 	public double getRightDistance() {
@@ -269,18 +267,14 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public boolean isInLowGear() {
-		if (inLowGear) {
-			return true;
-		} else {
-			return false;
-		}
+		return inLowGear;
 	}
 
 	public double getHeading() {
 		return gyro.getAngle();
 	}
 
-	void log() {
+	private void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
 		SmartDashboard.putNumber("Left wheels", backLeft.get());
 		SmartDashboard.putNumber("Right wheels", -frontRight.get());

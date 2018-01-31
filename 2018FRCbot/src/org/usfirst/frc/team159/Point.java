@@ -1,8 +1,8 @@
 package org.usfirst.frc.team159;
 
 public class Point {
-	public double x;
-	public double y;
+	public final double x;
+	public final double y;
 	
 	// simple class to hold a couple values
 	public Point(double x, double y) {

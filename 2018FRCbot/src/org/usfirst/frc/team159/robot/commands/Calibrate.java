@@ -15,7 +15,7 @@ public class Calibrate extends Command {
 	private Timer runTimer = new Timer();
 	private ArrayList<Double> rollingAverageList = new ArrayList<>();
 	private double rollingAverageTotal = 0;
-	private double speed = 1;
+	private static final double speed = 1;
 	private int count = 0;
 	
 	private ArrayList<Double[]> velocityList = new ArrayList<>();

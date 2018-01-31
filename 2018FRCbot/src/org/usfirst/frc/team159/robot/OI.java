@@ -11,14 +11,14 @@ import edu.wpi.first.wpilibj.Joystick;
  * interface to the commands and command groups that allow control of the robot.
  */
 public class OI {
-	public static Joystick driverController = new Joystick(RobotMap.DRIVER);
-	public static Joystick operatorController = new Joystick(RobotMap.OPERATOR);
+	public static final Joystick driverController = new Joystick(RobotMap.DRIVER);
+	public static final Joystick operatorController = new Joystick(RobotMap.OPERATOR);
 	
-	public static Button elevatorDown = new JoystickButton(operatorController, 6);
-	public static Button elevatorUp = new JoystickButton(operatorController, 7);
-	public static Button lowGear = new JoystickButton(driverController, 4);
-	public static Button highGear = new JoystickButton(driverController, 5);
-	public static Button cubeIntake = new JoystickButton(operatorController, 0);
+	public static Button elevatorDownButton = new JoystickButton(operatorController, 6);
+	public static Button elevatorUpButton = new JoystickButton(operatorController, 7);
+	public static Button lowGearButton = new JoystickButton(driverController, 4);
+	public static Button highGearButton = new JoystickButton(driverController, 5);
+	public static Button cubeIntakeButton = new JoystickButton(operatorController, 0);
 	
 	
 	//// CREATING BUTTONS

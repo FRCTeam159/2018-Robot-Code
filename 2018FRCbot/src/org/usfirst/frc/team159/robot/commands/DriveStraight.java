@@ -13,19 +13,19 @@ import edu.wpi.first.wpilibj.command.Command;
  *
  */
 public class DriveStraight extends Command implements PIDSource, PIDOutput {
-	PIDController pid;
-	PIDSourceType type = PIDSourceType.kDisplacement;
-	double distance;
-	double tolerance = 0.1;
-	boolean last_ontarget = false;
-	boolean started = false;
-	static public boolean debug = true;
-	static public double P = 0.25;
-	static public double I = 0.002;
-	static public double D = 0.0;
-	static public double TOL = 0.05;
-	static public double intime = 0.025;
-	Timer timer = new Timer();;
+	private PIDController pid;
+	private PIDSourceType type = PIDSourceType.kDisplacement;
+	private final double distance;
+	private static final double tolerance = 0.1;
+	private static final boolean lastOntarget = false;
+	private boolean started = false;
+	private static final boolean debug = true;
+	private static final double P = 0.25;
+	private static final double I = 0.002;
+	private static final double D = 0.0;
+	private static final double TOL = 0.05;
+	private static final double intime = 0.025;
+	private Timer timer = new Timer();
 
 	public DriveStraight(double distance) {
 		this.distance = distance;
@@ -49,7 +49,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		if (started == false && timer.get() > intime && !pid.isEnabled()) {
+		if (!started && timer.get() > intime && !pid.isEnabled()) {
 			pid.reset();
 			pid.enable();
 			started = true;

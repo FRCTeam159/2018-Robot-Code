@@ -3,20 +3,15 @@ package org.usfirst.frc.team159.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.Calibrate;
 import org.usfirst.frc.team159.robot.commands.DrivePath;
-import org.usfirst.frc.team159.robot.commands.DriveWithJoystick;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
-import org.usfirst.frc.team159.robot.subsystems.RampHandler;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,16 +24,15 @@ public class Robot extends IterativeRobot {
 
 	public static Elevator elevator;
 	public static CubeHandler cubeHandler;
-	public static RampHandler rampHandler;
 	public static DriveTrain driveTrain;
-	public static Cameras cameras;
+	private static Cameras cameras;
 
-	public static OI oi;
+	private static OI oi;
 	
-	public static double scale = 0.6;
+	public static final double scale = 0.6;
 
-	Command autonomousCommand;
-	SendableChooser<Integer> chooser = new SendableChooser<Integer>();
+	private Command autonomousCommand;
+	private SendableChooser<Integer> chooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -49,7 +43,6 @@ public class Robot extends IterativeRobot {
 		driveTrain = new DriveTrain();
 		elevator = new Elevator();
 		cubeHandler = new CubeHandler();
-		rampHandler = new RampHandler();
 		cameras = new Cameras();
 
 		oi = new OI();
@@ -134,14 +127,12 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during test mode
 	 */
 	@Override
-	public void testPeriodic() {
-		LiveWindow.run();
-	}
+	public void testPeriodic() {}
 	
 	private void putValuesOnSmartDashboard() {
-		chooser.addObject("Left", new Integer(0));
-		chooser.addDefault("Center", new Integer(1));
-		chooser.addObject("Right", new Integer(2));
+		chooser.addObject("Left", 0);
+		chooser.addDefault("Center", 1);
+		chooser.addObject("Right", 2);
 		SmartDashboard.putData("Position", chooser);
 		SmartDashboard.putBoolean("Prefer Scale", true);
 		SmartDashboard.putBoolean("Force Straight Path", false);

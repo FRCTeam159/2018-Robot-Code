@@ -29,8 +29,8 @@ public class RobotMap {
 	public static final int RIGHT_JOYSTICK=4;
 	public static final int LEFT_TRIGGER=2;
 	public static final int RIGHT_TRIGGER=3;
-	public static final int LOWGEAR_BUTTON=5;
-	public static final int HIGHGEAR_BUTTON=6;
+	public static final int LOW_GEAR_BUTTON =5;
+	public static final int HIGH_GEAR_BUTTON =6;
 	
 	//other
 	public static final int GEARSHIFT_ID=0;
