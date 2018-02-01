@@ -24,6 +24,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private WPI_TalonSRX frontRight;
 	private WPI_TalonSRX backLeft;
 	private WPI_TalonSRX backRight;
+	//TODO are these correct?
 	private static final double wheelDiameter = 6.1; //4.25
 	private static final double gearRatio = 1; //(38/22)*3
 	private static final double encoderTicks = 1024; //900
@@ -38,7 +39,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public void initDefaultCommand() {
 		// Set the default command for a subsystem here.
-		// setDefaultCommand(new MySpecialCommand());
 		setDefaultCommand(new DriveWithJoystick());
 	}
 
@@ -53,10 +53,10 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.configVelocityMeasurementWindow(RobotMap.ENCODER_WINDOW_SIZE, RobotMap.TIMEOUT);
 
 		// frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms,
-		// 10);
-		// backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 10);
+		// RobotMap.TIMEOUT);
+		// backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, RobotMap.TIMEOUT);
 
-		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , 10)
+		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , RobotMap.TIMEOUT)
 		frontRight.set(ControlMode.PercentOutput, 0);
 		backLeft.set(ControlMode.PercentOutput, 0);
 
@@ -83,15 +83,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public void reset() {
 		log();
-		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, RobotMap.TIMEOUT);
-		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, 4, RobotMap.TIMEOUT);
-		// int s1=
-		// frontRight.getStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_1_General,
-		// 10);
-		// int s2=
-		// frontRight.getStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature,
-		// 10);
-		// System.out.printf("general=%d quad=%d\n", s1, s2);
+		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
+		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
 
 		// frontRight.reset();
 		// backLeft.reset();
