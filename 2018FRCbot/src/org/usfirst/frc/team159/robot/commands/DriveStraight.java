@@ -36,7 +36,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
-		System.out.printf("divestraight.initialize distance = %f\n", distance);
+		System.out.printf("drivestraight.initialize distance = %f\n", distance);
 		pid.reset();
 		pid.setSetpoint(distance);
 		pid.disable();

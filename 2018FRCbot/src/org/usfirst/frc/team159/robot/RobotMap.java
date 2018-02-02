@@ -32,7 +32,7 @@ public class RobotMap {
     public static final int HIGH_GEAR_BUTTON = 6;
 
     //other
-    public static final int GEARSHIFT_ID = 0;
+    public static final int GEAR_SHIFTER_ID = 0;
 
     //Constants
     public static final int ENCODER_WINDOW_SIZE = 4;

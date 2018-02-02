@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
  *
  */
 public class DriveTrain extends Subsystem implements MotorSafety {
-	// Put methods for controlling this subsystems here. Call these from Commands.
 
 	private WPI_TalonSRX frontLeft;
 	private WPI_TalonSRX frontRight;
@@ -69,11 +68,13 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
 		// frontRight.enableLimitSwitch(false, false);
 		// backLeft.enableLimitSwitch(false, false);
-		gearPneumatic = new DoubleSolenoid(RobotMap.GEARSHIFT_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
+		gearPneumatic = new DoubleSolenoid(RobotMap.GEAR_SHIFTER_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 
 		gyro = new ADXRS450_Gyro();
 		reset();
 	}
+
+	// Put methods for controlling this subsystem here. Call these from Commands.
 
 	public void enable() {
 		frontRight.set(ControlMode.PercentOutput, 0);
@@ -103,8 +104,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public void tankDrive(double left, double right) {
 		setRaw(left, right);
-		//backLeft.set(left);
-		//frontRight.set(-right);
+		//backLeft.setSpeed(left);
+		//frontRight.setSpeed(-right);
 		//safetyHelper.feed();
 		log();
 	}
@@ -164,8 +165,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		 * -backLeft.getSensorCollection().getQuadraturePosition());
 		 */
 		setRaw(leftMotorOutput, rightMotorOutput);
-		//backLeft.set(leftMotorOutput);
-		//frontRight.set(-rightMotorOutput);
+		//backLeft.setSpeed(leftMotorOutput);
+		//frontRight.setSpeed(-rightMotorOutput);
 		//safetyHelper.feed();
 		log();
 	}
@@ -216,14 +217,12 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getRightDistance() {
-		double ticks = -frontRight.getSensorCollection().getQuadraturePosition();
-		return ticks / ticksPerFoot;
+		return -frontRight.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
 		// return frontRight.getPosition();
 	}
 
 	public double getLeftDistance() {
-		double ticks = backLeft.getSensorCollection().getQuadraturePosition();
-		return ticks / ticksPerFoot;
+		return backLeft.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
 		// return -backLeft.getPosition();
 	}
 

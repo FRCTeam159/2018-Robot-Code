@@ -12,25 +12,35 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class ElevatorCommands extends Command {
 
+	private double setpoint = 0;
+	private static final double maxSpeed = 40;
+	private static final double cycleTime = 0.02;
+	private static final double moveRate = cycleTime * maxSpeed;
+
 	public ElevatorCommands() {
-		// Use requires() here to declare subsystem dependencies
-		// eg. requires(chassis);
+		// Use requires() here to declare subsystem dependencies eg. requires(chassis);
 		requires(Robot.elevator);
 	}
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
+		setpoint = 0;
+		Robot.elevator.enable();
 		printInitializeMessage();
 	}
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
 		Joystick stick = OI.operatorController;
-		double leftStick = -stick.getRawAxis(RobotMap.LEFT_TRIGGER);
-		double rightStick = stick.getRawAxis(RobotMap.RIGHT_TRIGGER);
-		double value = rightStick + leftStick;
-		// System.out.printf("L=%f R=%f V=%f\n", Left, Right, value);
-		Robot.elevator.set(value);
+		double leftStick = 0.5 * (1 + stick.getRawAxis(RobotMap.LEFT_TRIGGER));
+		double rightStick = 0.5 * (1 + stick.getRawAxis(RobotMap.RIGHT_TRIGGER));
+
+		if(leftStick > 0){
+		    decrementElevatorPosition(leftStick);
+        }
+        if(rightStick > 0){
+		    incrementElevatorPosition(rightStick);
+        }
 	}
 
 	// Make this return true when this Command no longer needs to run execute()
@@ -40,8 +50,9 @@ public class ElevatorCommands extends Command {
 
 	// Called once after isFinished returns true
 	protected void end() {
+	    Robot.elevator.reset();
+	    Robot.elevator.disable();
 		printEndMessage();
-
 	}
 
 	// Called when another command which requires one or more of the same
@@ -50,6 +61,16 @@ public class ElevatorCommands extends Command {
 		printInterruptedMessage();
 		end();
 	}
+
+	private void incrementElevatorPosition(double value){
+	    setpoint += value * moveRate;
+	    Robot.elevator.setPosition(setpoint);
+    }
+
+    private void decrementElevatorPosition(double value){
+        setpoint -= value * moveRate;
+        Robot.elevator.setPosition(setpoint);
+    }
 	
 	private void printInitializeMessage() {
 		System.out.println("Elevator.initialize");

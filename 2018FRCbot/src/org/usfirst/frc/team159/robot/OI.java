@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.Joystick;
 
-//import org.usfirst.frc.team159.robot.commands.ExampleCommand;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -14,11 +13,11 @@ public class OI {
 	public static final Joystick driverController = new Joystick(RobotMap.DRIVER);
 	public static final Joystick operatorController = new Joystick(RobotMap.OPERATOR);
 	
-	public static Button elevatorDownButton = new JoystickButton(operatorController, 6);
-	public static Button elevatorUpButton = new JoystickButton(operatorController, 7);
-	public static Button lowGearButton = new JoystickButton(driverController, 4);
-	public static Button highGearButton = new JoystickButton(driverController, 5);
-	public static Button cubeIntakeButton = new JoystickButton(operatorController, 0);
+//	public static Button elevatorDownButton = new JoystickButton(operatorController, 6);
+//	public static Button elevatorUpButton = new JoystickButton(operatorController, 7);
+//	public static Button lowGearButton = new JoystickButton(driverController, 4);
+//	public static Button highGearButton = new JoystickButton(driverController, 5);
+//	public static Button cubeIntakeButton = new JoystickButton(operatorController, 0);
 	
 	
 	//// CREATING BUTTONS

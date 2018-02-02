@@ -27,7 +27,7 @@ public class Robot extends IterativeRobot {
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
 
-	private static OI oi;
+//	private static OI oi;
 	
 	public static final double scale = 0.6;
 
@@ -45,7 +45,7 @@ public class Robot extends IterativeRobot {
 		cubeHandler = new CubeHandler();
 		cameras = new Cameras();
 
-		oi = new OI();
+//		oi = new OI();
 		
 		putValuesOnSmartDashboard();
 		

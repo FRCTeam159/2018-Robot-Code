@@ -36,14 +36,14 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static double KV = 1.0 / MAX_VEL;
 	private static final double KA = 0.0;
 	private static final double GFACT = 2.0;
-	private final double wheelbase = metersPerInch(26);
+	private static final double wheelbase = metersPerInch(26);
 	private Trajectory trajectory;
 	private Trajectory leftTrajectory;
 	private Trajectory rightTrajectory;
 	private DistanceFollower leftFollower;
 	private DistanceFollower rightFollower;
-	private Trajectory.Config config;
-	TankModifier modifier;
+	//private Trajectory.Config config;
+	//TankModifier modifier;
 	private Timer timer;
 	private static final boolean plotPath = false;
 	private static final boolean plotTrajectory = false;
@@ -63,7 +63,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	private static final Point switchCurveEndPoint = new Point(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE);
 	private static final double straightEndPoint = 78;
-	private static final double scaleEndPoint = ROBOT_Y_TO_SCALE;
+	private static final double scaleEndPoint = SCALE_HOOK_TURN_Y;
 
 	DrivePath() {
 		requires(Robot.driveTrain);
@@ -171,9 +171,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 		double pathfinderHeading = Pathfinder.r2d(leftFollower.getHeading()); // Should also be in degrees
 
 		pathfinderHeading = pathfinderHeading > 180 ? 360 - pathfinderHeading : pathfinderHeading;
-		double herr = pathfinderHeading - gyroHeading;
+		double headingError = pathfinderHeading - gyroHeading;
 		if (useGyro)
-			turn = GFACT * (-1.0 / 180.0) * herr;
+			turn = GFACT * (-1.0 / 180.0) * headingError;
 		if (debugCommand) {
 			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rightPower + turn, leftPower - turn);
 		}
@@ -207,8 +207,8 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private Waypoint[] calculateScalePoints(double y) {
 		Waypoint[] waypoints = new Waypoint[3];
 		waypoints[0] = new Waypoint(0, 0, 0);
-		waypoints[1] = new Waypoint(NULL_ZONE_EDGE_TO_WALL, 0, Pathfinder.d2r(45));
-		waypoints[2] = new Waypoint(ROBOT_X_TO_SCALE, y, Pathfinder.d2r(90));
+		waypoints[1] = new Waypoint(SCALE_HOOK_TURN_X, 0, Pathfinder.d2r(45));
+		waypoints[2] = new Waypoint(ROBOT_TO_SCALE_CENTER, y, Pathfinder.d2r(90));
 		return waypoints;
 	}
 
@@ -258,7 +258,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}
 	
 	private Trajectory calculateTrajectory(String gameData, int robotPosition, double maxVelocity, double maxAcceleration, double maxJerk) {
-		config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
+		Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
 		
 		Waypoint[] waypoints = calculatePathWaypoints(gameData, robotPosition);
 		Trajectory calculatedTrajectory = Pathfinder.generate(waypoints, config);
@@ -288,8 +288,7 @@ public class DrivePath extends Command implements PhysicalConstants {
                         } else {
                             returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
                         }
-                    }
-                    if (gameData.charAt(0) == 'R') {
+                    } else if (gameData.charAt(0) == 'R') {
                         returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
                     } else {
                         returnWaypoints = calculateStraightPoints(straightEndPoint);
@@ -306,8 +305,7 @@ public class DrivePath extends Command implements PhysicalConstants {
                         } else {
                             returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
                         }
-                    }
-                    if (gameData.charAt(0) == 'L') {
+                    } else if (gameData.charAt(0) == 'L') {
                         returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
                     } else {
                         returnWaypoints = calculateStraightPoints(straightEndPoint);
@@ -358,11 +356,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 		pathIndex++;
 	}
 	
-	private double feetToMeters(double feet) {
+	private static double feetToMeters(double feet) {
 		return 2.54 * 12 * feet / 100;
 	}
 
-	private double metersPerInch(double inches) {
+	private static double metersPerInch(double inches) {
 		return 2.54 * inches / 100;
 	}
 	
