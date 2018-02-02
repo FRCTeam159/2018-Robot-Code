@@ -17,7 +17,8 @@ public class OI {
 //	public static Button elevatorUpButton = new JoystickButton(operatorController, 7);
 //	public static Button lowGearButton = new JoystickButton(driverController, 4);
 //	public static Button highGearButton = new JoystickButton(driverController, 5);
-//	public static Button cubeIntakeButton = new JoystickButton(operatorController, 0);
+	public static Button armToggleButton = new JoystickButton(operatorController, RobotMap.ARM_TOGGLE_BUTTON);
+	public static Button cubeIntakeButton = new JoystickButton(operatorController, RobotMap.INTAKE_BUTTON);
 	
 	
 	//// CREATING BUTTONS
