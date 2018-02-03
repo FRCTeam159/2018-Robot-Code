@@ -17,8 +17,8 @@ public class CubeHandler extends Subsystem {
 	// Put methods for controlling this subsystem here. Call these from Commands.
 	private WPI_TalonSRX leftIntakeMotor;
 	private WPI_TalonSRX rightIntakeMotor;
-	private Ultrasonic cubeDetector;
-	private DoubleSolenoid armPneumatic;
+//	private Ultrasonic cubeDetector;
+//	private DoubleSolenoid armPneumatic;
 
 	private static final double intakePower = 0.5;
 	private static final double outputPower = 0.25;
@@ -37,9 +37,9 @@ public class CubeHandler extends Subsystem {
 		super();
 		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
 		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
-		cubeDetector = new Ultrasonic(RobotMap.CUBE_DETECTOR_PING_CHANNEL, RobotMap.CUBE_DETECTOR_ECHO_CHANNEL);
-		cubeDetector.setAutomaticMode(true);
-		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
+//		cubeDetector = new Ultrasonic(RobotMap.CUBE_DETECTOR_PING_CHANNEL, RobotMap.CUBE_DETECTOR_ECHO_CHANNEL);
+//		cubeDetector.setAutomaticMode(true);
+//		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 	}
 
 	public void enable(){
@@ -93,16 +93,17 @@ public class CubeHandler extends Subsystem {
 
     public boolean cubeDetected(){
 	    // TODO test
-	    return cubeDetector.getRangeInches() < detectionRange;
+//	    return cubeDetector.getRangeInches() < detectionRange;
+    	return false;
     }
 
     private void openArms(){
-	    armPneumatic.set(DoubleSolenoid.Value.kReverse);
+//	    armPneumatic.set(DoubleSolenoid.Value.kReverse);
 	    armsOpen = true;
     }
 
     private void closeArms(){
-        armPneumatic.set(DoubleSolenoid.Value.kForward);
+//        armPneumatic.set(DoubleSolenoid.Value.kForward);
 	    armsOpen = false;
     }
 

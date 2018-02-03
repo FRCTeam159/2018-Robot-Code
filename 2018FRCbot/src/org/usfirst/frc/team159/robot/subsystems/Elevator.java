@@ -40,11 +40,11 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput{
 
 	public Elevator() {
 		super();
+		elevatorMotor = new WPI_TalonSRX(RobotMap.ELEVATOR_MOTOR);
+		elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotMap.TIMEOUT);
 		pidController = new PIDController(P, I, D, F, this, this);
 		pidController.setOutputRange(-1, 1);
 		pidController.disable();
-		elevatorMotor = new WPI_TalonSRX(RobotMap.ELEVATOR_MOTOR);
-		elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotMap.TIMEOUT);
 	}
 	
 	// Put methods for controlling this subsystem here. Call these from Commands.
