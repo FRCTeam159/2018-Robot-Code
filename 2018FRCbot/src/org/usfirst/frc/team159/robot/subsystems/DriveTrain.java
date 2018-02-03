@@ -119,43 +119,49 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		return value;
 	}
 
-	public void arcadeDrive(double moveValue, double rotateValue, boolean squaredInputs) {
+	public void arcadeDrive(double moveValue, double turnValue, double moveExponent, double turnExponent) {
 		double leftMotorOutput;
 		double rightMotorOutput;
 
-		if (squaredInputs) {
-			// square the inputs (while preserving the sign) to increase fine control
+        if(Math.abs(moveValue) > 0) {
+            moveValue = (moveValue / Math.abs(moveValue)) * Math.pow(moveValue, moveExponent);
+        }
+        if(Math.abs(turnValue) > 0) {
+            turnValue = (turnValue / Math.abs(turnValue)) * Math.pow(turnValue, turnExponent);
+        }
+        /*
+        if(squaredInputs()){
+            // square the inputs (while preserving the sign) to increase fine control
 			// while permitting full power
-			if (moveValue >= 0.0) {
-				moveValue = (moveValue * moveValue);
-			} else {
-				moveValue = -(moveValue * moveValue);
-			}
-			if (rotateValue >= 0.0) {
-				rotateValue = (rotateValue * rotateValue);
-			} else {
-				rotateValue = -(rotateValue * rotateValue);
-			}
-		}
+            if (moveValue >= 0.0) {
+                moveValue = (moveValue * moveValue);
+            } else {
+                moveValue = -(moveValue * moveValue);
+            }
+            if (turnValue >= 0.0) {
+                turnValue = (turnValue * turnValue);
+            } else {
+                turnValue = -(turnValue * turnValue);
+            }
+		}*/
 
 		if (moveValue > 0.0) {
-			if (rotateValue > 0.0) {
-				rightMotorOutput = moveValue - rotateValue;
-				leftMotorOutput = Math.max(moveValue, rotateValue);
+			if (turnValue > 0.0) {
+                leftMotorOutput = Math.max(moveValue, turnValue);
+				rightMotorOutput = moveValue - turnValue;
 			} else {
-				rightMotorOutput = Math.max(moveValue, -rotateValue);
-				leftMotorOutput = moveValue + rotateValue;
+                leftMotorOutput = moveValue + turnValue;
+				rightMotorOutput = Math.max(moveValue, -turnValue);
 			}
 		} else {
-			if (rotateValue > 0.0) {
-				rightMotorOutput = -Math.max(-moveValue, rotateValue);
-				leftMotorOutput = moveValue + rotateValue;
+			if (turnValue > 0.0) {
+                leftMotorOutput = moveValue + turnValue;
+				rightMotorOutput = -Math.max(-moveValue, turnValue);
 			} else {
-				rightMotorOutput = moveValue - rotateValue;
-				leftMotorOutput = -Math.max(-moveValue, -rotateValue);
+                leftMotorOutput = -Math.max(-moveValue, -turnValue);
+				rightMotorOutput = moveValue - turnValue;
 			}
 		}
-		// Ramp values up
 		// Make sure values are between -1 and 1
 		leftMotorOutput = coerce(-1, 1, leftMotorOutput);
 		rightMotorOutput = coerce(-1, 1, rightMotorOutput);
@@ -165,9 +171,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		 * -backLeft.getSensorCollection().getQuadraturePosition());
 		 */
 		setRaw(leftMotorOutput, rightMotorOutput);
-		//backLeft.setSpeed(leftMotorOutput);
-		//frontRight.setSpeed(-rightMotorOutput);
-		//safetyHelper.feed();
 		log();
 	}
 

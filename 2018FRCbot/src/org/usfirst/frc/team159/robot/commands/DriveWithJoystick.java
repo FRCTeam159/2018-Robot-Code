@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team159.robot.OI;
 import org.usfirst.frc.team159.robot.Robot;
 import org.usfirst.frc.team159.robot.RobotMap;
@@ -26,6 +27,8 @@ public class DriveWithJoystick extends Command {
 	protected void initialize() {
 		timer.start();
 		timer.reset();
+		SmartDashboard.putNumber("Move Exponent", SmartDashboard.getNumber("Move Exponent", 2));
+        SmartDashboard.putNumber("Turn Exponent", SmartDashboard.getNumber("Turn Exponent", 2));
 	}
 
 	// Called repeatedly when this Command is scheduled to run
@@ -48,7 +51,7 @@ public class DriveWithJoystick extends Command {
 		double newVelocity = (Robot.driveTrain.getLeftVelocity()) * 0.3048; // in m/s
 		double deltaVelocity = (newVelocity - lastVelocity)/0.02;
 
-		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, true);
+		Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, SmartDashboard.getNumber("Move Exponent", 1), SmartDashboard.getNumber("Turn Exponent", 1));
 
 		if(debug) {
 		System.out.format("%f %f %f %f %f %f %f %f %f\n", 

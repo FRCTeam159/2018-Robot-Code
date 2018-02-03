@@ -30,8 +30,8 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput{
     private static final double FEET_PER_REV = Math.PI * WHEEL_DIAMETER / 12.0;
     private static final double TICKS_PER_FOOT = TICKS_PER_REVOLUTION / FEET_PER_REV;
 
-    PIDController pidController;
-    PIDSourceType pidType = PIDSourceType.kDisplacement;
+    private PIDController pidController;
+    private PIDSourceType pidType = PIDSourceType.kDisplacement;
     private double setpoint = 0;
 
     public void initDefaultCommand() {
@@ -55,7 +55,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput{
         SmartDashboard.putNumber("Elevator", Math.round(value));
     }
 
-	public double getPosition(){
+	private double getPosition(){
         return metersToInches(elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_FOOT);
     }
 

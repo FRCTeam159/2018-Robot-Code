@@ -22,7 +22,7 @@ public class CubeHandler extends Subsystem {
 
 	private static final double intakePower = 0.5;
 	private static final double outputPower = 0.25;
-	private static final double detectionRange = 3;
+	private static final double detectionRange = 6;
 
 	private boolean outputStarted = false;
 	private boolean intakeStarted = false;
@@ -37,6 +37,8 @@ public class CubeHandler extends Subsystem {
 		super();
 		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
 		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
+
+		// commented out because it throws exceptions if the IDs are wrong
 //		cubeDetector = new Ultrasonic(RobotMap.CUBE_DETECTOR_PING_CHANNEL, RobotMap.CUBE_DETECTOR_ECHO_CHANNEL);
 //		cubeDetector.setAutomaticMode(true);
 //		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
@@ -103,7 +105,7 @@ public class CubeHandler extends Subsystem {
     }
 
     private void closeArms(){
-//        armPneumatic.set(DoubleSolenoid.Value.kForward);
+//      armPneumatic.set(DoubleSolenoid.Value.kForward);
 	    armsOpen = false;
     }
 
