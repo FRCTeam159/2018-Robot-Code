@@ -14,8 +14,7 @@ public class CubeCommands extends Command {
     private boolean armToggleLastPressed = false;
 
     public CubeCommands() {
-        // Use requires() here to declare subsystem dependencies
-        // eg. requires(chassis);
+        // Use requires() here to declare subsystem dependencies eg. requires(chassis);
     	requires(Robot.cubeHandler);
     }
 
@@ -28,14 +27,27 @@ public class CubeCommands extends Command {
     protected void execute() {
         boolean intakePressed = OI.cubeIntakeButton.get();
         boolean armTogglePressed = OI.armToggleButton.get();
-        if(intakePressed != intakeLastPressed){
-            doIntakeActions();
+        if(intakePressed && !intakeLastPressed){
+
+            if(Robot.cubeHandler.cubeDetected()){
+                Robot.cubeHandler.startOutput();
+            } else {
+                if (Robot.cubeHandler.isOutputStarted()) {
+                    Robot.cubeHandler.stop();
+                } else {
+                    Robot.cubeHandler.toggleIntake();
+                }
+            }
+
         }
-        if(armTogglePressed != armToggleLastPressed){
+        // toggles arms when arm button pressed
+        if(armTogglePressed && !armToggleLastPressed){
             Robot.cubeHandler.toggleArms();
         }
+
+        // stops intake when cube is fully in
         if(Robot.cubeHandler.cubeDetected() && Robot.cubeHandler.isIntakeStarted()){
-            Robot.cubeHandler.stopIntake();
+            Robot.cubeHandler.stop();
         }
 
         armToggleLastPressed = armTogglePressed;
@@ -56,13 +68,5 @@ public class CubeCommands extends Command {
     // subsystems is scheduled to run
     protected void interrupted() {
         end();
-    }
-
-    private void doIntakeActions(){
-        if(Robot.cubeHandler.cubeDetected()){
-            Robot.cubeHandler.startOutput();
-        } else {
-            Robot.cubeHandler.toggleIntake();
-        }
     }
 }

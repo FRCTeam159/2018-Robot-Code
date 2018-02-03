@@ -1,5 +1,7 @@
 package org.usfirst.frc.team159.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import org.usfirst.frc.team159.robot.RobotMap;
 import org.usfirst.frc.team159.robot.commands.CubeCommands;
 
@@ -15,14 +17,16 @@ public class CubeHandler extends Subsystem {
 	// Put methods for controlling this subsystem here. Call these from Commands.
 	private WPI_TalonSRX leftIntakeMotor;
 	private WPI_TalonSRX rightIntakeMotor;
+	private Ultrasonic cubeDetector;
+	private DoubleSolenoid armPneumatic;
 
 	private static final double intakePower = 0.5;
 	private static final double outputPower = 0.25;
+	private static final double detectionRange = 3;
 
-	private boolean droppingCube = false;
-	private boolean intakingCube = false;
+	private boolean outputStarted = false;
+	private boolean intakeStarted = false;
 	private boolean armsOpen = false;
-	private boolean cubeDetected = false;
 
 	public void initDefaultCommand() {
 		// Set the default command for a subsystem here.
@@ -33,6 +37,9 @@ public class CubeHandler extends Subsystem {
 		super();
 		leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
 		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
+		cubeDetector = new Ultrasonic(RobotMap.CUBE_DETECTOR_PING_CHANNEL, RobotMap.CUBE_DETECTOR_ECHO_CHANNEL);
+		cubeDetector.setAutomaticMode(true);
+		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 	}
 
 	public void enable(){
@@ -42,6 +49,8 @@ public class CubeHandler extends Subsystem {
 
 	public void disable(){
 	    stopWheels();
+	    leftIntakeMotor.disable();
+	    rightIntakeMotor.disable();
     }
 
 	private void spinWheels(double power, boolean inwards) {
@@ -59,19 +68,16 @@ public class CubeHandler extends Subsystem {
 	    rightIntakeMotor.set(0);
     }
 
-    public void toggleOutput(){
-        stopIntake();
-        if(droppingCube){
-            stopOutput();
-        } else {
-            startOutput();
-        }
+    public void stop(){
+        stopWheels();
+        outputStarted = false;
+        intakeStarted = false;
     }
 
     public void toggleIntake(){
-        stopOutput();
-	    if(intakingCube){
-	        stopIntake();
+        stop();
+	    if(intakeStarted){
+	        stop();
         } else {
 	        startIntake();
         }
@@ -86,39 +92,38 @@ public class CubeHandler extends Subsystem {
     }
 
     public boolean cubeDetected(){
-	    return cubeDetected;
+	    // TODO test
+	    return cubeDetector.getRangeInches() < detectionRange;
     }
 
-    public void openArms(){
+    private void openArms(){
+	    armPneumatic.set(DoubleSolenoid.Value.kReverse);
 	    armsOpen = true;
-	    //TODO Complete this function
     }
 
-    public void closeArms(){
+    private void closeArms(){
+        armPneumatic.set(DoubleSolenoid.Value.kForward);
 	    armsOpen = false;
-	    //TODO Complete this function
     }
 
-    public void startIntake(){
+    private void startIntake(){
 	    spinWheels(intakePower, true);
-    }
-
-    public void stopIntake(){
-	    stopWheels();
-	    intakingCube = false;
+	    outputStarted = false;
+	    intakeStarted = true;
     }
 
     public void startOutput(){
 	    spinWheels(outputPower, false);
-	    droppingCube = true;
+	    outputStarted = true;
+	    intakeStarted = false;
     }
 
-    public void stopOutput(){
-	    stopWheels();
-	    droppingCube = false;
-    }
 
     public boolean isIntakeStarted(){
-	    return intakingCube;
+	    return intakeStarted;
     }
+
+    public boolean isOutputStarted(){
+		return outputStarted;
+	}
 }
