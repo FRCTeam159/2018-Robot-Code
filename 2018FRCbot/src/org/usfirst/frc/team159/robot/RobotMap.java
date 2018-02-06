@@ -34,7 +34,7 @@ public class RobotMap {
     public static final int RIGHT_TRIGGER = 3;
     public static final int LOW_GEAR_BUTTON = 5;
     public static final int HIGH_GEAR_BUTTON = 6;
-    public static final int INTAKE_BUTTON = 0;
+    public static final int INTAKE_BUTTON = 2;
     public static final int ARM_TOGGLE_BUTTON = 1;
 
     //other
