@@ -36,7 +36,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	// Called just before this Command runs the first time
 	protected void initialize() {
-		System.out.printf("drivestraight.initialize distance = %f\n", distance);
+		System.out.printf("DriveStraight.initialize distance = %f\n", distance);
 		pid.reset();
 		pid.setSetpoint(distance);
 		pid.disable();
@@ -96,8 +96,8 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 			return 0;
 		}
 		if (debug) {
-			double timeval = timer.get();
-			System.out.printf("tm=%f l=%g r=%g d=%g\n", timeval * 1000, Robot.driveTrain.getLeftDistance(),
+			double time = timer.get();
+			System.out.printf("tm=%f l=%g r=%g d=%g\n", time * 1000, Robot.driveTrain.getLeftDistance(),
 					Robot.driveTrain.getRightDistance(), Robot.driveTrain.getDistance());
 		}
 		return Robot.driveTrain.getDistance();

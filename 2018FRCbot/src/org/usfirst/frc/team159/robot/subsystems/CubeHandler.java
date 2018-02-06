@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  */
 public class CubeHandler extends Subsystem {
 
-	// Put methods for controlling this subsystem here. Call these from Commands.
 	private WPI_TalonSRX leftIntakeMotor;
 	private WPI_TalonSRX rightIntakeMotor;
 //	private Ultrasonic cubeDetector;
@@ -29,7 +28,7 @@ public class CubeHandler extends Subsystem {
 	private boolean armsOpen = false;
 
 	public void initDefaultCommand() {
-		// Set the default command for a subsystem here.
+		// Set the default command for this subsystem here.
 		setDefaultCommand(new CubeCommands());
 	}
 
@@ -54,6 +53,8 @@ public class CubeHandler extends Subsystem {
 	    leftIntakeMotor.disable();
 	    rightIntakeMotor.disable();
     }
+
+	// Put methods for controlling this subsystem here. Call these from Commands.
 
 	private void spinWheels(double power, boolean inwards) {
 	    if(inwards) {

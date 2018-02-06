@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 public class Cameras extends Subsystem {
 
 	public void initDefaultCommand() {
-		// Set the default command for a subsystem here.
+		// Set the default command for this subsystem here.
 		// setDefaultCommand(new MySpecialCommand());
 	}
 
@@ -21,5 +21,4 @@ public class Cameras extends Subsystem {
 		//driverCamera.setFPS(10);
 		//elevatorCamera.setFPS(10);
 	}
-	// Put methods for controlling this subsystems here. Call these from Commands.
 }

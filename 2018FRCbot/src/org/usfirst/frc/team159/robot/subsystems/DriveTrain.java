@@ -37,7 +37,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private ADXRS450_Gyro gyro;
 
 	public void initDefaultCommand() {
-		// Set the default command for a subsystem here.
+		// Set the default command for this subsystem here.
 		setDefaultCommand(new DriveWithJoystick());
 	}
 
@@ -108,15 +108,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		//frontRight.setSpeed(-right);
 		//safetyHelper.feed();
 		log();
-	}
-
-	private double coerce(double min, double max, double value) {
-		if (value < min) {
-			value = min;
-		} else if (value > max) {
-			value = max;
-		}
-		return value;
 	}
 
 	public void arcadeDrive(double moveValue, double turnValue, double moveExponent, double turnExponent) {
@@ -261,13 +252,17 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		safetyHelper.feed();
 	}
 
-	public boolean isInLowGear() {
+	public boolean inLowGear() {
 		return inLowGear;
 	}
 
 	public double getHeading() {
 		return gyro.getAngle();
 	}
+
+    private static double coerce(double min, double max, double value) {
+        return Math.max(min, Math.min(value, max));
+    }
 
 	private void log() {
 		SmartDashboard.putNumber("Heading", getHeading());
