@@ -41,7 +41,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static double KV = 1.0 / MAX_VEL;
 	private static final double KA = 0.0;
 	private static final double GFACT = 2.0;
-	private static final double wheelbase = metersPerInch(26);
+	private static final double wheelbase = inchesToMeters(26);
 	private Trajectory trajectory;
 	private Trajectory leftTrajectory;
 	private Trajectory rightTrajectory;
@@ -50,14 +50,14 @@ public class DrivePath extends Command implements PhysicalConstants {
 	//private Trajectory.Config config;
 	//TankModifier modifier;
 	private Timer timer;
-	private static final boolean print_calculated_trajectory = false;
-	private static final boolean print_calculated_path = false;
+	private static final boolean printCalculatedTrajectory = false;
+	private static final boolean printCalculatedPath = false;
 	private static final boolean useGyro = false;
 	private static final boolean debugCommand = false;
-	private static final boolean print_path = true;
-	private static final boolean publish_path = true;
+	private static final boolean printPath = true;
+	private static final boolean publishPath = true;
 	
-	static int plot_id=0;
+//	private static int plotId = 0;
 	private int pathIndex = 0;
 
 	private static final int LEFT_POSITION = 0;
@@ -72,10 +72,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final double straightEndPoint = 78;
 	private static final double scaleEndPoint = SCALE_HOOK_TURN_Y;
 
-	static ArrayList<PathData> pathdata = new ArrayList<PathData>();
+	private static ArrayList<PathData> pathData = new ArrayList<>();
 	//static NetworkTableInstance ti=NetworkTableInstance.getDefault();	
 	//static NetworkTable table=ti.getTable("datatable");
-	public static NetworkTable table = NetworkTable.getTable("datatable");
+	//TODO use non deprecated class (edu.wpi.first.networktables.NetworkTable)
+	private static NetworkTable table = NetworkTable.getTable("datatable");
 
 	
 	DrivePath() {
@@ -131,7 +132,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		rightFollower.configurePIDVA(KP, KI, KD, KV, KA);
 		System.out.format("trajectory length:%d runtime:%f calctime:%f\n", trajectory.length(), runtime, timer.get());
 
-		if (print_calculated_trajectory) {
+		if (printCalculatedTrajectory) {
 			double time = 0;
 			for (int i = 0; i < trajectory.length(); i++) {
 				Segment segment = trajectory.get(i);
@@ -140,7 +141,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 			}
 		}
 		
-		if (print_calculated_path) {
+		if (printCalculatedPath) {
 			double time = 0;
 			for (int i = 0; i < trajectory.length(); i++) {
 				Segment centerSegment = trajectory.get(i);
@@ -159,7 +160,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		}
 		
 		printInitializeMessage();
-		pathdata.clear();
+		pathData.clear();
 		
 		leftFollower.reset();
 		rightFollower.reset();
@@ -193,9 +194,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rightPower + turn, leftPower - turn);
 		}
 
-		if (print_path) 
+		if (printPath)
 			debugPathError();		
-		if (publish_path) 
+		if (publishPath)
 			addPlotData();
 		
 		pathIndex++;
@@ -213,8 +214,8 @@ public class DrivePath extends Command implements PhysicalConstants {
 	// Called once after isFinished returns true
 	protected void end() {
 		printEndMessage();
-		if(publish_path)
-			publish(pathdata,4);
+		if(publishPath)
+			publish(pathData,4);
 	}
 
 	// Called when another command which requires one or more of the same
@@ -352,11 +353,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 		return data.toString();
 	}
 
-	private double inchesToMeters(double inches) {
+	private static double inchesToMeters(double inches) {
 		return inches * 0.0254;
 	}
 
-	private double metersToInches(double meters) {
+	private static double metersToInches(double meters) {
 		return meters / 0.0254;
 	}
 
@@ -380,10 +381,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 		return 2.54 * 12 * feet / 100;
 	}
 
-	private static double metersPerInch(double inches) {
-		return 2.54 * inches / 100;
-	}
-	
 	private void putStringOnDashboard(String name, String data) {
 		SmartDashboard.putString(name, data);
 	}
@@ -425,10 +422,10 @@ public class DrivePath extends Command implements PhysicalConstants {
 		pd.d[4] = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
 		double th = Pathfinder.r2d(rs.heading); // Should also be in degrees
 		pd.d[5] = th > 180 ? th - 360 : th; // convert to signed angle fixes problem:th 0->360 gh:-180->180
-		pathdata.add(pd);
+		pathData.add(pd);
 	}
 
-	public static void publish(ArrayList<PathData> d, int traces) {
+	private static void publish(ArrayList<PathData> d, int traces) {
     	double info[] = new double[3];
     	int points=d.size();
     	info[0]=0;
@@ -451,9 +448,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 		}
     }
 	public class PathData {
-		public static final int DATA_SIZE=6;
-		public double tm=0;
-		public double d[]=new double[DATA_SIZE];
+		static final int DATA_SIZE=6;
+		double tm=0;
+		double d[]=new double[DATA_SIZE];
 	}
 
 }
