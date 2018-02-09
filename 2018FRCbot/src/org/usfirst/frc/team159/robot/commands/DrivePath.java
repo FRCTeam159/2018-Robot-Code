@@ -72,7 +72,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final double straightEndPoint = 78;
 	private static final double scaleEndPoint = SCALE_HOOK_TURN_Y;
 
-	private static ArrayList<PathData> pathData = new ArrayList<>();
+	private ArrayList<PathData> pathDataList = new ArrayList<>();
 	//static NetworkTableInstance ti=NetworkTableInstance.getDefault();	
 	//static NetworkTable table=ti.getTable("datatable");
 	//TODO use non deprecated class (edu.wpi.first.networktables.NetworkTable)
@@ -160,7 +160,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		}
 		
 		printInitializeMessage();
-		pathData.clear();
+		pathDataList.clear();
 		
 		leftFollower.reset();
 		rightFollower.reset();
@@ -217,7 +217,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	protected void end() {
 		printEndMessage();
 		if(publishPathAllowed()) {
-            publish(pathData, 4);
+            publish(pathDataList, 4);
         }
 	}
 
@@ -428,10 +428,10 @@ public class DrivePath extends Command implements PhysicalConstants {
 		pathData.data[4] = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
 		double th = Pathfinder.r2d(rightSegment.heading); // Should also be in degrees
 		pathData.data[5] = th > 180 ? th - 360 : th; // convert to signed angle fixes problem:th 0->360 gh:-180->180
-		DrivePath.pathData.add(pathData);
+		pathDataList.add(pathData);
 	}
 
-	private static void publish(ArrayList<PathData> dataList, int traces) {
+	private void publish(ArrayList<PathData> dataList, int traces) {
     	double info[] = new double[3];
     	int points = dataList.size();
     	info[0] = 0;
@@ -452,6 +452,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 			}
 			table.putNumberArray("PlotData" + i, data);
 		}
+    	dataList.clear();
     }
 	public class PathData {
 		static final int DATA_SIZE=6;
