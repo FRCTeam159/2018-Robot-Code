@@ -141,6 +141,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 30);
 		SmartDashboard.putBoolean("Calibrate", false);
+		SmartDashboard.putBoolean("Publish Path", false);
 		SmartDashboard.putNumber("P", DrivePath.KP);
 	}
 }

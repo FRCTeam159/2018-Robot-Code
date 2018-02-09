@@ -130,7 +130,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		leftFollower.configurePIDVA(KP, KI, KD, KV, KA);
 		rightFollower = new DistanceFollower(rightTrajectory);
 		rightFollower.configurePIDVA(KP, KI, KD, KV, KA);
-		System.out.format("trajectory length:%d runtime:%f calctime:%f\n", trajectory.length(), runtime, timer.get());
+		System.out.format("trajectory length:%data runtime:%f calctime:%f\n", trajectory.length(), runtime, timer.get());
 
 		if (printCalculatedTrajectory) {
 			double time = 0;
@@ -194,10 +194,12 @@ public class DrivePath extends Command implements PhysicalConstants {
 			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rightPower + turn, leftPower - turn);
 		}
 
-		if (printPath)
-			debugPathError();		
-		if (publishPath)
+		if (printPath) {
+			debugPathError();
+		}
+		if (publishPathAllowed()) {
 			addPlotData();
+		}
 		
 		pathIndex++;
 
@@ -214,8 +216,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 	// Called once after isFinished returns true
 	protected void end() {
 		printEndMessage();
-		if(publishPath)
-			publish(pathData,4);
+		if(publishPathAllowed()) {
+            publish(pathData, 4);
+        }
 	}
 
 	// Called when another command which requires one or more of the same
@@ -224,6 +227,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 		end();
 	}
 
+	private boolean publishPathAllowed(){
+	    return SmartDashboard.getBoolean("Publish Path", false);
+    }
 	
 	private Waypoint[] calculateScalePoints(double y) {
 		Waypoint[] waypoints = new Waypoint[3];
@@ -410,47 +416,47 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}
 	
 	private void addPlotData() {
-		PathData pd = new PathData();
+		PathData pathData = new PathData();
 		
-		pd.tm = timer.get();
-		pd.d[0] = 12 * (Robot.driveTrain.getLeftDistance());
-		pd.d[2] = 12 * (Robot.driveTrain.getRightDistance());
-		Segment ls = leftTrajectory.get(pathIndex);
-		Segment rs = rightTrajectory.get(pathIndex);
-		pd.d[1] = metersToInches (ls.position);
-		pd.d[3] = metersToInches (rs.position);
-		pd.d[4] = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
-		double th = Pathfinder.r2d(rs.heading); // Should also be in degrees
-		pd.d[5] = th > 180 ? th - 360 : th; // convert to signed angle fixes problem:th 0->360 gh:-180->180
-		pathData.add(pd);
+		pathData.time = timer.get();
+		pathData.data[0] = 12 * (Robot.driveTrain.getLeftDistance());
+		pathData.data[2] = 12 * (Robot.driveTrain.getRightDistance());
+		Segment leftSegment = leftTrajectory.get(pathIndex);
+		Segment rightSegment = rightTrajectory.get(pathIndex);
+		pathData.data[1] = metersToInches(leftSegment.position);
+		pathData.data[3] = metersToInches(rightSegment.position);
+		pathData.data[4] = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
+		double th = Pathfinder.r2d(rightSegment.heading); // Should also be in degrees
+		pathData.data[5] = th > 180 ? th - 360 : th; // convert to signed angle fixes problem:th 0->360 gh:-180->180
+		DrivePath.pathData.add(pathData);
 	}
 
-	private static void publish(ArrayList<PathData> d, int traces) {
+	private static void publish(ArrayList<PathData> dataList, int traces) {
     	double info[] = new double[3];
-    	int points=d.size();
-    	info[0]=0;
-    	info[1]=traces;
-    	info[2]=points;
+    	int points = dataList.size();
+    	info[0] = 0;
+    	info[1] = traces;
+    	info[2] = points;
     
     	System.out.println("Publishing Plot Data");
     	//table.putValue("NewPlot", NetworkTableValue.makeDoubleArray(info));
 		table.putNumberArray("NewPlot", info);
 
     	for (int i = 0; i < points; i++) {
-    		PathData pd=d.get(i);
+    		PathData pathData = dataList.get(i);
 			double data[] = new double[traces+2];
-			data[0]=(double)i;
-			data[1]=pd.tm;
-			for (int j = 0; j < traces; j++) {
-				data[j+2]=pd.d[j];
+			data[0] = (double) i;
+			data[1] = pathData.time;
+			for(int j = 0; j < traces; j++) {
+				data[j+2]=pathData.data[j];
 			}
-			table.putNumberArray("PlotData"+i, data);
+			table.putNumberArray("PlotData" + i, data);
 		}
     }
 	public class PathData {
 		static final int DATA_SIZE=6;
-		double tm=0;
-		double d[]=new double[DATA_SIZE];
+		double time = 0;
+		double data[]=new double[DATA_SIZE];
 	}
 
 }
