@@ -134,12 +134,16 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Center", 1);
 		chooser.addObject("Right", 2);
 		SmartDashboard.putData("Position", chooser);
-		SmartDashboard.putBoolean("Prefer Scale", true);
+		SmartDashboard.putBoolean("Prefer Scale", false);
 		SmartDashboard.putBoolean("Force Straight Path", false);
-		SmartDashboard.putString("FMS Data", "???");
+		SmartDashboard.putString("FMS Data", "RLL");
 		SmartDashboard.putNumber("Max Velocity", 1.5);
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
-		SmartDashboard.putNumber("Max Jerk", 30);
+		SmartDashboard.putNumber("Max Jerk", 4);		
+		SmartDashboard.putNumber("GFACT", 2.0);
+		SmartDashboard.putBoolean("Use Gyro", false);
+		SmartDashboard.putString("Target", "Calculating");
+
 		SmartDashboard.putBoolean("Calibrate", false);
 		SmartDashboard.putBoolean("Publish Path", false);
 		SmartDashboard.putNumber("P", DrivePath.KP);
