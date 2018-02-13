@@ -1,5 +1,6 @@
 package org.usfirst.frc.team159.robot.subsystems;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import org.usfirst.frc.team159.robot.RobotMap;
@@ -16,7 +17,7 @@ public class CubeHandler extends Subsystem {
 
 	private WPI_TalonSRX leftIntakeMotor;
 	private WPI_TalonSRX rightIntakeMotor;
-//	private Ultrasonic cubeDetector;
+//	private AnalogInput cubeDetector;
 //	private DoubleSolenoid armPneumatic;
 
 	private static final double intakePower = 0.5;
@@ -38,8 +39,7 @@ public class CubeHandler extends Subsystem {
 		rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
 
 		// commented out because it throws exceptions if the IDs are wrong
-//		cubeDetector = new Ultrasonic(RobotMap.CUBE_DETECTOR_PING_CHANNEL, RobotMap.CUBE_DETECTOR_ECHO_CHANNEL);
-//		cubeDetector.setAutomaticMode(true);
+//		cubeDetector = new AnalogInput(RobotMap.CUBE_DETECTOR_ID);
 //		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 	}
 
@@ -96,7 +96,7 @@ public class CubeHandler extends Subsystem {
 
     public boolean cubeDetected(){
 	    // TODO test
-//	    return cubeDetector.getRangeInches() < detectionRange;
+//	    return cubeDetector.getValue() < detectionRange;
     	return false;
     }
 

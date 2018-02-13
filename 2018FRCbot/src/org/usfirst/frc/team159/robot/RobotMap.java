@@ -24,8 +24,7 @@ public class RobotMap {
     public static final int ELEVATOR_MOTOR = 7;
 
     //Sensor IDs
-    public static final int CUBE_DETECTOR_PING_CHANNEL = 0;
-    public static final int CUBE_DETECTOR_ECHO_CHANNEL = 0;
+    public static final int CUBE_DETECTOR_ID = 0;
 
     // Button IDs
     public static final int LEFT_JOYSTICK = 1;
