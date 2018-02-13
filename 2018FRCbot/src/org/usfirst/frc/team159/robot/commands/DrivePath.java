@@ -53,9 +53,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private static final boolean printCalculatedTrajectory = false;
 	private static final boolean printCalculatedPath = false;
 	private static  boolean useGyro = false;
-	private static final boolean debugCommand = true;
+	private static final boolean debugCommand = false;
 	private static final boolean printPath = false;
-	private static final boolean publishPath = true;
+	private static final boolean publishPath = false;
 	
 //	private static int plotId = 0;
 	private int pathIndex = 0;
@@ -294,10 +294,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 		waypoints[0] = new Waypoint(0, 0, 0);
 		waypoints[1] = new Waypoint(x-3*y, 0,0);
 		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
-		if(robot_position == RIGHT_POSITION) 
+		if(robot_position == RIGHT_POSITION) {
 			return mirrorWaypoints(waypoints);
-		else
+		} else {
 			return waypoints;
+		}
 	}
 	private Waypoint[] calculateSideScaleHookPoints() {
 		double y=SCALE_HOOK_Y_DISTANCE;
@@ -377,11 +378,13 @@ public class DrivePath extends Command implements PhysicalConstants {
 		Waypoint[] returnWaypoints = null;
         switch (robotPosition) {
             case CENTER_POSITION:
-				target_object=SWITCH;
-				if (gameData.charAt(0) == 'R')
-					target_side=RIGHT;
-				else
-					target_side=LEFT;				
+				target_object = SWITCH;
+				if (gameData.charAt(0) == 'R') {
+					target_side = RIGHT;
+				} else {
+					target_side = LEFT;
+				}
+				returnWaypoints = calculateCenterSwitchPoints();
                 break;
             case RIGHT_POSITION:
     			target_side=RIGHT;
@@ -400,7 +403,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 						target_object=SWITCH;
                         //returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
                     	returnWaypoints = calculateSideSwitchHookPoints();
-
+                    } else if (gameData.charAt(1) == 'R') {
+                    	returnWaypoints = calculateSideScaleHookPoints();
+                    	target_object = SCALE;
                     } else {
     					target_object=NONE;
                         returnWaypoints = calculateStraightPoints(straightEndPoint);
@@ -427,6 +432,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 						target_object=SWITCH;
                     	returnWaypoints = calculateSideSwitchHookPoints();
                         //returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
+                    } else if (gameData.charAt(1) == 'L') {
+                    	returnWaypoints = calculateSideScaleHookPoints();
+                    	target_object = SCALE;
                     } else {
                         returnWaypoints = calculateStraightPoints(straightEndPoint);
     					target_object=NONE;
@@ -437,8 +445,11 @@ public class DrivePath extends Command implements PhysicalConstants {
                 }
                 break;
         }
-        assert returnWaypoints != null;
-        return waypointsInchesToMeters(returnWaypoints);
+        if(returnWaypoints != null) {
+        	return waypointsInchesToMeters(returnWaypoints);
+        } else {
+        	return null;
+        }
 	}
 
 	private String generateFMSData() {
