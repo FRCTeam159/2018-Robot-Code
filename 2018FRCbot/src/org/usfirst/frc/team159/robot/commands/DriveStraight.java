@@ -34,7 +34,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		requires(Robot.driveTrain);
 	}
 
-	// Called just before this Command runs the first time
+//	 Called just before this Command runs the first time
 	protected void initialize() {
 		System.out.printf("DriveStraight.initialize distance = %f\n", distance);
 		pid.reset();
@@ -47,7 +47,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 
 	}
 
-	// Called repeatedly when this Command is scheduled to run
+//	 Called repeatedly when this Command is scheduled to run
 	protected void execute() {
 		if (!started && timer.get() > intime && !pid.isEnabled()) {
 			pid.reset();
@@ -56,7 +56,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		}
 	}
 
-	// Make this return true when this Command no longer needs to run execute()
+//	 Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
 		if (timer.get() > 3.0) {
 			printFinishedMessage();
@@ -65,7 +65,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		return pid.onTarget();
 	}
 
-	// Called once after isFinished returns true
+//	 Called once after isFinished returns true
 	protected void end() {
 		Robot.driveTrain.disable();
 		pid.disable();
@@ -74,8 +74,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		printEndMessage();
 	}
 
-	// Called when another command which requires one or more of the same
-	// subsystems is scheduled to run
+//	 Called when another command which requires one or more of the same subsystems is scheduled to run
 	protected void interrupted() {
 		end();
 	}
@@ -97,8 +96,7 @@ public class DriveStraight extends Command implements PIDSource, PIDOutput {
 		}
 		if (debug) {
 			double time = timer.get();
-			System.out.printf("tm=%f l=%g r=%g d=%g\n", time * 1000, Robot.driveTrain.getLeftDistance(),
-					Robot.driveTrain.getRightDistance(), Robot.driveTrain.getDistance());
+			System.out.printf("time=%f leftDistance=%g rightDistance=%g distance=%g\n", time * 1000, Robot.driveTrain.getLeftDistance(), Robot.driveTrain.getRightDistance(), Robot.driveTrain.getDistance());
 		}
 		return Robot.driveTrain.getDistance();
 	}

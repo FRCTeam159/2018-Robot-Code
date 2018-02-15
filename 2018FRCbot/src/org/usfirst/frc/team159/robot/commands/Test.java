@@ -9,46 +9,40 @@ import edu.wpi.first.wpilibj.command.Command;
  *
  */
 public class Test extends Command {
-	private Timer timer = new Timer();
+    private Timer timer = new Timer();
+
     public Test() {
-        // Use requires() here to declare subsystem dependencies
-        // eg. requires(chassis);
+//         Use requires() here to declare subsystem dependencies eg. requires(chassis);
     }
 
-    // Called just before this Command runs the first time
+//     Called just before this Command runs the first time
     protected void initialize() {
-    	printInitializeMessage();
-    	Robot.driveTrain.reset();
-    	timer.start();
-    	timer.reset();
+        printInitializeMessage();
+        Robot.driveTrain.reset();
+        timer.start();
+        timer.reset();
     }
 
-    // Called repeatedly when this Command is scheduled to run
+//     Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.driveTrain.tankDrive(0.0, 0.5);
+        Robot.driveTrain.tankDrive(0.0, 0.5);
     }
 
-    // Make this return true when this Command no longer needs to run execute()
+//     Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-    	return timer.get() >= 4.0;
+        return timer.get() >= 4.0;
     }
 
-    // Called once after isFinished returns true
+//     Called once after isFinished returns true
     protected void end() {
-    	printEndMessage();
+        printEndMessage();
     }
 
-    // Called when another command which requires one or more of the same
-    // subsystems is scheduled to run
-    protected void interrupted() {
-    	
-    }
-    
     private void printInitializeMessage() {
-    	System.out.println("Test.initialize()");
+        System.out.println("Test.initialize()");
     }
-    
+
     private void printEndMessage() {
-    	System.out.println("Test.end()");
+        System.out.println("Test.end()");
     }
 }

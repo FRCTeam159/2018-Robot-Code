@@ -23,7 +23,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private WPI_TalonSRX frontRight;
 	private WPI_TalonSRX backLeft;
 	private WPI_TalonSRX backRight;
-	//TODO are these correct?
+
+//	TODO are these correct?
 	private static final double wheelDiameter = 6.1; //4.25
 	private static final double gearRatio = 1; //(38/22)*3
 	private static final double encoderTicks = 1024; //900
@@ -31,13 +32,14 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private static final double ticksPerRevolution = gearRatio * encoderTicks * encoderEdges;
 	private static final double feetPerRev = Math.PI * wheelDiameter / 12.0;
 	private static final double ticksPerFoot = ticksPerRevolution / feetPerRev;
-	private boolean inLowGear = false;
+	private boolean lowGear = false;
+
+//	TODO is this needed?
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 	private DoubleSolenoid gearPneumatic;
 	private ADXRS450_Gyro gyro;
 
 	public void initDefaultCommand() {
-		// Set the default command for this subsystem here.
 		setDefaultCommand(new DriveWithJoystick());
 	}
 
@@ -51,30 +53,28 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight.configVelocityMeasurementWindow(RobotMap.ENCODER_WINDOW_SIZE, RobotMap.TIMEOUT);
 		backLeft.configVelocityMeasurementWindow(RobotMap.ENCODER_WINDOW_SIZE, RobotMap.TIMEOUT);
 
-		// frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms,
-		// RobotMap.TIMEOUT);
-		// backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, RobotMap.TIMEOUT);
+//		 frontRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms,
+//		 RobotMap.TIMEOUT);
+//		 backLeft.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, RobotMap.TIMEOUT);
 
-		// frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , RobotMap.TIMEOUT)
+//		 frontRight.setStatusFramePeriod(StatusFrameEnhanced frame, 10 , RobotMap.TIMEOUT)
 		frontRight.set(ControlMode.PercentOutput, 0);
 		backLeft.set(ControlMode.PercentOutput, 0);
 
 		frontLeft.set(ControlMode.Follower, RobotMap.BACK_LEFT);
 		backRight.set(ControlMode.Follower, RobotMap.FRONT_RIGHT);
-		// frontRight.configEncoderCodesPerRev(ticks_per_foot);
-		// backLeft.configEncoderCodesPerRev(ticks_per_foot);
 
 		frontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
 		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
-		// frontRight.enableLimitSwitch(false, false);
-		// backLeft.enableLimitSwitch(false, false);
+//		 frontRight.enableLimitSwitch(false, false);
+//		 backLeft.enableLimitSwitch(false, false);
 		gearPneumatic = new DoubleSolenoid(RobotMap.GEAR_SHIFTER_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
 
 		gyro = new ADXRS450_Gyro();
 		reset();
 	}
 
-	// Put methods for controlling this subsystem here. Call these from Commands.
+//	 Put methods for controlling this subsystem here. Call these from Commands.
 
 	public void enable() {
 		frontRight.set(ControlMode.PercentOutput, 0);
@@ -87,8 +87,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
 		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
 
-		// frontRight.reset();
-		// backLeft.reset();
+//		 frontRight.reset();
+//		 backLeft.reset();
 		backLeft.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
 		frontRight.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
 		gyro.reset();
@@ -104,9 +104,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public void tankDrive(double left, double right) {
 		setRaw(left, right);
-		//backLeft.setSpeed(left);
-		//frontRight.setSpeed(-right);
-		//safetyHelper.feed();
+//		safetyHelper.feed();
 		log();
 	}
 
@@ -153,7 +151,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 				rightMotorOutput = moveValue - turnValue;
 			}
 		}
-		// Make sure values are between -1 and 1
+//		 Make sure values are between -1 and 1
 		leftMotorOutput = coerce(-1, 1, leftMotorOutput);
 		rightMotorOutput = coerce(-1, 1, rightMotorOutput);
 		/*
@@ -212,12 +210,10 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 
 	public double getRightDistance() {
 		return -frontRight.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
-		// return frontRight.getPosition();
 	}
 
 	public double getLeftDistance() {
 		return backLeft.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
-		// return -backLeft.getPosition();
 	}
 
 	public double getVelocity() {
@@ -233,16 +229,16 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public void setLowGear() {
-		if (!inLowGear) {
+		if (!lowGear) {
 			gearPneumatic.set(DoubleSolenoid.Value.kReverse);
-			inLowGear = true;
+			lowGear = true;
 		}
 	}
 
 	public void setHighGear() {
-		if (inLowGear) {
+		if (lowGear) {
 			gearPneumatic.set(DoubleSolenoid.Value.kForward);
-			inLowGear = false;
+			lowGear = false;
 		}
 	}
 
@@ -252,8 +248,8 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		safetyHelper.feed();
 	}
 
-	public boolean inLowGear() {
-		return inLowGear;
+	private boolean inLowGear() {
+		return lowGear;
 	}
 
 	public double getHeading() {
@@ -271,6 +267,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		SmartDashboard.putNumber("Left distance", getLeftDistance());
 		SmartDashboard.putNumber("Right distance", getRightDistance());
 		SmartDashboard.putNumber("Velocity", getVelocity());
-		SmartDashboard.putBoolean("Low Gear", inLowGear);
+		SmartDashboard.putBoolean("Low Gear", inLowGear());
 	}
 }

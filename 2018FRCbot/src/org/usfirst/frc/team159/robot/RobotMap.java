@@ -7,11 +7,11 @@ package org.usfirst.frc.team159.robot;
  * floating around.
  */
 public class RobotMap {
-    //Controller IDs
+//    Controller IDs
     public static final int DRIVER = 0;
     public static final int OPERATOR = 1;
 
-    //Motor IDs
+//    Motor IDs
     public static final int FRONT_LEFT = 3;
     public static final int BACK_LEFT = 4;
 
@@ -21,12 +21,12 @@ public class RobotMap {
 
     public static final int LEFT_INTAKE_MOTOR = 5;
     public static final int RIGHT_INTAKE_MOTOR = 6;
-    public static final int ELEVATOR_MOTOR = 7;
+    public static final int ELEVATOR_MOTOR = 5;
 
-    //Sensor IDs
+//    Sensor IDs
     public static final int CUBE_DETECTOR_ID = 0;
 
-    // Button IDs
+//     Button IDs
     public static final int LEFT_JOYSTICK = 1;
     public static final int RIGHT_JOYSTICK = 4;
     public static final int LEFT_TRIGGER = 2;
@@ -36,12 +36,12 @@ public class RobotMap {
     public static final int INTAKE_BUTTON = 2;
     public static final int ARM_TOGGLE_BUTTON = 1;
 
-    //other
+//    other
     public static final int GEAR_SHIFTER_ID = 0;
+//    TODO put correct id
     public static final int ARM_PISTON_ID = 0;
-    //TODO put correct ids
 
-    //Constants
+//    Constants
     public static final int ENCODER_WINDOW_SIZE = 4;
     public static final int ENCODER_STATUS_FRAME_PERIOD = 4;
     public static final int TIMEOUT = 10;
