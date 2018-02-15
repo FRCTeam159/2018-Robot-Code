@@ -33,7 +33,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput {
 
     private PIDController pidController;
     private PIDSourceType pidType = PIDSourceType.kDisplacement;
-    
+
     private double elevatorTarget = 0;
 
     public void initDefaultCommand() {
@@ -45,7 +45,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput {
         elevatorMotor = new WPI_TalonSRX(RobotMap.ELEVATOR_MOTOR);
         elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotMap.TIMEOUT);
         pidController = new PIDController(P, I, D, F, this, this);
-        pidController.setOutputRange(-1, 1);
+        pidController.setOutputRange(-0.5, 0.5);
         pidController.disable();
     }
 
