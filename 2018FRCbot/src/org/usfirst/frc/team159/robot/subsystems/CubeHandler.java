@@ -1,6 +1,5 @@
 package org.usfirst.frc.team159.robot.subsystems;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import org.usfirst.frc.team159.robot.RobotMap;
 import org.usfirst.frc.team159.robot.commands.CubeCommands;
@@ -16,38 +15,33 @@ public class CubeHandler extends Subsystem {
 
     private WPI_TalonSRX leftIntakeMotor;
     private WPI_TalonSRX rightIntakeMotor;
-//	private AnalogInput cubeDetector;
 //	private DoubleSolenoid armPneumatic;
 
     private static final double intakePower = 0.5;
     private static final double outputPower = 0.25;
-//	private static final double detectionRange = 6;
 
-    private boolean outputStarted = false;
-    private boolean intakeStarted = false;
     private boolean armsOpen = false;
 
     public void initDefaultCommand() {
-        setDefaultCommand(new CubeCommands());
+//        setDefaultCommand(new CubeCommands());
     }
 
     public CubeHandler() {
         super();
-        leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
-        rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
+//        leftIntakeMotor = new WPI_TalonSRX(RobotMap.LEFT_INTAKE_MOTOR);
+//        rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
 
 //		 commented out because it throws exceptions if the IDs are wrong
-//		cubeDetector = new AnalogInput(RobotMap.CUBE_DETECTOR_ID);
 //		armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
     }
 
     public void enable() {
-        stopWheels();
+        stop();
         openArms();
     }
 
     public void disable() {
-        stopWheels();
+        stop();
         leftIntakeMotor.disable();
         rightIntakeMotor.disable();
     }
@@ -64,24 +58,9 @@ public class CubeHandler extends Subsystem {
         }
     }
 
-    private void stopWheels() {
-        leftIntakeMotor.set(0);
-        rightIntakeMotor.set(0);
-    }
-
     public void stop() {
-        stopWheels();
-        outputStarted = false;
-        intakeStarted = false;
-    }
-
-    public void toggleIntake() {
-        stop();
-        if (intakeStarted) {
-            stop();
-        } else {
-            startIntake();
-        }
+    	leftIntakeMotor.set(0);
+        rightIntakeMotor.set(0);
     }
 
     public void toggleArms() {
@@ -90,12 +69,6 @@ public class CubeHandler extends Subsystem {
         } else {
             openArms();
         }
-    }
-
-    public boolean cubeDetected() {
-//	    TODO test
-//	    return cubeDetector.getValue() < detectionRange;
-        return false;
     }
 
     private void openArms() {
@@ -108,24 +81,11 @@ public class CubeHandler extends Subsystem {
         armsOpen = false;
     }
 
-    private void startIntake() {
+    public void intake() {
         spinWheels(intakePower, true);
-        outputStarted = false;
-        intakeStarted = true;
     }
 
-    public void startOutput() {
+    public void output() {
         spinWheels(outputPower, false);
-        outputStarted = true;
-        intakeStarted = false;
-    }
-
-
-    public boolean isIntakeStarted() {
-        return intakeStarted;
-    }
-
-    public boolean isOutputStarted() {
-        return outputStarted;
     }
 }

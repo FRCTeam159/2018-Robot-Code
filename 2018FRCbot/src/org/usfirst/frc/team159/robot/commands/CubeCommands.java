@@ -4,14 +4,12 @@ import org.usfirst.frc.team159.robot.OI;
 import org.usfirst.frc.team159.robot.Robot;
 
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *
  */
 public class CubeCommands extends Command {
-
-    private boolean intakeLastPressed = false;
-    private boolean armToggleLastPressed = false;
 
     public CubeCommands() {
 //         Use requires() here to declare subsystem dependencies eg. requires(chassis);
@@ -25,31 +23,23 @@ public class CubeCommands extends Command {
 
     //     Called repeatedly when this Command is scheduled to run
     protected void execute() {
-        boolean intakePressed = OI.cubeIntakeButton.get();
-        boolean armTogglePressed = OI.armToggleButton.get();
-        if (intakePressed && !intakeLastPressed) {
-            if (Robot.cubeHandler.cubeDetected()) {
-                Robot.cubeHandler.startOutput();
-            } else {
-                if (Robot.cubeHandler.isOutputStarted()) {
-                    Robot.cubeHandler.stop();
-                } else {
-                    Robot.cubeHandler.toggleIntake();
-                }
-            }
+    	boolean intakePressed = OI.cubeIntakeButton.get();
+    	boolean outputPressed = OI.cubeOutputButton.get();
+    	boolean armsPressed = OI.armToggleButton.get();
+    	
+        if (intakePressed) {
+            Robot.cubeHandler.intake();
         }
-//         toggles arms when arm button pressed
-        if (armTogglePressed && !armToggleLastPressed) {
+        if (outputPressed) {
+        	Robot.cubeHandler.output();
+        }
+        if (armsPressed) {
             Robot.cubeHandler.toggleArms();
         }
-
-//         stops intake when cube is fully in
-        if (Robot.cubeHandler.cubeDetected() && Robot.cubeHandler.isIntakeStarted()) {
-            Robot.cubeHandler.stop();
-        }
-
-        armToggleLastPressed = armTogglePressed;
-        intakeLastPressed = intakePressed;
+        
+        SmartDashboard.putBoolean("Grabber Intake", intakePressed);
+        SmartDashboard.putBoolean("Grabber Output", outputPressed);
+        SmartDashboard.putBoolean("Grabber Arms", armsPressed);
     }
 
     //     Make this return true when this Command no longer needs to run execute()

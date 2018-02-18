@@ -33,8 +33,13 @@ public class RobotMap {
     public static final int RIGHT_TRIGGER = 3;
     public static final int LOW_GEAR_BUTTON = 5;
     public static final int HIGH_GEAR_BUTTON = 6;
-    public static final int INTAKE_BUTTON = 2;
-    public static final int ARM_TOGGLE_BUTTON = 1;
+    public static final int INTAKE_BUTTON = 1;
+    public static final int OUTPUT_BUTTON = 2;
+    public static final int ARM_TOGGLE_BUTTON = 4;
+    public static final int RESET_ELEVATOR_BUTTON = 5;
+    public static final int GO_TO_ELEVATOR_TOP_BUTTON = 6;
+    public static final int ELEVATOR_GO_TO_SWITCH_BUTTON = 3;
+    
 
 //    other
     public static final int GEAR_SHIFTER_ID = 0;

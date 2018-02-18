@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.usfirst.frc.team159.robot.PhysicalConstants;
 import org.usfirst.frc.team159.robot.Robot;
+import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
 //import edu.wpi.first.networktables.NetworkTable;
 //import edu.wpi.first.networktables.NetworkTableInstance;
@@ -48,6 +49,8 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private DistanceFollower rightFollower;
 	//private Trajectory.Config config;
 	//TankModifier modifier;
+	private static double switchHeight = 30;
+	private static double scaleHeight = 55;
 	private Timer timer;
 	private static final boolean printCalculatedTrajectory = false;
 	private static final boolean printCalculatedPath = false;
@@ -95,6 +98,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	DrivePath() {
 		requires(Robot.driveTrain);
+		requires(Robot.elevator);
 		
 		Sendable position = SmartDashboard.getData("Position");
 		SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) position;
@@ -129,8 +133,15 @@ public class DrivePath extends Command implements PhysicalConstants {
 		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
 		
 		trajectory = calculateTrajectory(gameMessage, robotPosition.getSelected(), maxVelocity, maxAcceleration, maxJerk);
-
+		
+		targetString = whichSide[targetSide] + " " + whichObject[targetObject];
 		SmartDashboard.putString("Target", targetString);
+		
+		if(targetObject == SWITCH) {
+			Robot.elevator.setElevatorTarget(Elevator.SWITCH_HEIGHT);
+		} else if(targetObject == SCALE) {
+			Robot.elevator.setElevatorTarget(Elevator.SCALE_HEIGHT);
+		}
 		
 		// Create the Modifier Object
 		TankModifier modifier = new TankModifier(trajectory);
@@ -185,6 +196,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 		leftFollower.reset();
 		rightFollower.reset();
 		Robot.driveTrain.reset();
+		Robot.elevator.enable();
 		timer.start();
 		timer.reset();
 		pathIndex=0;

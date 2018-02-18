@@ -34,7 +34,6 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private static final double ticksPerFoot = ticksPerRevolution / feetPerRev;
 	private boolean lowGear = false;
 
-//	TODO is this needed?
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 	private DoubleSolenoid gearPneumatic;
 	private ADXRS450_Gyro gyro;
