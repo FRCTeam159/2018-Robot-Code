@@ -51,10 +51,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 	//TankModifier modifier;
 	private static double switchHeight = 30;
 	private static double scaleHeight = 55;
-	private Timer timer;
 	private static final boolean printCalculatedTrajectory = false;
 	private static final boolean printCalculatedPath = false;
-	private static  boolean useGyro = false;
+	private static boolean useGyro = false;
 	private static final boolean debugCommand = false;
 	private static final boolean printPath = false;
 
@@ -78,7 +77,14 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private String whichObject[]= {"Switch","Scale","Straight"};
 	private String whichSide[]= {"Left","Right"};
 
+	private Timer timer = new Timer();
+	private Timer pushTimer = new Timer();
+	
+	private boolean pushing = false;
+	
 	private final double runtime;
+	private double pushTime = 1;
+	private double endTime = 0;
 
 //	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
 
@@ -100,9 +106,24 @@ public class DrivePath extends Command implements PhysicalConstants {
 		requires(Robot.driveTrain);
 		requires(Robot.elevator);
 		
-		Sendable position = SmartDashboard.getData("Position");
-		SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) position;
-
+//		Sendable position = SmartDashboard.getData("Position");
+//		SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) position;
+		
+		int robotPosition = -1;
+		
+		switch (SmartDashboard.getString("Position", "Center").toLowerCase()) {
+		
+			case "left":
+				robotPosition = LEFT_POSITION;
+				break;
+			case "center":
+				robotPosition = CENTER_POSITION;
+				break;
+			case "right":
+				robotPosition = RIGHT_POSITION;
+				break;
+		}
+		
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
 		if (gameMessage.equals("")) {
 			if (isGameDataEmpty()) {
@@ -112,8 +133,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 			}
 		}
 		putFMSDataOnDashboard(gameMessage);
-
-		timer = new Timer();
 		timer.start();
 		timer.reset();
 
@@ -132,16 +151,10 @@ public class DrivePath extends Command implements PhysicalConstants {
 		GFACT =getNumberOnDashboard("GFACT", GFACT);
 		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
 		
-		trajectory = calculateTrajectory(gameMessage, robotPosition.getSelected(), maxVelocity, maxAcceleration, maxJerk);
+		trajectory = calculateTrajectory(gameMessage, robotPosition, maxVelocity, maxAcceleration, maxJerk);
 		
 		targetString = whichSide[targetSide] + " " + whichObject[targetObject];
 		SmartDashboard.putString("Target", targetString);
-		
-		if(targetObject == SWITCH) {
-			Robot.elevator.setElevatorTarget(Elevator.SWITCH_HEIGHT);
-		} else if(targetObject == SCALE) {
-			Robot.elevator.setElevatorTarget(Elevator.SCALE_HEIGHT);
-		}
 		
 		// Create the Modifier Object
 		TankModifier modifier = new TankModifier(trajectory);
@@ -190,13 +203,23 @@ public class DrivePath extends Command implements PhysicalConstants {
 		
 		printInitializeMessage();
 		pathDataList.clear();
-		if(!publishPathAllowed())
-			plotCount =0;
+		if(!publishPathAllowed()) {
+			plotCount = 0;
+		}
+		
+//		Robot.elevator.setElevatorTarget(6);
+		
+//		if(targetObject == SWITCH) {
+		Robot.elevator.setElevatorTarget(Elevator.SWITCH_HEIGHT);
+//		} else if(targetObject == SCALE) {
+//			Robot.elevator.setElevatorTarget(Elevator.SCALE_HEIGHT);
+//		}
 		
 		leftFollower.reset();
 		rightFollower.reset();
 		Robot.driveTrain.reset();
 		Robot.elevator.enable();
+		Robot.cubeHandler.hold();
 		timer.start();
 		timer.reset();
 		pathIndex=0;
@@ -204,7 +227,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	// Called repeatedly when this Command is scheduled to run
 	protected void execute() {
-		if (trajectory == null) {
+		if (trajectory == null || pushing) {
 			return;
 		}
 		double leftDistance = feetToMeters(Robot.driveTrain.getLeftDistance());
@@ -250,7 +273,34 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-        return trajectory == null || timer.get() - runtime > 0.5 || leftFollower.isFinished() && rightFollower.isFinished();
+		if(trajectory == null) {
+			return true;
+		}
+		if(pushing) {
+			Robot.cubeHandler.output();
+			if(pushTimer.get() > pushTime) {
+				Robot.cubeHandler.hold();
+				return true;
+			}
+		} else if(leftFollower.isFinished() && rightFollower.isFinished()) {
+			if(targetObject == SCALE) {
+				Robot.elevator.setElevatorTarget(Elevator.SCALE_HEIGHT);
+				if(Robot.elevator.getPosition() > Elevator.SCALE_HEIGHT - Elevator.MOVE_RATE && Robot.elevator.getPosition() < Elevator.SCALE_HEIGHT + Elevator.MOVE_RATE) {
+					pushing = true;
+					pushTimer.reset();
+					pushTimer.start();
+				}
+			}
+			if(targetObject == SWITCH) {
+				pushing = true;
+				pushTimer.reset();
+				pushTimer.start();
+			}
+		} else if (pushTimer.get() - runtime > 2) {
+			System.out.println("DrivePath Timeout Expired");
+			return true;
+		}		
+        return false;
     }
 
 	// Called once after isFinished returns true
@@ -295,11 +345,11 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}
 
 	private Waypoint[] calculateSideSwitchHookPoints(int position) {
-		double y=SWITCH_HOOK_Y_DISTANCE-12;
+		double y=SWITCH_HOOK_Y_DISTANCE;
 		double x=ROBOT_TO_SWITCH_CENTER+12;
 		Waypoint[] waypoints = new Waypoint[3];
 		waypoints[0] = new Waypoint(0, 0, 0);
-		waypoints[1] = new Waypoint(x-3*y, 0,0);
+		waypoints[1] = new Waypoint(x-2.25*y, 0,0);
 		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
 		if(position == RIGHT_POSITION) {
 			return mirrorWaypoints(waypoints);
@@ -309,12 +359,12 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}
 	private Waypoint[] calculateSideScaleHookPoints(int position) {
 		double y=SCALE_HOOK_Y_DISTANCE;
-		double x=ROBOT_TO_SCALE_CENTER+12;
+		double x=ROBOT_TO_SCALE_CENTER;
 		Waypoint[] waypoints = new Waypoint[4];
 		waypoints[0] = new Waypoint(0, 0, 0);
 		waypoints[1] = new Waypoint(x-6*y,-12,0);
 		waypoints[2] = new Waypoint(x-2*y, -12,0);
-		waypoints[3] = new Waypoint(x, y-6, Pathfinder.d2r(90));
+		waypoints[3] = new Waypoint(x, y-9, Pathfinder.d2r(90));
 		if(position == RIGHT_POSITION)
 			return mirrorWaypoints(waypoints);
 		else

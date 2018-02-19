@@ -14,10 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  */
 public class ElevatorCommands extends Command {
-
-    private static final double maxSpeed = 60;
-    private static final double cycleTime = 0.02;
-    private static final double moveRate = cycleTime * maxSpeed;
     
     private boolean goingToBottom = false;
     private boolean goingToTop = false;
@@ -41,26 +37,29 @@ public class ElevatorCommands extends Command {
         double leftStick = stick.getRawAxis(RobotMap.LEFT_TRIGGER);
         double rightStick = stick.getRawAxis(RobotMap.RIGHT_TRIGGER);
         
-        if (OI.elevatorGoToZeroButton.get()) {
+        boolean goToZeroPressed = stick.getRawButton(RobotMap.RESET_ELEVATOR_BUTTON);
+        boolean goToSwitchPressed = stick.getRawButton(RobotMap.ELEVATOR_GO_TO_SWITCH_BUTTON);
+        
+        if (goToZeroPressed) {
             Robot.elevator.setElevatorTarget(0);
             goingToBottom = true;
         }
-        if(OI.elevatorGoToTopButton.get()) {
-        	Robot.elevator.setElevatorTarget(Elevator.MAX_HEIGHT);
-        	goingToTop = true;
-        }
-        if(OI.elevatorGoToSwitchButton.get()) {
-        	Robot.elevator.setElevatorTarget(Elevator.SWITCH_HEIGHT);
+//        if(OI.elevatorGoToTopButton.get()) {
+//        	Robot.elevator.setElevatorTarget(Elevator.MAX_HEIGHT);
+//        	goingToTop = true;
+//        }
+        if(goToSwitchPressed) {
+        	Robot.elevator.setElevatorTarget(Elevator.START_HEIGHT);
         	goingToSwitch = true;
         }
         
-        if(goingToBottom && Robot.elevator.getPosition() < moveRate) {
+        if(goingToBottom && Robot.elevator.getPosition() < Elevator.MOVE_RATE) {
         	goingToBottom = false;
         }
-        if(goingToTop && Robot.elevator.getPosition() > Elevator.MAX_HEIGHT - moveRate) {
+        if(goingToTop && Robot.elevator.getPosition() > Elevator.MAX_HEIGHT - Elevator.MOVE_RATE) {
         	goingToTop = false;
         }
-        if(goingToSwitch && Robot.elevator.getPosition() > Elevator.SWITCH_HEIGHT - moveRate && Robot.elevator.getPosition() < Elevator.SWITCH_HEIGHT + moveRate) {
+        if(goingToSwitch && Robot.elevator.getPosition() > Elevator.SWITCH_HEIGHT - Elevator.MOVE_RATE && Robot.elevator.getPosition() < Elevator.SWITCH_HEIGHT + Elevator.MOVE_RATE) {
         	goingToSwitch = false;
         }
         
@@ -70,9 +69,6 @@ public class ElevatorCommands extends Command {
         if (rightStick > 0) {
             incrementElevatorPosition(rightStick);
         }
-        
-        SmartDashboard.putNumber("Elevator", Robot.elevator.getPosition());
-        System.out.println(Robot.elevator.getElevatorTarget());
     }
 
     //	 Make this return true when this Command no longer needs to run execute()
@@ -100,7 +96,7 @@ public class ElevatorCommands extends Command {
         	position = Robot.elevator.getElevatorTarget();
         }
         
-        Robot.elevator.setElevatorTarget(position + (value * moveRate));
+        Robot.elevator.setElevatorTarget(position + (value * Elevator.MOVE_RATE));
         goingToBottom = false;
         goingToTop = false;
         goingToSwitch = false;
@@ -114,7 +110,7 @@ public class ElevatorCommands extends Command {
         	position = Robot.elevator.getElevatorTarget();
         }
 
-        Robot.elevator.setElevatorTarget(position - (value * moveRate));
+        Robot.elevator.setElevatorTarget(position - (value * Elevator.MOVE_RATE));
         goingToBottom = false;
         goingToTop = false;
         goingToSwitch = false;

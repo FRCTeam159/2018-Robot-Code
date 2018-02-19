@@ -52,6 +52,11 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     
 	public static final double SWITCH_HEIGHT = 24;
 	public static final double SCALE_HEIGHT = 60;
+	public static final double START_HEIGHT = 4;
+	
+    private static final double MAX_SPEED = 60;
+    private static final double CYCLE_TIME = 0.02;
+    public static final double MOVE_RATE = CYCLE_TIME * MAX_SPEED;
 
     private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
     
@@ -112,7 +117,9 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     public void reset() {
         elevatorTarget = 0;
         pidController.reset();
+        pidController.enable();
         pidController.setSetpoint(elevatorTarget);
+        elevatorMotor.set(ControlMode.PercentOutput, 0);
         elevatorMotor.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
     }
     
@@ -126,6 +133,9 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     }*/
 
     public void enable() {
+    	if(elevatorMotor.getSensorCollection().getQuadraturePosition() < 0) {
+//    		elevatorMotor.getSensorCollection().setQuadraturePosition(0, RobotMap.TIMEOUT);
+    	}
         pidController.enable();
     }
 

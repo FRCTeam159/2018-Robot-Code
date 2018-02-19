@@ -2,7 +2,9 @@ package org.usfirst.frc.team159.robot.commands;
 
 import org.usfirst.frc.team159.robot.OI;
 import org.usfirst.frc.team159.robot.Robot;
+import org.usfirst.frc.team159.robot.RobotMap;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -23,9 +25,11 @@ public class CubeCommands extends Command {
 
     //     Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	boolean intakePressed = OI.cubeIntakeButton.get();
-    	boolean outputPressed = OI.cubeOutputButton.get();
-    	boolean armsPressed = OI.armToggleButton.get();
+    	Joystick stick = OI.operatorController;
+    	boolean intakePressed = stick.getRawButton(RobotMap.INTAKE_BUTTON);
+    	boolean outputPressed = stick.getRawButton(RobotMap.OUTPUT_BUTTON);
+    	boolean armsOpened = stick.getRawButton(RobotMap.ARMS_OPEN_BUTTON);
+    	boolean armsClosed = stick.getRawButton(RobotMap.ARMS_CLOSED_BUTTON);
     	
         if (intakePressed) {
             Robot.cubeHandler.intake();
@@ -33,13 +37,19 @@ public class CubeCommands extends Command {
         if (outputPressed) {
         	Robot.cubeHandler.output();
         }
-        if (armsPressed) {
-            Robot.cubeHandler.toggleArms();
+        if (!intakePressed && !outputPressed) {
+        	Robot.cubeHandler.hold();
+        }
+        
+        if (armsOpened) {
+            Robot.cubeHandler.openArms();
+        } else if (armsClosed) {
+        	Robot.cubeHandler.closeArms();
         }
         
         SmartDashboard.putBoolean("Grabber Intake", intakePressed);
         SmartDashboard.putBoolean("Grabber Output", outputPressed);
-        SmartDashboard.putBoolean("Grabber Arms", armsPressed);
+        SmartDashboard.putBoolean("Grabber Arms", armsOpened);
     }
 
     //     Make this return true when this Command no longer needs to run execute()

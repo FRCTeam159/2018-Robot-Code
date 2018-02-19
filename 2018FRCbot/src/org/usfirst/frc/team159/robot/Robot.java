@@ -32,7 +32,7 @@ public class Robot extends IterativeRobot {
 	public static final double scale = 0.6;
 
 	private Command autonomousCommand;
-	private SendableChooser<Integer> chooser = new SendableChooser<>();
+//	private SendableChooser<Integer> chooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -48,6 +48,11 @@ public class Robot extends IterativeRobot {
 //		oi = new OI();
 		
 		putValuesOnSmartDashboard();
+	}
+	
+	@Override
+	public void robotPeriodic() {
+		SmartDashboard.putNumber("Elevator", Robot.elevator.getPosition());
 	}
 
 	/**
@@ -116,20 +121,21 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {}
 	
 	private void putValuesOnSmartDashboard() {
-		chooser.addObject("Left", 0);
-		chooser.addDefault("Center", 1);
-		chooser.addObject("Right", 2);
+//		chooser.addObject("Left", 0);
+//		chooser.addDefault("Center", 1);
+//		chooser.addObject("Right", 2);
 
-		SmartDashboard.putData("Position", chooser);
+//		SmartDashboard.putData("Position", chooser);
 		SmartDashboard.putBoolean("Prefer Scale", false);
 		SmartDashboard.putBoolean("Force Straight Path", false);
-		SmartDashboard.putString("FMS Data", "RLL");
 		SmartDashboard.putNumber("Max Velocity", 1.5);
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 4);		
 		SmartDashboard.putNumber("GFACT", 2.0);
 		SmartDashboard.putBoolean("Use Gyro", false);
 		SmartDashboard.putString("Target", "Calculating");
+		SmartDashboard.putString("FMS Data", "RLL");
+		SmartDashboard.putString("Position", "Center");
 
 		SmartDashboard.putBoolean("Calibrate", false);
 		SmartDashboard.putBoolean("Publish Path", false);

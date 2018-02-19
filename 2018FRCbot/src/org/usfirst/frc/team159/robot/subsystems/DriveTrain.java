@@ -67,7 +67,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		backLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.TIMEOUT);
 //		 frontRight.enableLimitSwitch(false, false);
 //		 backLeft.enableLimitSwitch(false, false);
-		gearPneumatic = new DoubleSolenoid(RobotMap.GEAR_SHIFTER_ID, RobotMap.SOLENOID_FORWARD, RobotMap.SOLENOID_REVERSE);
+		gearPneumatic = new DoubleSolenoid(RobotMap.GEAR_SHIFTER_ID, RobotMap.GEAR_SHIFTER_FORWARD, RobotMap.GEAR_SHIFTER_REVERSE);
 
 		gyro = new ADXRS450_Gyro();
 		reset();
