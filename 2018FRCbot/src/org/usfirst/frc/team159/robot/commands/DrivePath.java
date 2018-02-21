@@ -243,8 +243,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 		pathfinderHeading = pathfinderHeading > 180 ? pathfinderHeading-360 : pathfinderHeading;
 		double headingError = pathfinderHeading - gyroHeading;
-		if (useGyro)
+		if (useGyro) {
 			turn = GFACT * (-1.0 / 180.0) * headingError;
+		}
 		
 		double lval = leftPower - turn;
 		double rval = rightPower + turn;

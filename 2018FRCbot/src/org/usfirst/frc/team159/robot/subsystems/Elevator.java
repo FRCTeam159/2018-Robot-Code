@@ -51,7 +51,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     private static final double MIN_HEIGHT = 0;
     
 	public static final double SWITCH_HEIGHT = 24;
-	public static final double SCALE_HEIGHT = 60;
+	public static final double SCALE_HEIGHT = MAX_HEIGHT;
 	public static final double START_HEIGHT = 4;
 	
     private static final double MAX_SPEED = 60;

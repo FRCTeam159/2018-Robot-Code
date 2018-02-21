@@ -25,13 +25,18 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	private WPI_TalonSRX backRight;
 
 //	TODO are these correct?
-	private static final double wheelDiameter = 6.1; //4.25
-	private static final double gearRatio = 1; //(38/22)*3
-	private static final double encoderTicks = 1024; //900
-	private static final double encoderEdges = 4;
-	private static final double ticksPerRevolution = gearRatio * encoderTicks * encoderEdges;
-	private static final double feetPerRev = Math.PI * wheelDiameter / 12.0;
-	private static final double ticksPerFoot = ticksPerRevolution / feetPerRev;
+	private static final double WHEEL_DIAMETER = 6.1; //4.25
+	private static final double GEAR_RATIO = 1; //(38/22)*3
+	private static final double ENCODER_TICKS = 1024; //900
+	private static final double ENCODER_EDGES = 4;
+	private static final double TICKS_PER_REVOLUTION = GEAR_RATIO * ENCODER_TICKS * ENCODER_EDGES;
+	private static final double FEET_PER_REV = Math.PI * WHEEL_DIAMETER / 12.0;
+	private static final double TICKS_PER_FOOT = TICKS_PER_REVOLUTION / FEET_PER_REV;
+	
+//	private static final double MAX_MOVE_CHANGE = 0.05;
+	
+//	private double lastMoveValue = 0;
+	
 	private boolean lowGear = false;
 
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
@@ -111,12 +116,25 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		double leftMotorOutput;
 		double rightMotorOutput;
 
+		
+//		System.out.println("moveValue: " + moveValue);
+//		System.out.println("turnValue: " + turnValue);
+//		System.out.println("lastMoveValue: " + lastMoveValue);
+		System.out.println();
         if(Math.abs(moveValue) > 0) {
-            moveValue = (moveValue / Math.abs(moveValue)) * Math.pow(moveValue, moveExponent);
+            moveValue = (moveValue / Math.abs(moveValue)) * Math.pow(Math.abs(moveValue), moveExponent);
         }
         if(Math.abs(turnValue) > 0) {
-            turnValue = (turnValue / Math.abs(turnValue)) * Math.pow(turnValue, turnExponent);
+        	turnValue = (turnValue / Math.abs(turnValue)) * Math.pow(Math.abs(turnValue), turnExponent); // Math.abs the turnValue
         }
+        
+//        if(Math.abs(moveValue) - Math.abs(lastMoveValue) > MAX_MOVE_CHANGE) {
+//        	if(moveValue < 0) {
+//        		moveValue = lastMoveValue - MAX_MOVE_CHANGE;
+//        	} else if(moveValue > 0) {
+//        		moveValue = lastMoveValue + MAX_MOVE_CHANGE;
+//        	}
+//        }
         /*
         if(squaredInputs()){
             // square the inputs (while preserving the sign) to increase fine control
@@ -158,6 +176,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		 * frontRight.getSensorCollection().getQuadraturePosition(),
 		 * -backLeft.getSensorCollection().getQuadraturePosition());
 		 */
+//		lastMoveValue = moveValue;
 		setRaw(leftMotorOutput, rightMotorOutput);
 		log();
 	}
@@ -208,11 +227,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getRightDistance() {
-		return -frontRight.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
+		return -frontRight.getSensorCollection().getQuadraturePosition() / TICKS_PER_FOOT;
 	}
 
 	public double getLeftDistance() {
-		return backLeft.getSensorCollection().getQuadraturePosition() / ticksPerFoot;
+		return backLeft.getSensorCollection().getQuadraturePosition() / TICKS_PER_FOOT;
 	}
 
 	public double getVelocity() {
@@ -220,11 +239,11 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 	}
 
 	public double getLeftVelocity() {
-		return (backLeft.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
+		return (backLeft.getSensorCollection().getQuadratureVelocity() * 10) / TICKS_PER_FOOT;
 	}
 
 	public double getRightVelocity() {
-		return (-frontRight.getSensorCollection().getQuadratureVelocity() * 10) / ticksPerFoot;
+		return (-frontRight.getSensorCollection().getQuadratureVelocity() * 10) / TICKS_PER_FOOT;
 	}
 
 	public void setLowGear() {

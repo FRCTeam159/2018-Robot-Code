@@ -27,6 +27,7 @@ public class DriveWithJoystick extends Command {
     protected void initialize() {
         timer.start();
         timer.reset();
+        Robot.elevator.setElevatorTarget(Robot.elevator.getPosition());
         SmartDashboard.putNumber("Move Exponent", SmartDashboard.getNumber("Move Exponent", 2));
         SmartDashboard.putNumber("Turn Exponent", SmartDashboard.getNumber("Turn Exponent", 2));
     }
