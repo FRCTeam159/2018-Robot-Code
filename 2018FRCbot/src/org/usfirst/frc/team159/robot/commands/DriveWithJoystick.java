@@ -20,7 +20,11 @@ public class DriveWithJoystick extends Command {
 
     public DriveWithJoystick() {
         requires(Robot.driveTrain);
+        SmartDashboard.putNumber("Move Exponent", SmartDashboard.getNumber("Move Exponent", 2));
+        SmartDashboard.putNumber("Turn Exponent", SmartDashboard.getNumber("Turn Exponent", 2));
+        SmartDashboard.putNumber("Turn Scale", SmartDashboard.getNumber("Turn Scale", 0.5));
     }
+    
 
     //	 Called just before this Command runs the first time
     @Override
@@ -28,8 +32,7 @@ public class DriveWithJoystick extends Command {
         timer.start();
         timer.reset();
         Robot.elevator.setElevatorTarget(Robot.elevator.getPosition());
-        SmartDashboard.putNumber("Move Exponent", SmartDashboard.getNumber("Move Exponent", 2));
-        SmartDashboard.putNumber("Turn Exponent", SmartDashboard.getNumber("Turn Exponent", 2));
+ 
     }
 
     //	 Called repeatedly when this Command is scheduled to run
@@ -54,8 +57,20 @@ public class DriveWithJoystick extends Command {
 
         double moveExponent = SmartDashboard.getNumber("Move Exponent", 1);
         double turnExponent = SmartDashboard.getNumber("Turn Exponent", 1);
-
-        Robot.driveTrain.arcadeDrive(moveAxis, turnAxis, moveExponent, turnExponent);
+        double turnScale = SmartDashboard.getNumber("Turn Scale", 0.5);
+        
+        double moveValue = 0;
+        double turnValue = 0;
+        
+        if(Math.abs(moveAxis) > 0) {
+        	moveValue = (moveAxis / Math.abs(moveAxis)) * Math.pow(Math.abs(moveAxis), moveExponent);
+        }
+        if(Math.abs(turnAxis) > 0) {
+        	turnValue = (turnAxis / Math.abs(turnAxis)) * Math.pow(Math.abs(turnAxis), turnExponent); // Math.abs the turnValue
+        }
+        
+		turnValue *= Math.abs(moveValue)*(1-turnScale)+turnScale;
+        Robot.driveTrain.arcadeDrive(moveValue, turnValue);
 
         if (debug) {
             System.out.format("%f %f %f %f %f %f %f %f %f\n",

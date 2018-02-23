@@ -11,11 +11,9 @@ import org.usfirst.frc.team159.robot.subsystems.Elevator;
 //import edu.wpi.first.networktables.NetworkTableInstance;
 //import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
@@ -49,8 +47,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private DistanceFollower rightFollower;
 	//private Trajectory.Config config;
 	//TankModifier modifier;
-	private static double switchHeight = 30;
-	private static double scaleHeight = 55;
 	private static final boolean printCalculatedTrajectory = false;
 	private static final boolean printCalculatedPath = false;
 	private static boolean useGyro = false;
@@ -84,7 +80,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 	
 	private final double runtime;
 	private double pushTime = 1;
-	private double endTime = 0;
 
 //	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
 
@@ -100,7 +95,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	//TODO use non deprecated class (edu.wpi.first.networktables.NetworkTable)
 	private static NetworkTable table = NetworkTable.getTable("datatable");
 
-	private String targetString = whichSide[targetSide] + " " + whichObject[targetObject];
+	private String targetString = whichSide[targetSide] + " " + whichObject[targetObject];         
 
 	DrivePath() {
 		requires(Robot.driveTrain);

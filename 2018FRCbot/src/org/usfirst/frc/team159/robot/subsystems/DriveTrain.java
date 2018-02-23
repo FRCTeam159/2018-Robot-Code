@@ -112,7 +112,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		log();
 	}
 
-	public void arcadeDrive(double moveValue, double turnValue, double moveExponent, double turnExponent) {
+	public void arcadeDrive(double moveValue, double turnValue) {
 		double leftMotorOutput;
 		double rightMotorOutput;
 
@@ -121,14 +121,7 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 //		System.out.println("turnValue: " + turnValue);
 //		System.out.println("lastMoveValue: " + lastMoveValue);
 		System.out.println();
-        if(Math.abs(moveValue) > 0) {
-            moveValue = (moveValue / Math.abs(moveValue)) * Math.pow(Math.abs(moveValue), moveExponent);
-        }
-        if(Math.abs(turnValue) > 0) {
-        	turnValue = (turnValue / Math.abs(turnValue)) * Math.pow(Math.abs(turnValue), turnExponent); // Math.abs the turnValue
-        }
-        
-//        if(Math.abs(moveValue) - Math.abs(lastMoveValue) > MAX_MOVE_CHANGE) {
+ //        if(Math.abs(moveValue) - Math.abs(lastMoveValue) > MAX_MOVE_CHANGE) {
 //        	if(moveValue < 0) {
 //        		moveValue = lastMoveValue - MAX_MOVE_CHANGE;
 //        	} else if(moveValue > 0) {

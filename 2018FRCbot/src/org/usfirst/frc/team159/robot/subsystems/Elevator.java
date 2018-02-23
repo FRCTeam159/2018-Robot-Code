@@ -81,20 +81,22 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
         
         elevatorMotor.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
         elevatorMotor.set(ControlMode.PercentOutput, 0);
-//    	elevatorMotor.enableCurrentLimit(true);
-//    	elevatorMotor.configPeakCurrentLimit(0, RobotMap.TIMEOUT);
-//    	elevatorMotor.configContinuousCurrentLimit(1, RobotMap.TIMEOUT);
+//        elevatorMotor.enableCurrentLimit(true);
+//        elevatorMotor.configPeakCurrentLimit(0, RobotMap.TIMEOUT);
+        elevatorMotor.configContinuousCurrentLimit(1, RobotMap.TIMEOUT);
         pidController = new PIDController(P, I, D, F, this, this, 0.01);
         pidController.setOutputRange(-1.0, 1.0);
         reset();
 //        pidController.disable();
-        SmartDashboard.putNumber("Elevator", getPosition());
     }
 
 //	 Put methods for controlling this subsystem here. Call these from Commands.
 
     public double getPosition() {
-        return (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
+    	double pos= (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
+        SmartDashboard.putNumber("Elevator", pos);
+        SmartDashboard.putNumber("ElevatorCurrent", elevatorMotor.getOutputCurrent());       
+        return pos;
     }
 
     public void setElevatorTarget(double value) {
