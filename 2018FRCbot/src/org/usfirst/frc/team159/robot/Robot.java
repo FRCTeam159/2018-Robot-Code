@@ -1,5 +1,6 @@
 package org.usfirst.frc.team159.robot;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -20,19 +21,21 @@ import org.usfirst.frc.team159.robot.subsystems.Elevator;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
+public class Robot extends IterativeRobot implements RobotMap {
 
 	public static Elevator elevator;
 	public static CubeHandler cubeHandler;
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
+	public static int robotPosition = -1;
+
 
 //	private static OI oi;
 	
 	public static final double scale = 0.6;
 
 	private Command autonomousCommand;
-//	private SendableChooser<Integer> chooser = new SendableChooser<>();
+	private SendableChooser<Integer> chooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -121,24 +124,33 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {}
 	
 	private void putValuesOnSmartDashboard() {
-//		chooser.addObject("Left", 0);
-//		chooser.addDefault("Center", 1);
-//		chooser.addObject("Right", 2);
+		chooser.addObject("Left", 0);
+		chooser.addDefault("Center", 1);
+		chooser.addObject("Right", 2);
 
-//		SmartDashboard.putData("Position", chooser);
+		SmartDashboard.putData("Position", chooser);
 		SmartDashboard.putBoolean("Prefer Scale", false);
 		SmartDashboard.putBoolean("Force Straight Path", false);
 		SmartDashboard.putNumber("Max Velocity", 1.5);
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
-		SmartDashboard.putNumber("Max Jerk", 4);		
+		SmartDashboard.putNumber("Max Jerk", 4);
 		SmartDashboard.putNumber("GFACT", 2.0);
 		SmartDashboard.putBoolean("Use Gyro", false);
 		SmartDashboard.putString("Target", "Calculating");
 		SmartDashboard.putString("FMS Data", "RLL");
-		SmartDashboard.putString("Position", "Center");
+//		SmartDashboard.putString("Position", "Center");
 
 		SmartDashboard.putBoolean("Calibrate", false);
 		SmartDashboard.putBoolean("Publish Path", false);
 		SmartDashboard.putNumber("P", DrivePath.KP);
+		
+        SmartDashboard.putBoolean("Grabber Intake", false);
+        SmartDashboard.putBoolean("Grabber Output", false);
+        SmartDashboard.putBoolean("Grabber Arms", false);
+	}
+	
+	public static void getPosition() {
+		DigitalInput input1 = new DigitalInput(0);
+		DigitalInput input2 = new DigitalInput(1);
 	}
 }

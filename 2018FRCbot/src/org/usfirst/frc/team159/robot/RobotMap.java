@@ -6,7 +6,7 @@ package org.usfirst.frc.team159.robot;
  * the wiring easier and significantly reduces the number of magic numbers
  * floating around.
  */
-public class RobotMap {
+public interface  RobotMap {
 //    Controller IDs
     public static final int DRIVER = 0;
     public static final int OPERATOR = 1;
@@ -57,4 +57,11 @@ public class RobotMap {
     public static final int GEAR_SHIFTER_REVERSE = 1;
     public static final int ARM_FORWARD = 2;
     public static final int ARM_REVERSE = 3;
+    
+    public static final int LEFT_POSITION = 0;
+    public static final int CENTER_POSITION = 1;
+    public static final int RIGHT_POSITION = 2;
+    public static final int ILLEGAL_POSITION = 3;
+
+
 }

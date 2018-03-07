@@ -22,7 +22,7 @@ public class DriveWithJoystick extends Command {
         requires(Robot.driveTrain);
         SmartDashboard.putNumber("Move Exponent", SmartDashboard.getNumber("Move Exponent", 2));
         SmartDashboard.putNumber("Turn Exponent", SmartDashboard.getNumber("Turn Exponent", 2));
-        SmartDashboard.putNumber("Turn Scale", SmartDashboard.getNumber("Turn Scale", 0.5));
+        SmartDashboard.putNumber("Turn Scale", SmartDashboard.getNumber("Turn Scale", 0.65));
     }
     
 
@@ -57,7 +57,7 @@ public class DriveWithJoystick extends Command {
 
         double moveExponent = SmartDashboard.getNumber("Move Exponent", 1);
         double turnExponent = SmartDashboard.getNumber("Turn Exponent", 1);
-        double turnScale = SmartDashboard.getNumber("Turn Scale", 0.5);
+        double turnScale = SmartDashboard.getNumber("Turn Scale", 0.65);
         
         double moveValue = 0;
         double turnValue = 0;

@@ -4,16 +4,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.usfirst.frc.team159.robot.PhysicalConstants;
+import org.usfirst.frc.team159.robot.RobotMap;
+
 import org.usfirst.frc.team159.robot.Robot;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 //import edu.wpi.first.networktables.NetworkTable;
 //import edu.wpi.first.networktables.NetworkTableInstance;
 //import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
@@ -25,7 +30,23 @@ import jaci.pathfinder.modifiers.TankModifier;
 /**
  *
  */
-public class DrivePath extends Command implements PhysicalConstants {
+public class DrivePath extends Command implements PhysicalConstants, RobotMap {
+	
+	private static final boolean forceSetData = false; // Set true to force data
+	
+	private static final boolean preferScale = false;
+	
+	private static final boolean forcedStraight = false;
+	
+	private static final boolean forcedDontMove = false;
+	
+	private static final int forcedPosition = CENTER_POSITION;
+	// Options:
+//	LEFT_POSITION
+//	CENTER_POSITION
+//	RIGHT_POSITION
+	
+	
 	private static final double TIME_STEP = 0.02;
 	// double MAX_VEL = 1.3635; //1.8
 	// double MAX_ACC = 18.7; //14
@@ -56,10 +77,6 @@ public class DrivePath extends Command implements PhysicalConstants {
 	//	private static int plotId = 0;
 	private int pathIndex = 0;
 
-	private static final int LEFT_POSITION = 0;
-	private static final int CENTER_POSITION = 1;
-	private static final int RIGHT_POSITION = 2;
-
 	private static final int SWITCH = 0;
 	private static final int SCALE = 1;
 	private static final int NONE = 2;
@@ -72,6 +89,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 	
 	private String whichObject[]= {"Switch","Scale","Straight"};
 	private String whichSide[]= {"Left","Right"};
+	private String whichPosition[] = {"Left", "Center", "Right", "ILLEGAL"};
 
 	private Timer timer = new Timer();
 	private Timer pushTimer = new Timer();
@@ -84,7 +102,7 @@ public class DrivePath extends Command implements PhysicalConstants {
 //	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
 
 //	private static final Point switchCurveEndPoint = new Point(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE);
-	private static final double straightEndPoint = 78;
+	private static final double straightEndPoint = ROBOT_TO_SWITCH;
 //	private static final double scaleEndPoint = SCALE_HOOK_TURN_Y;
 	
 	private static int plotCount = 0;
@@ -95,38 +113,63 @@ public class DrivePath extends Command implements PhysicalConstants {
 	//TODO use non deprecated class (edu.wpi.first.networktables.NetworkTable)
 	private static NetworkTable table = NetworkTable.getTable("datatable");
 
-	private String targetString = whichSide[targetSide] + " " + whichObject[targetObject];         
+	private String targetString = whichSide[targetSide] + " " + whichObject[targetObject];
+	
+	private int robotPosition = ILLEGAL_POSITION;
+	
 
 	DrivePath() {
 		requires(Robot.driveTrain);
 		requires(Robot.elevator);
 		
-//		Sendable position = SmartDashboard.getData("Position");
-//		SendableChooser<Integer> robotPosition = (SendableChooser<Integer>) position;
+		Sendable position = SmartDashboard.getData("Position");
+		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position;
 		
-		int robotPosition = -1;
+		timer.start();
+		timer.reset();
 		
-		switch (SmartDashboard.getString("Position", "Center").toLowerCase()) {
 		
-			case "left":
-				robotPosition = LEFT_POSITION;
-				break;
-			case "center":
-				robotPosition = CENTER_POSITION;
-				break;
-			case "right":
-				robotPosition = RIGHT_POSITION;
-				break;
+		if(!forceSetData) {
+//			String positionString = SmartDashboard.getString("Position", "?").toLowerCase();
+			
+//			while(positionString.equals("?") && timer.get() < 1) {
+//				positionString = SmartDashboard.getString("Position", "?").toLowerCase();
+//			}
+//			if(positionString.equals("left")) {
+//				robotPosition = LEFT_POSITION;
+//			} else if(positionString.equals("center")) {
+//				robotPosition = CENTER_POSITION;
+//			} else if(positionString.equals("right")) {
+//				robotPosition = RIGHT_POSITION;
+//			}
+			robotPosition = positionChooser.getSelected();
+		} else {
+			robotPosition = forcedPosition;
 		}
+		
+		
+		System.out.println("Position="+robotPosition);
+		
+		timer.start();
+		timer.reset();
+		
+//		String gameMessage;
 		
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		if (gameMessage.equals("")) {
-			if (isGameDataEmpty()) {
-				gameMessage = generateFMSData();
-			} else {
-				gameMessage = SmartDashboard.getString("FMS Data", "LLL");
-			}
+		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
 		}
+//		if (gameMessage.equals("")|| gameMessage.equals(null)) {
+//			gameMessage = "???";
+//			SmartDashboard.putBoolean("Force Straight Path", true);		
+//			if (isGameDataEmpty()) {
+//				gameMessage = generateFMSData();
+//			} else {
+//				gameMessage = SmartDashboard.getString("FMS Data", "LLL");
+//			}
+//		}
+		System.out.println("FMS="+gameMessage);
+
 		putFMSDataOnDashboard(gameMessage);
 		timer.start();
 		timer.reset();
@@ -148,7 +191,13 @@ public class DrivePath extends Command implements PhysicalConstants {
 		
 		trajectory = calculateTrajectory(gameMessage, robotPosition, maxVelocity, maxAcceleration, maxJerk);
 		
-		targetString = whichSide[targetSide] + " " + whichObject[targetObject];
+		if(trajectory == null) {
+			SmartDashboard.putString("Target", "ERROR");
+			runtime = 0;
+			return;
+		}
+		
+		targetString = "Position:"+whichPosition[robotPosition] + " Target:" + whichSide[targetSide] + " - " + whichObject[targetObject];
 		SmartDashboard.putString("Target", targetString);
 		
 		// Create the Modifier Object
@@ -287,11 +336,14 @@ public class DrivePath extends Command implements PhysicalConstants {
 					pushTimer.start();
 				}
 			}
-			if(targetObject == SWITCH) {
+			else if(targetObject == SWITCH) {
 				pushing = true;
 				pushTimer.reset();
 				pushTimer.start();
 			}
+			else
+				return true;
+				
 		} else if (pushTimer.get() - runtime > 2) {
 			System.out.println("DrivePath Timeout Expired");
 			return true;
@@ -380,6 +432,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 	}*/
 
 	private Waypoint[] calculateStraightPoints(double x) {
+		if(forcedDontMove) {
+			return null;
+		}
         return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
 	}
 
@@ -416,6 +471,9 @@ public class DrivePath extends Command implements PhysicalConstants {
 		Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
 		
 		Waypoint[] waypoints = calculatePathWaypoints(gameData, robotPosition);
+		if(waypoints == null) {
+			return null;
+		}
 		Trajectory calculatedTrajectory = Pathfinder.generate(waypoints, config);
 		
 		/*if (calculatedTrajectory == null) {
@@ -432,80 +490,81 @@ public class DrivePath extends Command implements PhysicalConstants {
 
 	private Waypoint[] calculatePathWaypoints(String gameData, int robotPosition) {
 		Waypoint[] returnWaypoints = null;
-        switch (robotPosition) {
-            case CENTER_POSITION:
-				targetObject = SWITCH;
-				if (gameData.charAt(0) == 'R') {
-					targetSide = RIGHT;
+		switch (robotPosition) {
+		case CENTER_POSITION:
+			targetObject = SWITCH;
+			if (gameData.charAt(0) == 'R') {
+				targetSide = RIGHT;
+			} else {
+				targetSide = LEFT;
+			}
+			returnWaypoints = calculateCenterSwitchPoints(targetSide);
+			break;
+		case RIGHT_POSITION:
+			targetSide =RIGHT;
+			if (!isStraightPathForced()) {
+				if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
+					if (isScalePreferredOverSwitch()) {
+						targetObject =SCALE;
+						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+						//returnWaypoints = calculateScalePoints(scaleEndPoint);
+					} else {
+						targetObject =SWITCH;
+						returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+						//returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
+					}
+				} else if (gameData.charAt(0) == 'R') {
+					targetObject =SWITCH;
+					//returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
+					returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+				} else if (gameData.charAt(1) == 'R') {
+					returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+					targetObject = SCALE;
 				} else {
-					targetSide = LEFT;
+					targetObject =NONE;
+					returnWaypoints = calculateStraightPoints(straightEndPoint);
 				}
-				returnWaypoints = calculateCenterSwitchPoints(targetSide);
-                break;
-            case RIGHT_POSITION:
-    			targetSide =RIGHT;
-                if (!isStraightPathForced()) {
-                    if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
-                        if (isScalePreferredOverSwitch()) {
-    						targetObject =SCALE;
-    						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-                            //returnWaypoints = calculateScalePoints(scaleEndPoint);
-                        } else {
-    						targetObject =SWITCH;
-                        	returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-                            //returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
-                        }
-                    } else if (gameData.charAt(0) == 'R') {
+			} else {
+				targetObject =NONE;
+				returnWaypoints = calculateStraightPoints(straightEndPoint);
+			}
+			break;
+		case LEFT_POSITION:
+			targetSide =LEFT;
+			if (!isStraightPathForced()) {
+				if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
+					if (isScalePreferredOverSwitch()) {
+						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+						//returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
+						targetObject =SCALE;
+					} else {
+						returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+						//returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
 						targetObject =SWITCH;
-                        //returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
-                    	returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-                    } else if (gameData.charAt(1) == 'R') {
-                    	returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-                    	targetObject = SCALE;
-                    } else {
-    					targetObject =NONE;
-                        returnWaypoints = calculateStraightPoints(straightEndPoint);
-                    }
-                } else {
+					}
+				} else if (gameData.charAt(0) == 'L') {
+					targetObject =SWITCH;
+					returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+					//returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
+				} else if (gameData.charAt(1) == 'L') {
+					returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+					targetObject = SCALE;
+				} else {
+					returnWaypoints = calculateStraightPoints(straightEndPoint);
 					targetObject =NONE;
-                    returnWaypoints = calculateStraightPoints(straightEndPoint);
-                }
-                break;
-            case LEFT_POSITION:
-    			targetSide =LEFT;
-                if (!isStraightPathForced()) {
-                    if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
-                        if (isScalePreferredOverSwitch()) {
-    						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-                            //returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
-    						targetObject =SCALE;
-                        } else {
-                        	returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-                           //returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
-    						targetObject =SWITCH;
-                        }
-                    } else if (gameData.charAt(0) == 'L') {
-						targetObject =SWITCH;
-                    	returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-                        //returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
-                    } else if (gameData.charAt(1) == 'L') {
-                    	returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-                    	targetObject = SCALE;
-                    } else {
-                        returnWaypoints = calculateStraightPoints(straightEndPoint);
-    					targetObject =NONE;
-                    }
-                } else {
-                    returnWaypoints = calculateStraightPoints(straightEndPoint);
-					targetObject =NONE;
-                }
-                break;
-        }
-        if(returnWaypoints != null) {
-        	return waypointsInchesToMeters(returnWaypoints);
-        } else {
-        	return null;
-        }
+				}
+			} else {
+				returnWaypoints = calculateStraightPoints(straightEndPoint);
+				targetObject =NONE;
+			}
+			break;
+		}
+			
+		if(returnWaypoints != null) {
+			return waypointsInchesToMeters(returnWaypoints);
+		} else {
+			return null;
+		}
 	}
 
 	private String generateFMSData() {
@@ -564,17 +623,21 @@ public class DrivePath extends Command implements PhysicalConstants {
 	private void printEndMessage() {
 		System.out.println("DrivePath.end()");
 	}
-	
-	private boolean isGameDataEmpty() {
-		return SmartDashboard.getString("FMS Data", "").equals("") || SmartDashboard.getString("FMS Data", "???").equals("???");
-	}
 
 	private boolean isScalePreferredOverSwitch() {
-		return SmartDashboard.getBoolean("Prefer Scale", true);
+		if(forceSetData) {
+			return preferScale;
+		} else {
+			return SmartDashboard.getBoolean("Prefer Scale", false);
+		}
 	}
 
 	private boolean isStraightPathForced() {
-		return SmartDashboard.getBoolean("Force Straight Path", false);
+		if(forceSetData) {
+			return forcedStraight;
+		} else {
+			return SmartDashboard.getBoolean("Force Straight Path", false);
+		}
 	}
 	
 	private void addPlotData() {

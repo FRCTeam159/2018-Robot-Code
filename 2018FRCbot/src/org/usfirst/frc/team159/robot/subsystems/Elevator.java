@@ -1,5 +1,6 @@
 package org.usfirst.frc.team159.robot.subsystems;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -34,7 +35,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
      * F = 0
      */
     
-    private static final double P = 0.125;
+    private static final double P = 0.15;
     private static final double I = 0.0;
     private static final double D = 0.75;
     private static final double F = 0.0;
@@ -47,7 +48,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     private static final double INCHES_PER_REV = Math.PI * WHEEL_DIAMETER;
     private static final double TICKS_PER_INCH = TICKS_PER_REVOLUTION / INCHES_PER_REV;
     
-    public static final double MAX_HEIGHT = 76.5;
+    public static final double MAX_HEIGHT = 78;
     private static final double MIN_HEIGHT = 0;
     
 	public static final double SWITCH_HEIGHT = 24;
@@ -81,10 +82,9 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
         
         elevatorMotor.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
         elevatorMotor.set(ControlMode.PercentOutput, 0);
-//        elevatorMotor.enableCurrentLimit(true);
-//        elevatorMotor.configPeakCurrentLimit(0, RobotMap.TIMEOUT);
-        elevatorMotor.configContinuousCurrentLimit(1, RobotMap.TIMEOUT);
-        pidController = new PIDController(P, I, D, F, this, this, 0.01);
+//		Current limits set
+    	//SmartDashboard.putNumber("Current limit", 20);
+          pidController = new PIDController(P, I, D, F, this, this, 0.01);
         pidController.setOutputRange(-1.0, 1.0);
         reset();
 //        pidController.disable();
@@ -123,6 +123,14 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
         pidController.setSetpoint(elevatorTarget);
         elevatorMotor.set(ControlMode.PercentOutput, 0);
         elevatorMotor.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
+   // int ClValue = (int)SmartDashboard.getNumber("Current limit", 20);
+    
+        //elevatorMotor.configPeakCurrentLimit(0, RobotMap.TIMEOUT);
+        //elevatorMotor.configContinuousCurrentLimit(ClValue, RobotMap.TIMEOUT);
+    	//elevatorMotor.configPeakCurrentDuration(50, RobotMap.TIMEOUT);
+    	//elevatorMotor.enableCurrentLimit(true);
+    	
+
     }
     
     /*public boolean isAtZero() {

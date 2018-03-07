@@ -25,7 +25,7 @@ public class DropGrabber extends Command {
 
     // Called just before this Command runs the first time
     protected void initialize() {
-    	Robot.elevator.reset();
+    	//Robot.elevator.reset();
     	Robot.elevator.setElevatorTarget(Elevator.START_HEIGHT);
     	timer.reset();
     	timer.start();
