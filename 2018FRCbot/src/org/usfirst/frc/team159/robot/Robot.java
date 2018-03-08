@@ -2,6 +2,7 @@ package org.usfirst.frc.team159.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -27,12 +28,20 @@ public class Robot extends IterativeRobot implements RobotMap {
 	public static CubeHandler cubeHandler;
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
+	
+	private static final boolean useDashboard = true;
+	
+	public static boolean preferScale = false;
+	public static boolean forcedStraight = false;
+	public static boolean oppositeSideAllowed = false;
+	public static boolean useGyro = false;
+	
 	public static int robotPosition = -1;
 
 
 //	private static OI oi;
 	
-	public static final double scale = 0.6;
+	public static final double powerScale = 0.6;
 
 	private Command autonomousCommand;
 	private SendableChooser<Integer> chooser = new SendableChooser<>();
@@ -81,6 +90,7 @@ public class Robot extends IterativeRobot implements RobotMap {
 			autonomousCommand = new Autonomous();
 		}
 		
+		getPreferences();
 		driveTrain.reset();
 		
 		if (autonomousCommand != null) {
@@ -131,6 +141,7 @@ public class Robot extends IterativeRobot implements RobotMap {
 		SmartDashboard.putData("Position", chooser);
 		SmartDashboard.putBoolean("Prefer Scale", false);
 		SmartDashboard.putBoolean("Force Straight Path", false);
+		SmartDashboard.putBoolean("Opposite Side Allowed", false);
 		SmartDashboard.putNumber("Max Velocity", 1.5);
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 4);
@@ -149,8 +160,41 @@ public class Robot extends IterativeRobot implements RobotMap {
         SmartDashboard.putBoolean("Grabber Arms", false);
 	}
 	
-	public static void getPosition() {
-		DigitalInput input1 = new DigitalInput(0);
-		DigitalInput input2 = new DigitalInput(1);
+	private void getPreferences() {
+		if(useDashboard) {
+			getDashboardPreferences();
+		} else {
+			getSwitchPreferences();
+		}
+	}
+	
+	private void getDashboardPreferences() {
+		preferScale = SmartDashboard.getBoolean("Prefer Scale", false);
+		forcedStraight = SmartDashboard.getBoolean("Force Straight Path", false);
+		oppositeSideAllowed = SmartDashboard.getBoolean("Opposite Side Allowed", false);
+		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
+		Sendable position = SmartDashboard.getData("Position");
+		if(position != null) {
+			SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position; 
+			robotPosition = positionChooser.getSelected();
+		}
+	}
+	
+	private void getSwitchPreferences() {
+		//TODO complete this
+		DigitalInput leftPosition = new DigitalInput(LEFT_POSITION_CHANNEL);
+		DigitalInput centerPosition = new DigitalInput(CENTER_POSITION_CHANNEL);
+		DigitalInput rightPosition = new DigitalInput(RIGHT_POSITION_CHANNEL);
+		DigitalInput oppositeSide = new DigitalInput(ALLOW_OPPOSITE_CHANNEL);
+		
+		oppositeSideAllowed = oppositeSide.get();
+		
+		if(leftPosition.get()) {
+			robotPosition = LEFT_POSITION;
+		} else if(centerPosition.get()) {
+			robotPosition = CENTER_POSITION;
+		} else if(rightPosition.get()) {
+			robotPosition = RIGHT_POSITION;
+		}
 	}
 }

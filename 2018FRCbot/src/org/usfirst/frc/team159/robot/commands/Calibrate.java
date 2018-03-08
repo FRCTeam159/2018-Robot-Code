@@ -47,7 +47,7 @@ public class Calibrate extends Command {
             return;
         }
         if (runTimer.get() >= 0.25) {
-            Robot.driveTrain.setRaw(Robot.scale * speed, Robot.scale * speed);
+            Robot.driveTrain.setRaw(Robot.powerScale * speed, Robot.powerScale * speed);
         }
         double averageVelocity = getRollingAverage(feetToMeters(Robot.driveTrain.getVelocity()));
         velocityList.add(new Double[]{averageVelocity, runTimer.get()});

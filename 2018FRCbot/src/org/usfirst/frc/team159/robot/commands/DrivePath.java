@@ -9,16 +9,13 @@ import org.usfirst.frc.team159.robot.RobotMap;
 import org.usfirst.frc.team159.robot.Robot;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 //import edu.wpi.first.networktables.NetworkTable;
 //import edu.wpi.first.networktables.NetworkTableInstance;
 //import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
@@ -27,30 +24,14 @@ import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.DistanceFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
-/**
- *
- */
 public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 	
-	private static final boolean forceSetData = false; // Set true to force data
 	
-	private static final boolean preferScale = false;
-	
-	private static final boolean forcedStraight = false;
-	
-	private static final boolean forcedDontMove = false;
-	
-	private static final int forcedPosition = CENTER_POSITION;
-	// Options:
-//	LEFT_POSITION
-//	CENTER_POSITION
-//	RIGHT_POSITION
-	
-	
-	private static final double TIME_STEP = 0.02;
 	// double MAX_VEL = 1.3635; //1.8
 	// double MAX_ACC = 18.7; //14
 	// double MAX_JRK = 497.9; //116
+	private static final double TIME_STEP = 0.02;
+	
 	private static final double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
 	private static final double MAX_ACC = 26.7;
 	private static final double MAX_JRK = 10;
@@ -122,38 +103,18 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		requires(Robot.driveTrain);
 		requires(Robot.elevator);
 		
-		Sendable position = SmartDashboard.getData("Position");
-		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position;
+//		Sendable position = SmartDashboard.getData("Position");
+//		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position;
 		
 		timer.start();
 		timer.reset();
 		
-		
-		if(!forceSetData) {
-//			String positionString = SmartDashboard.getString("Position", "?").toLowerCase();
-			
-//			while(positionString.equals("?") && timer.get() < 1) {
-//				positionString = SmartDashboard.getString("Position", "?").toLowerCase();
-//			}
-//			if(positionString.equals("left")) {
-//				robotPosition = LEFT_POSITION;
-//			} else if(positionString.equals("center")) {
-//				robotPosition = CENTER_POSITION;
-//			} else if(positionString.equals("right")) {
-//				robotPosition = RIGHT_POSITION;
-//			}
-			robotPosition = positionChooser.getSelected();
-		} else {
-			robotPosition = forcedPosition;
-		}
-		
+		robotPosition = Robot.robotPosition;
 		
 		System.out.println("Position="+robotPosition);
 		
 		timer.start();
 		timer.reset();
-		
-//		String gameMessage;
 		
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
 		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
@@ -168,7 +129,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 //				gameMessage = SmartDashboard.getString("FMS Data", "LLL");
 //			}
 //		}
-		System.out.println("FMS="+gameMessage);
+		System.out.println("FMS=" + gameMessage);
 
 		putFMSDataOnDashboard(gameMessage);
 		timer.start();
@@ -186,8 +147,8 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
 		KV = 1 / maxVelocity;
 		KP = getNumberOnDashboard("P", KP);
-		GFACT =getNumberOnDashboard("GFACT", GFACT);
-		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
+		GFACT = getNumberOnDashboard("GFACT", GFACT);
+		useGyro = Robot.useGyro;
 		
 		trajectory = calculateTrajectory(gameMessage, robotPosition, maxVelocity, maxAcceleration, maxJerk);
 		
@@ -277,33 +238,34 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		double leftDistance = feetToMeters(Robot.driveTrain.getLeftDistance());
 		double rightDistance = feetToMeters(Robot.driveTrain.getRightDistance());
 		
-		double rightPower =  leftFollower.calculate(leftDistance);
 		double leftPower = rightFollower.calculate(rightDistance);
+		double rightPower =  leftFollower.calculate(leftDistance);
 
 		double turn = 0;
 
 		double gyroHeading = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
 		double pathfinderHeading = Pathfinder.r2d(leftFollower.getHeading()); // Should also be in degrees
 
-		pathfinderHeading = pathfinderHeading > 180 ? pathfinderHeading-360 : pathfinderHeading;
+		pathfinderHeading = pathfinderHeading > 180 ? pathfinderHeading - 360 : pathfinderHeading;
 		double headingError = pathfinderHeading - gyroHeading;
 		if (useGyro) {
 			turn = GFACT * (-1.0 / 180.0) * headingError;
 		}
 		
-		double lval = leftPower - turn;
-		double rval = rightPower + turn;
+		double leftValue = leftPower - turn;
+		double rightValue = rightPower + turn;
 		
-		lval *= Robot.scale;
-		rval *= Robot.scale;
+		leftValue *= Robot.powerScale;
+		rightValue *= Robot.powerScale;
 
 		if (debugCommand) {
-			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rval, lval);
+			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rightValue, leftValue);
 		}
 
 		if (printPath) {
 			debugPathError();
 		}
+		
 		if (publishPathAllowed()) {
 			addPlotData();
 		}
@@ -311,7 +273,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		pathIndex++;
 
 		// this is reversed because we found it to be reversed, don't change unless you know what you're doing
-		Robot.driveTrain.tankDrive(lval, rval);
+		Robot.driveTrain.tankDrive(leftValue, rightValue);
 		//Robot.driveTrain.tankDrive(leftPower - turn, rightPower + turn);
 
 	}
@@ -432,9 +394,6 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 	}*/
 
 	private Waypoint[] calculateStraightPoints(double x) {
-		if(forcedDontMove) {
-			return null;
-		}
         return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
 	}
 
@@ -625,19 +584,11 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 	}
 
 	private boolean isScalePreferredOverSwitch() {
-		if(forceSetData) {
-			return preferScale;
-		} else {
-			return SmartDashboard.getBoolean("Prefer Scale", false);
-		}
+		return Robot.preferScale;
 	}
 
 	private boolean isStraightPathForced() {
-		if(forceSetData) {
-			return forcedStraight;
-		} else {
-			return SmartDashboard.getBoolean("Force Straight Path", false);
-		}
+		return Robot.forcedStraight;
 	}
 	
 	private void addPlotData() {
