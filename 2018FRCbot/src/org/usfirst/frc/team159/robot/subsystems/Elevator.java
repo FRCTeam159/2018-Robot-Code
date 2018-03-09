@@ -93,7 +93,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
 //	 Put methods for controlling this subsystem here. Call these from Commands.
 
     public double getPosition() {
-    	double pos= (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
+    	double pos = (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
         SmartDashboard.putNumber("Elevator", pos);
         SmartDashboard.putNumber("ElevatorCurrent", elevatorMotor.getOutputCurrent());       
         return pos;
@@ -133,14 +133,9 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
 
     }
     
-    /*public boolean isAtZero() {
-    	// TODO: implement lower limit switch
-    	return	elevatorMotor.getSensorCollection().isRevLimitSwitchClosed(); 
+    public boolean isAtTarget() {
+    	return getPosition() > elevatorTarget - MOVE_RATE && getPosition() < elevatorTarget + MOVE_RATE;
     }
-    
-    public boolean isAtTop() {
-    	return	elevatorMotor.getSensorCollection().isFwdLimitSwitchClosed(); 
-    }*/
 
     public void enable() {
     	if(elevatorMotor.getSensorCollection().getQuadraturePosition() < 0) {

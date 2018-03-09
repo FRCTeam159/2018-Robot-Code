@@ -57,11 +57,6 @@ public interface  RobotMap {
     public static final int GEAR_SHIFTER_REVERSE = 1;
     public static final int ARM_FORWARD = 2;
     public static final int ARM_REVERSE = 3;
-    
-    public static final int LEFT_POSITION = 0;
-    public static final int CENTER_POSITION = 1;
-    public static final int RIGHT_POSITION = 2;
-    public static final int ILLEGAL_POSITION = 3;
 
 //    DIO channels
     public static final int LEFT_POSITION_CHANNEL = 0;

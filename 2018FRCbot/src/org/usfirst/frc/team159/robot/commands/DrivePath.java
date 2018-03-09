@@ -3,6 +3,7 @@ package org.usfirst.frc.team159.robot.commands;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.usfirst.frc.team159.robot.Constants;
 import org.usfirst.frc.team159.robot.PhysicalConstants;
 import org.usfirst.frc.team159.robot.RobotMap;
 
@@ -24,7 +25,7 @@ import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.DistanceFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
-public class DrivePath extends Command implements PhysicalConstants, RobotMap {
+public class DrivePath extends Command implements PhysicalConstants, RobotMap, Constants {
 	
 	
 	// double MAX_VEL = 1.3635; //1.8
@@ -96,10 +97,10 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
 	private String targetString = whichSide[targetSide] + " " + whichObject[targetObject];
 	
-	private int robotPosition = ILLEGAL_POSITION;
+	private int robotPosition = POSITION_ILLEGAL;
 	
 
-	DrivePath() {
+	public DrivePath() {
 		requires(Robot.driveTrain);
 		requires(Robot.elevator);
 		
@@ -280,10 +281,13 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
 	// Make this return true when this Command no longer needs to run execute()
 	protected boolean isFinished() {
-		if(trajectory == null) {
-			return true;
-		}
-		if(pushing) {
+		
+		return trajectory == null || (leftFollower.isFinished() && rightFollower.isFinished());
+		
+//		if(trajectory == null) {
+//			return true;
+//		}
+/*		if(pushing) {
 			Robot.cubeHandler.output();
 			if(pushTimer.get() > pushTime) {
 				Robot.cubeHandler.hold();
@@ -309,8 +313,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		} else if (pushTimer.get() - runtime > 2) {
 			System.out.println("DrivePath Timeout Expired");
 			return true;
-		}		
-        return false;
+		}*/
     }
 
 	// Called once after isFinished returns true
@@ -361,7 +364,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		waypoints[0] = new Waypoint(0, 0, 0);
 		waypoints[1] = new Waypoint(x-2.25*y, 0,0);
 		waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
-		if(position == RIGHT_POSITION) {
+		if(position == POSITION_RIGHT) {
 			return mirrorWaypoints(waypoints);
 		} else {
 			return waypoints;
@@ -375,7 +378,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		waypoints[1] = new Waypoint(x-6*y,-12,0);
 		waypoints[2] = new Waypoint(x-2*y, -12,0);
 		waypoints[3] = new Waypoint(x, y-9, Pathfinder.d2r(90));
-		if(position == RIGHT_POSITION)
+		if(position == POSITION_RIGHT)
 			return mirrorWaypoints(waypoints);
 		else
 			return waypoints;
@@ -450,7 +453,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 	private Waypoint[] calculatePathWaypoints(String gameData, int robotPosition) {
 		Waypoint[] returnWaypoints = null;
 		switch (robotPosition) {
-		case CENTER_POSITION:
+		case POSITION_CENTER:
 			targetObject = SWITCH;
 			if (gameData.charAt(0) == 'R') {
 				targetSide = RIGHT;
@@ -459,7 +462,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 			}
 			returnWaypoints = calculateCenterSwitchPoints(targetSide);
 			break;
-		case RIGHT_POSITION:
+		case POSITION_RIGHT:
 			targetSide =RIGHT;
 			if (!isStraightPathForced()) {
 				if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
@@ -488,7 +491,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 				returnWaypoints = calculateStraightPoints(straightEndPoint);
 			}
 			break;
-		case LEFT_POSITION:
+		case POSITION_LEFT:
 			targetSide =LEFT;
 			if (!isStraightPathForced()) {
 				if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {

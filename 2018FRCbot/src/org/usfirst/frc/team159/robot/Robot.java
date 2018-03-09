@@ -1,15 +1,20 @@
 package org.usfirst.frc.team159.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.Calibrate;
 import org.usfirst.frc.team159.robot.commands.DrivePath;
+import org.usfirst.frc.team159.robot.commands.DropGrabber;
+import org.usfirst.frc.team159.robot.commands.PushCube;
+import org.usfirst.frc.team159.robot.commands.SetElevatorHeight;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
@@ -22,7 +27,7 @@ import org.usfirst.frc.team159.robot.subsystems.Elevator;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot implements RobotMap {
+public class Robot extends IterativeRobot implements RobotMap, Constants {
 
 	public static Elevator elevator;
 	public static CubeHandler cubeHandler;
@@ -36,15 +41,24 @@ public class Robot extends IterativeRobot implements RobotMap {
 	public static boolean oppositeSideAllowed = false;
 	public static boolean useGyro = false;
 	
+	
+	public static int targetObject = OBJECT_NONE;
+	public static int targetSide = POSITION_ILLEGAL;
 	public static int robotPosition = -1;
+	
+	public static int allBadOption = OTHER_SCALE;
+	public static int allGoodOption = SAME_SCALE;
 
 
 //	private static OI oi;
 	
 	public static final double powerScale = 0.6;
 
-	private Command autonomousCommand;
-	private SendableChooser<Integer> chooser = new SendableChooser<>();
+	private CommandGroup autonomousCommand;
+	
+	private SendableChooser<Integer> positionChooser = new SendableChooser<>();
+	private SendableChooser<Integer> allBadChooser = new SendableChooser<>();
+	private SendableChooser<Integer> allGoodChooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -84,14 +98,23 @@ public class Robot extends IterativeRobot implements RobotMap {
 
 	@Override
 	public void autonomousInit() {
-		if(SmartDashboard.getBoolean("Calibrate", false)) {
-			autonomousCommand = new Calibrate();
-		} else {
-			autonomousCommand = new Autonomous();
-		}
-		
 		getPreferences();
-		driveTrain.reset();
+		getAutoTargets();
+		
+		autonomousCommand = new Autonomous();
+		if(SmartDashboard.getBoolean("Calibrate", false)) {
+			autonomousCommand.addSequential(new Calibrate());
+		} else {
+			autonomousCommand.addSequential(new DropGrabber());
+			autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SWITCH_HEIGHT, 5));
+			autonomousCommand.addSequential(new DrivePath());
+			if(targetObject == OBJECT_SCALE) {
+				autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SCALE_HEIGHT, 5));
+			}
+			if(targetObject != OBJECT_NONE) {
+				autonomousCommand.addSequential(new PushCube(1));
+			}
+		}
 		
 		if (autonomousCommand != null) {
 			autonomousCommand.start();
@@ -134,11 +157,21 @@ public class Robot extends IterativeRobot implements RobotMap {
 	public void testPeriodic() {}
 	
 	private void putValuesOnSmartDashboard() {
-		chooser.addObject("Left", 0);
-		chooser.addDefault("Center", 1);
-		chooser.addObject("Right", 2);
+		positionChooser.addObject("Left", POSITION_LEFT);
+		positionChooser.addDefault("Center", POSITION_CENTER);
+		positionChooser.addObject("Right", POSITION_RIGHT);
+		
+		allBadChooser.addDefault("Opposite Scale", OTHER_SCALE);
+		allBadChooser.addObject("Opposite Switch", OTHER_SWITCH);
+		allBadChooser.addObject("Go Straight", GO_STRAIGHT);
 
-		SmartDashboard.putData("Position", chooser);
+		allGoodChooser.addDefault("Prefer Scale", SAME_SCALE);
+		allGoodChooser.addObject("Prefer Switch", SAME_SWITCH);
+
+		SmartDashboard.putData("Position", positionChooser);
+		SmartDashboard.putData("All Good Strategy", allGoodChooser);
+		SmartDashboard.putData("All Bad Strategy", allBadChooser);
+		
 		SmartDashboard.putBoolean("Prefer Scale", false);
 		SmartDashboard.putBoolean("Force Straight Path", false);
 		SmartDashboard.putBoolean("Opposite Side Allowed", false);
@@ -173,11 +206,11 @@ public class Robot extends IterativeRobot implements RobotMap {
 		forcedStraight = SmartDashboard.getBoolean("Force Straight Path", false);
 		oppositeSideAllowed = SmartDashboard.getBoolean("Opposite Side Allowed", false);
 		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
+		allGoodOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Good Strategy")).getSelected();
+		allBadOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Bad Strategy")).getSelected();
 		Sendable position = SmartDashboard.getData("Position");
-		if(position != null) {
-			SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position; 
-			robotPosition = positionChooser.getSelected();
-		}
+		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position; 
+		robotPosition = positionChooser.getSelected();
 	}
 	
 	private void getSwitchPreferences() {
@@ -190,11 +223,77 @@ public class Robot extends IterativeRobot implements RobotMap {
 		oppositeSideAllowed = oppositeSide.get();
 		
 		if(leftPosition.get()) {
-			robotPosition = LEFT_POSITION;
+			robotPosition = POSITION_LEFT;
 		} else if(centerPosition.get()) {
-			robotPosition = CENTER_POSITION;
+			robotPosition = POSITION_CENTER;
 		} else if(rightPosition.get()) {
-			robotPosition = RIGHT_POSITION;
+			robotPosition = POSITION_RIGHT;
 		}
+	}
+	
+	private void getAutoTargets() {
+		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+		String which_object[]= {"Switch","Scale","Straight"};
+		String which_side[]= {"Center","Left","Right"};
+		if (robotPosition == POSITION_CENTER) {
+			targetObject = OBJECT_SWITCH;
+			if (gameMessage.charAt(0) == 'R') {
+				targetSide = POSITION_RIGHT;
+			} else {
+				targetSide = POSITION_LEFT;       
+			}
+		} else if (robotPosition == POSITION_RIGHT) {
+			targetSide = POSITION_RIGHT;
+			if (!forcedStraight) {
+				if (gameMessage.charAt(1) == 'R' && gameMessage.charAt(0) == 'R') {
+					if (preferScale) {
+						targetObject = OBJECT_SCALE;
+					} else {
+						targetObject = OBJECT_SWITCH;
+					}
+				} else if (gameMessage.charAt(0) == 'R') {
+					targetObject = OBJECT_SWITCH;
+				} else if (gameMessage.charAt(1) == 'R') {
+					targetObject = OBJECT_SCALE;
+				} else if(allBadOption == OTHER_SCALE) { // LL
+					targetObject = OBJECT_SCALE;
+					targetSide = POSITION_LEFT;
+				} else if(allBadOption == OTHER_SWITCH) { // LL
+					targetObject = OBJECT_SWITCH;
+					targetSide = POSITION_LEFT;
+				} else {
+					targetObject = OBJECT_NONE;
+				}
+			} else {
+				targetObject = OBJECT_NONE;
+			}
+		} else if (robotPosition == POSITION_LEFT) {
+			targetSide = POSITION_LEFT;
+			if (forcedStraight) {
+				if (gameMessage.charAt(1) == 'L' && gameMessage.charAt(0) == 'L') { //LL
+					if (preferScale) {
+						targetObject=OBJECT_SCALE;
+					} else {
+						targetObject=OBJECT_SWITCH;
+					}
+				} else if (gameMessage.charAt(0) == 'L') {  // LL LR
+					targetObject=OBJECT_SWITCH;
+				} else if (gameMessage.charAt(1) == 'L') { // RL
+					targetObject=OBJECT_SCALE;
+				} else if(allBadOption == OTHER_SCALE) { // RR
+					targetObject=OBJECT_SCALE;
+					targetSide=POSITION_RIGHT;
+				} else if(allBadOption == OTHER_SWITCH) { // LL
+					targetObject=OBJECT_SWITCH;
+					targetSide=POSITION_RIGHT;
+				} else {
+					targetObject=OBJECT_NONE;
+				}
+			} else {
+				targetObject=OBJECT_NONE;
+			}
+		}
+		String targetString=which_side[targetSide]+"-"+which_object[targetObject];
+		SmartDashboard.putString("Target", targetString);
 	}
 }
