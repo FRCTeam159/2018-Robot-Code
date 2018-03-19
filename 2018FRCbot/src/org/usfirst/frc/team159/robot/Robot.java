@@ -35,7 +35,7 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	public static CubeHandler cubeHandler;
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
-	private static DIOSwitches DIOs;
+	public static DIOSwitches DIOs;
 	
 	public static boolean preferScale = false;
 	public static boolean forcedStraight = false;

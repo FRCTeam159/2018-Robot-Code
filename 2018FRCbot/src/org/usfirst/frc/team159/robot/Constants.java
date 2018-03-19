@@ -17,10 +17,20 @@ public interface Constants {
     public static final int SAME_SCALE = 0;
     public static final int SAME_SWITCH = 1;
     
-    // strategies
+    // strategy options
+    //TODO change prefix to STRATEGY_OPTION
     public static final int STRATEGY_TWO_CUBES = 4;
-    public static final int STRATEGY_ALLOW_OPPOSITE_SIDE = 3;
-    public static final int STRATEGY_OUR_SIDE_ONLY = 2;
+    public static final int STRATEGY_OPPOSITE_SCALE = 3;
+    public static final int STRATEGY_OUR_SCALE = 2;
     public static final int STRATEGY_SWITCH_ONLY = 1;
     public static final int STRATEGY_STRAIGHT = 0;
+    
+    // actual strategies
+    public static final int STRATEGY_CENTER_SWITCH = 0;
+    public static final int STRATEGY_CENTER_TWO_CUBES = 1;
+    public static final int STRATEGY_SIDE_TWO_CUBES = 2;
+    public static final int STRATEGY_SAME_SCALE = 3;
+    public static final int STRATEGY_SAME_SWITCH = 4;
+    public static final int STRATEGY_OTHER_SCALE = 5;
+    public static final int STRATEGY_GO_STRAIGHT = 6;
 }

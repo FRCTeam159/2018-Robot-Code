@@ -53,9 +53,9 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 		if(!strategyFour.get()) {
 			strategy = STRATEGY_TWO_CUBES;
 		} else if(!strategyThree.get()) {
-			strategy = STRATEGY_ALLOW_OPPOSITE_SIDE;
+			strategy = STRATEGY_OPPOSITE_SCALE;
 		} else if(!strategyTwo.get()) {
-			strategy = 2;
+			strategy = STRATEGY_OUR_SCALE;
 		} else if(!strategyOne.get()) {
 			strategy = STRATEGY_SWITCH_ONLY;
 		}
@@ -79,8 +79,8 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 							break;
 						}
 					}
-					strategy = STRATEGY_ALLOW_OPPOSITE_SIDE;
-				case STRATEGY_ALLOW_OPPOSITE_SIDE:
+					strategy = STRATEGY_OPPOSITE_SCALE;
+				case STRATEGY_OPPOSITE_SCALE:
 					if(!leftPosition.get()) {
 						if(gameMessage.startsWith("RR")) {
 							break;
@@ -90,8 +90,8 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 							break;
 						}
 					}
-					strategy = STRATEGY_OUR_SIDE_ONLY;
-				case STRATEGY_OUR_SIDE_ONLY:
+					strategy = STRATEGY_OUR_SCALE;
+				case STRATEGY_OUR_SCALE:
 					if(!leftPosition.get()) {
 						if(gameMessage.length() > 0 && (gameMessage.charAt(0) == 'L' || gameMessage.charAt(1) == 'L')) {
 							break;
@@ -121,9 +121,9 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 			
 			if(strategy == STRATEGY_TWO_CUBES) {
 				System.out.println("TWO_CUBES");
-			} else if(strategy == STRATEGY_ALLOW_OPPOSITE_SIDE) {
+			} else if(strategy == STRATEGY_OPPOSITE_SCALE) {
 				System.out.println("ALLOW_OPPOSITE_SIDE");
-			} else if(strategy == STRATEGY_OUR_SIDE_ONLY) {
+			} else if(strategy == STRATEGY_OUR_SCALE) {
 				System.out.println("OUR_SIDE_ONLY");
 			} else if(strategy == STRATEGY_SWITCH_ONLY) {
 				System.out.println("SWITCH_ONLY");
