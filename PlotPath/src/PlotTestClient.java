@@ -13,6 +13,9 @@ public class PlotTestClient implements ITableListener {
 	int index=0;
 	int points=0;
 	int count=0;
+	int plot_count=0;
+	int id=0;
+
 	static NetworkTable table;
 	public static void main(String[] args) {
 		new PlotTestClient().run();
@@ -35,10 +38,12 @@ public class PlotTestClient implements ITableListener {
 		}
 	}
 
-	private static void createAndShowGui(ArrayList<PathData> list, int traces) {
+	private static void createAndShowGui(int id, ArrayList<PathData> list, int traces) {
 		JFrame frame = new PlotPath(list, traces);
+		frame.setTitle("Path Plot "+id);
+
 		System.out.println("Showing plot: Size = " + list.size());
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
@@ -48,10 +53,9 @@ public class PlotTestClient implements ITableListener {
 
 	@Override
 	public void valueChanged(ITable arg0, String arg1, Object arg2, boolean arg3) {
-		int id=0;
-		if (arg1.contentEquals("NewPlot")) {
+		if (arg1.contentEquals("NewPlot"+plot_count)) {
 			list.clear();
-			double info[] = arg0.getNumberArray("NewPlot", new double[0]);
+			double info[] = arg0.getNumberArray("NewPlot"+plot_count, new double[0]);
 			id = (int) info[0];
 			traces = (int) info[1];
 			points = (int) info[2];
@@ -71,16 +75,17 @@ public class PlotTestClient implements ITableListener {
 			}
 			list.add(pd);
 			count++;
-			System.out.println("PlotData:" + index);
+			//System.out.println("PlotData:" + index);
 
 		}
-		if((count >= points) && (points > 0)) {
+		if((count >= points) && (points > 0) && (id==plot_count)) {
 			count=0;
 			index=0;
+			plot_count++;
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					System.out.println("points " + points);
-					createAndShowGui(list, traces);
+					createAndShowGui(id, list, traces);
 				}
 			});
 		}

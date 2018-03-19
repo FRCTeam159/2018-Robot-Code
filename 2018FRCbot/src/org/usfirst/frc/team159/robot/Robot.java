@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Sendable;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -17,6 +18,7 @@ import org.usfirst.frc.team159.robot.commands.PushCube;
 import org.usfirst.frc.team159.robot.commands.SetElevatorHeight;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
+import org.usfirst.frc.team159.robot.subsystems.DIOSwitches;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
@@ -33,21 +35,26 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	public static CubeHandler cubeHandler;
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
-	
-	private static final boolean useDashboard = true;
+	private static DIOSwitches DIOs;
 	
 	public static boolean preferScale = false;
 	public static boolean forcedStraight = false;
 	public static boolean oppositeSideAllowed = false;
 	public static boolean useGyro = false;
-	
+	public static final boolean useHardware = true;
 	
 	public static int targetObject = OBJECT_NONE;
 	public static int targetSide = POSITION_ILLEGAL;
 	public static int robotPosition = -1;
+	public static String fmsData = "";
 	
 	public static int allBadOption = OTHER_SCALE;
 	public static int allGoodOption = SAME_SCALE;
+	
+	public static final double DRIVEPATH_MAX_VELOCITY = 2.6218;
+	public static final double DRIVEPATH_MAX_ACCELERATION = 10.162;
+	public static final double DRIVEPATH_MAX_JERK = 100;
+	
 
 
 //	private static OI oi;
@@ -70,6 +77,7 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		elevator = new Elevator();
 		cubeHandler = new CubeHandler();
 		cameras = new Cameras();
+		DIOs = new DIOSwitches();
 
 //		oi = new OI();
 		
@@ -98,15 +106,25 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 
 	@Override
 	public void autonomousInit() {
+		Timer timer = new Timer();
+		
+		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+			fmsData = DriverStation.getInstance().getGameSpecificMessage();
+		}
+		
 		getPreferences();
 		getAutoTargets();
+		
+		System.out.println(Robot.preferScale);
 		
 		autonomousCommand = new Autonomous();
 		if(SmartDashboard.getBoolean("Calibrate", false)) {
 			autonomousCommand.addSequential(new Calibrate());
 		} else {
-			autonomousCommand.addSequential(new DropGrabber());
-			autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SWITCH_HEIGHT, 5));
+			System.out.println("autonomousInit");
+			autonomousCommand.addSequential(new DropGrabber(1));
+			autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SWITCH_HEIGHT, 2));
 			autonomousCommand.addSequential(new DrivePath());
 			if(targetObject == OBJECT_SCALE) {
 				autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SCALE_HEIGHT, 5));
@@ -154,7 +172,10 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	 * This function is called periodically during test mode
 	 */
 	@Override
-	public void testPeriodic() {}
+	public void testPeriodic() {
+		DIOs.getPreferences();
+//		System.out.println(robotPosition);
+	}
 	
 	private void putValuesOnSmartDashboard() {
 		positionChooser.addObject("Left", POSITION_LEFT);
@@ -179,7 +200,7 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		SmartDashboard.putNumber("Max Acceleration", 22.25);
 		SmartDashboard.putNumber("Max Jerk", 4);
 		SmartDashboard.putNumber("GFACT", 2.0);
-		SmartDashboard.putBoolean("Use Gyro", false);
+		SmartDashboard.putBoolean("Use Gyro", true);
 		SmartDashboard.putString("Target", "Calculating");
 		SmartDashboard.putString("FMS Data", "RLL");
 //		SmartDashboard.putString("Position", "Center");
@@ -194,10 +215,10 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	}
 	
 	private void getPreferences() {
-		if(useDashboard) {
+		if(!useHardware) {
 			getDashboardPreferences();
 		} else {
-			getSwitchPreferences();
+			DIOs.getPreferences();
 		}
 	}
 	
@@ -205,7 +226,7 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		preferScale = SmartDashboard.getBoolean("Prefer Scale", false);
 		forcedStraight = SmartDashboard.getBoolean("Force Straight Path", false);
 		oppositeSideAllowed = SmartDashboard.getBoolean("Opposite Side Allowed", false);
-		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
+		useGyro = SmartDashboard.getBoolean("Use Gyro", true);
 		allGoodOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Good Strategy")).getSelected();
 		allBadOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Bad Strategy")).getSelected();
 		Sendable position = SmartDashboard.getData("Position");
@@ -213,23 +234,7 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		robotPosition = positionChooser.getSelected();
 	}
 	
-	private void getSwitchPreferences() {
-		//TODO complete this
-		DigitalInput leftPosition = new DigitalInput(LEFT_POSITION_CHANNEL);
-		DigitalInput centerPosition = new DigitalInput(CENTER_POSITION_CHANNEL);
-		DigitalInput rightPosition = new DigitalInput(RIGHT_POSITION_CHANNEL);
-		DigitalInput oppositeSide = new DigitalInput(ALLOW_OPPOSITE_CHANNEL);
-		
-		oppositeSideAllowed = oppositeSide.get();
-		
-		if(leftPosition.get()) {
-			robotPosition = POSITION_LEFT;
-		} else if(centerPosition.get()) {
-			robotPosition = POSITION_CENTER;
-		} else if(rightPosition.get()) {
-			robotPosition = POSITION_RIGHT;
-		}
-	}
+	
 	
 	private void getAutoTargets() {
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();

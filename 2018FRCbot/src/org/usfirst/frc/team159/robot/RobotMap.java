@@ -59,9 +59,9 @@ public interface  RobotMap {
     public static final int ARM_REVERSE = 3;
 
 //    DIO channels
-    public static final int LEFT_POSITION_CHANNEL = 0;
-    public static final int CENTER_POSITION_CHANNEL = 1;
-    public static final int RIGHT_POSITION_CHANNEL = 2;
+    public static final int LEFT_POSITION_CHANNEL = 4;
+    public static final int CENTER_POSITION_CHANNEL = 5;
+    public static final int RIGHT_POSITION_CHANNEL = 6;
     
     public static final int ALLOW_OPPOSITE_CHANNEL = 3;
 }

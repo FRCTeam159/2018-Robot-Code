@@ -34,7 +34,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap, C
 	private static final double TIME_STEP = 0.02;
 	
 	private static final double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	private static final double MAX_ACC = 26.7;
+	private static final double MAX_ACC = 30;
 	private static final double MAX_JRK = 10;
 	public static double KP = 4;
 	private static final double KI = 0.0;
@@ -117,18 +117,14 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap, C
 		timer.start();
 		timer.reset();
 		
-		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
-			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		}
+		String gameMessage = Robot.fmsData;
+		
+//		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+//		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+//			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+//		}
 //		if (gameMessage.equals("")|| gameMessage.equals(null)) {
-//			gameMessage = "???";
-//			SmartDashboard.putBoolean("Force Straight Path", true);		
-//			if (isGameDataEmpty()) {
-//				gameMessage = generateFMSData();
-//			} else {
-//				gameMessage = SmartDashboard.getString("FMS Data", "LLL");
-//			}
+//			gameMessage = SmartDashboard.getString("FMS Data", "LLL");
 //		}
 		System.out.println("FMS=" + gameMessage);
 
