@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import org.usfirst.frc.team159.robot.commands.AutoSelector;
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.Calibrate;
 import org.usfirst.frc.team159.robot.commands.DrivePath;
@@ -37,35 +39,35 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	private static Cameras cameras;
 	public static DIOSwitches DIOs;
 	
-	public static boolean preferScale = false;
-	public static boolean forcedStraight = false;
-	public static boolean oppositeSideAllowed = false;
 	public static boolean useGyro = false;
 	public static final boolean useHardware = true;
 	
-	public static int targetObject = OBJECT_NONE;
-	public static int targetSide = POSITION_ILLEGAL;
+	//public static int targetObject = OBJECT_NONE;
+	//public static int targetSide = POSITION_ILLEGAL;
 	public static int robotPosition = -1;
 	public static String fmsData = "";
-	
-	public static int allBadOption = OTHER_SCALE;
-	public static int allGoodOption = SAME_SCALE;
-	
+		
 	public static final double DRIVEPATH_MAX_VELOCITY = 2.6218;
 	public static final double DRIVEPATH_MAX_ACCELERATION = 10.162;
 	public static final double DRIVEPATH_MAX_JERK = 100;
 	
+  public static double MAX_VEL = 1.5;
+  public static double MAX_ACC = 22.25;
+  public static double MAX_JRK = 4;
+  public static double KP = 4.0;
+  public static double KD = 0.0;
+  public static double GFACT = 2.0;
 
-
+  public static boolean calibrate = false;
+  public static Integer strategyOption = STRATEGY_SAME_SIDE_SCALE;
 //	private static OI oi;
 	
-	public static final double powerScale = 0.6;
+	public static double powerScale = 0.6;
 
 	private CommandGroup autonomousCommand;
 	
-	private SendableChooser<Integer> positionChooser = new SendableChooser<>();
-	private SendableChooser<Integer> allBadChooser = new SendableChooser<>();
-	private SendableChooser<Integer> allGoodChooser = new SendableChooser<>();
+	SendableChooser<Integer> positionChooser = new SendableChooser<>();
+  SendableChooser<Integer> strategyChooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -78,10 +80,11 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		cubeHandler = new CubeHandler();
 		cameras = new Cameras();
 		DIOs = new DIOSwitches();
+		reset();
 
 //		oi = new OI();
 		
-		putValuesOnSmartDashboard();
+		setDashboardData();
 	}
 	
 	@Override
@@ -107,36 +110,32 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	@Override
 	public void autonomousInit() {
 		Timer timer = new Timer();
-		
+    System.out.println("autonomousInit");
+
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
 		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
 			fmsData = DriverStation.getInstance().getGameSpecificMessage();
 		}
+		setDashboardFMSString();
+		//setDashboardData();
+		getRobotPosition();
+		getStrategyChoice();
+		showSwitchesState();
+		//getAutoTargets();
 		
-		getPreferences();
-		getAutoTargets();
-		
-		System.out.println(Robot.preferScale);
-		
-		autonomousCommand = new Autonomous();
-		if(SmartDashboard.getBoolean("Calibrate", false)) {
-			autonomousCommand.addSequential(new Calibrate());
-		} else {
-			System.out.println("autonomousInit");
-			autonomousCommand.addSequential(new DropGrabber(1));
-			autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SWITCH_HEIGHT, 2));
-			autonomousCommand.addSequential(new DrivePath());
-			if(targetObject == OBJECT_SCALE) {
-				autonomousCommand.addSequential(new SetElevatorHeight(Elevator.SCALE_HEIGHT, 5));
-			}
-			if(targetObject != OBJECT_NONE) {
-				autonomousCommand.addSequential(new PushCube(1));
-			}
-		}
-		
-		if (autonomousCommand != null) {
-			autonomousCommand.start();
-		}
+    if (autonomousCommand != null)
+      autonomousCommand.cancel();
+
+    SmartDashboard.putBoolean("Error", false);
+    autonomousCommand = new CommandGroup();
+    if (calibrate) 
+      autonomousCommand.addSequential(new Calibrate());
+    else 
+      autonomousCommand = new AutoSelector();
+
+    // schedule the autonomous command (example)
+    if (autonomousCommand != null)
+      autonomousCommand.start();
 	}
 
 	/**
@@ -173,132 +172,93 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	 */
 	@Override
 	public void testPeriodic() {
-		DIOs.getPreferences();
+	  showSwitchesState();
+		//DIOs.getPreferences();
 //		System.out.println(robotPosition);
 	}
 	
-	private void putValuesOnSmartDashboard() {
+	 void reset() {
+	    driveTrain.reset();
+	    elevator.reset();
+	    //cubeHandler.reset();
+	    //cubeHandler.enable();
+	    //elevator.enable();
+	   // driveTrain.enable();
+	  }
+
+	private void setDashboardData() {
 		positionChooser.addObject("Left", POSITION_LEFT);
 		positionChooser.addDefault("Center", POSITION_CENTER);
 		positionChooser.addObject("Right", POSITION_RIGHT);
 		
-		allBadChooser.addDefault("Opposite Scale", OTHER_SCALE);
-		allBadChooser.addObject("Opposite Switch", OTHER_SWITCH);
-		allBadChooser.addObject("Go Straight", GO_STRAIGHT);
-
-		allGoodChooser.addDefault("Prefer Scale", SAME_SCALE);
-		allGoodChooser.addObject("Prefer Switch", SAME_SWITCH);
-
 		SmartDashboard.putData("Position", positionChooser);
-		SmartDashboard.putData("All Good Strategy", allGoodChooser);
-		SmartDashboard.putData("All Bad Strategy", allBadChooser);
 		
-		SmartDashboard.putBoolean("Prefer Scale", false);
-		SmartDashboard.putBoolean("Force Straight Path", false);
-		SmartDashboard.putBoolean("Opposite Side Allowed", false);
-		SmartDashboard.putNumber("Max Velocity", 1.5);
-		SmartDashboard.putNumber("Max Acceleration", 22.25);
-		SmartDashboard.putNumber("Max Jerk", 4);
-		SmartDashboard.putNumber("GFACT", 2.0);
+    strategyChooser = new SendableChooser<>();
+    strategyChooser.addObject("Same Side Switch", STRATEGY_SAME_SIDE_SWITCH);
+    strategyChooser.addDefault("Same Side Scale", STRATEGY_SAME_SIDE_SCALE);
+    strategyChooser.addObject("Other Side Scale", STRATEGY_OPPOSITE_SCALE);
+    strategyChooser.addObject("Two Cube Auto", STRATEGY_TWO_CUBES);
+    
+    SmartDashboard.putData("Strategy Selector", strategyChooser);
+	
+		SmartDashboard.putNumber("MAX_VEL", MAX_VEL);
+		SmartDashboard.putNumber("MAX_ACC", MAX_ACC);
+		SmartDashboard.putNumber("MAX_JRK", MAX_JRK);
+    SmartDashboard.putNumber("KP",KP);
+
+		SmartDashboard.putNumber("GFACT", GFACT);
 		SmartDashboard.putBoolean("Use Gyro", true);
 		SmartDashboard.putString("Target", "Calculating");
-		SmartDashboard.putString("FMS Data", "RLL");
-//		SmartDashboard.putString("Position", "Center");
 
-		SmartDashboard.putBoolean("Calibrate", false);
+		SmartDashboard.putBoolean("Calibrate", calibrate);
 		SmartDashboard.putBoolean("Publish Path", false);
-		SmartDashboard.putNumber("P", DrivePath.KP);
+    SmartDashboard.putNumber("Auto Scale", powerScale);
+    
 		
-        SmartDashboard.putBoolean("Grabber Intake", false);
-        SmartDashboard.putBoolean("Grabber Output", false);
-        SmartDashboard.putBoolean("Grabber Arms", false);
+//    SmartDashboard.putBoolean("Grabber Intake", false);
+//    SmartDashboard.putBoolean("Grabber Output", false);
+//    SmartDashboard.putBoolean("Grabber Arms", false);
 	}
 	
-	private void getPreferences() {
-		if(!useHardware) {
-			getDashboardPreferences();
-		} else {
-			DIOs.getPreferences();
-		}
+	void getDashboardData() {
+    useGyro = SmartDashboard.getBoolean("Use Gyro", useGyro);
+    MAX_VEL = SmartDashboard.getNumber("MAX_VEL", MAX_VEL);
+    MAX_ACC = SmartDashboard.getNumber("MAX_ACC", MAX_ACC);
+    MAX_JRK = SmartDashboard.getNumber("MAX_JRK", MAX_JRK);
+    GFACT = SmartDashboard.getNumber("GFACT", GFACT);
+    KP = SmartDashboard.getNumber("KP", KP);
+    powerScale = SmartDashboard.getNumber("Auto Scale", powerScale);
+    calibrate = SmartDashboard.getBoolean("Calibrate", calibrate); 
 	}
 	
-	private void getDashboardPreferences() {
-		preferScale = SmartDashboard.getBoolean("Prefer Scale", false);
-		forcedStraight = SmartDashboard.getBoolean("Force Straight Path", false);
-		oppositeSideAllowed = SmartDashboard.getBoolean("Opposite Side Allowed", false);
-		useGyro = SmartDashboard.getBoolean("Use Gyro", true);
-		allGoodOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Good Strategy")).getSelected();
-		allBadOption = ((SendableChooser<Integer>) SmartDashboard.getData("All Bad Strategy")).getSelected();
-		Sendable position = SmartDashboard.getData("Position");
-		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position; 
-		robotPosition = positionChooser.getSelected();
-	}
+  int getDashboardPosition() {
+    return positionChooser.getSelected();
+  }
+  int getDashboardStrategy() {
+    return strategyChooser.getSelected();
+  }
+  void setDashboardFMSString() {
+    SmartDashboard.putString("FMS Data", fmsData);
+  }
+ 
+  private void getStrategyChoice() {
+    if (!useHardware) {
+      strategyOption = getDashboardStrategy();
+    } else {
+      strategyOption = DIOs.getStrategy();
+    }
+  }
 	
-	
-	
-	private void getAutoTargets() {
-		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		String which_object[]= {"Switch","Scale","Straight"};
-		String which_side[]= {"Center","Left","Right"};
-		if (robotPosition == POSITION_CENTER) {
-			targetObject = OBJECT_SWITCH;
-			if (gameMessage.charAt(0) == 'R') {
-				targetSide = POSITION_RIGHT;
-			} else {
-				targetSide = POSITION_LEFT;       
-			}
-		} else if (robotPosition == POSITION_RIGHT) {
-			targetSide = POSITION_RIGHT;
-			if (!forcedStraight) {
-				if (gameMessage.charAt(1) == 'R' && gameMessage.charAt(0) == 'R') {
-					if (preferScale) {
-						targetObject = OBJECT_SCALE;
-					} else {
-						targetObject = OBJECT_SWITCH;
-					}
-				} else if (gameMessage.charAt(0) == 'R') {
-					targetObject = OBJECT_SWITCH;
-				} else if (gameMessage.charAt(1) == 'R') {
-					targetObject = OBJECT_SCALE;
-				} else if(allBadOption == OTHER_SCALE) { // LL
-					targetObject = OBJECT_SCALE;
-					targetSide = POSITION_LEFT;
-				} else if(allBadOption == OTHER_SWITCH) { // LL
-					targetObject = OBJECT_SWITCH;
-					targetSide = POSITION_LEFT;
-				} else {
-					targetObject = OBJECT_NONE;
-				}
-			} else {
-				targetObject = OBJECT_NONE;
-			}
-		} else if (robotPosition == POSITION_LEFT) {
-			targetSide = POSITION_LEFT;
-			if (forcedStraight) {
-				if (gameMessage.charAt(1) == 'L' && gameMessage.charAt(0) == 'L') { //LL
-					if (preferScale) {
-						targetObject=OBJECT_SCALE;
-					} else {
-						targetObject=OBJECT_SWITCH;
-					}
-				} else if (gameMessage.charAt(0) == 'L') {  // LL LR
-					targetObject=OBJECT_SWITCH;
-				} else if (gameMessage.charAt(1) == 'L') { // RL
-					targetObject=OBJECT_SCALE;
-				} else if(allBadOption == OTHER_SCALE) { // RR
-					targetObject=OBJECT_SCALE;
-					targetSide=POSITION_RIGHT;
-				} else if(allBadOption == OTHER_SWITCH) { // LL
-					targetObject=OBJECT_SWITCH;
-					targetSide=POSITION_RIGHT;
-				} else {
-					targetObject=OBJECT_NONE;
-				}
-			} else {
-				targetObject=OBJECT_NONE;
-			}
-		}
-		String targetString=which_side[targetSide]+"-"+which_object[targetObject];
-		SmartDashboard.putString("Target", targetString);
-	}
+  private void getRobotPosition() {
+    if (!useHardware) {
+      robotPosition = getDashboardPosition();
+    } else {
+      robotPosition = DIOs.getPosition();
+    }
+  }
+  void showSwitchesState() {
+    SmartDashboard.putNumber("PositionSwitches", DIOs.getPosition());
+    SmartDashboard.putNumber("TargetSwitches", DIOs.getStrategy());
+
+  }
 }

@@ -65,6 +65,8 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     private PIDSourceType pidType = PIDSourceType.kDisplacement;
 
     private double elevatorTarget = 0;
+    double tolerance = 6;
+
 
     public void initDefaultCommand() {
     	setDefaultCommand(new ElevatorCommands());
@@ -105,7 +107,12 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
         elevatorTarget = value;
         pidController.setSetpoint(elevatorTarget);
     }
-    
+    public boolean atTarget() {
+      if (Math.abs(getPosition() - elevatorTarget) < tolerance)
+        return true;
+      return false;
+    }
+   
     public double getElevatorTarget() {
         return elevatorTarget;
     }

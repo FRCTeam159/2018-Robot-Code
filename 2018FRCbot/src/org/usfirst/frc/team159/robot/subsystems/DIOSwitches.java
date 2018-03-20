@@ -24,13 +24,40 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 //	DigitalInput oppositeSide = new DigitalInput(ALLOW_OPPOSITE_CHANNEL);	
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
+	
+	int position=-1;
+  int strategy=-1;
 
     public void initDefaultCommand() {
         // Set the default command for a subsystem here.
         //setDefaultCommand(new MySpecialCommand());
     }
     
-    public void getPreferences() {
+    public int getPosition() {
+      if(!leftPosition.get()) {
+        position = POSITION_LEFT;
+      } else if(!centerPosition.get()) {
+        position = POSITION_CENTER;
+      } else if(!rightPosition.get()) {
+        position = POSITION_RIGHT;
+      }
+      return position;
+    }
+    public int getStrategy() {
+      
+      if(!strategyFour.get()) {
+        strategy = STRATEGY_TWO_CUBES;
+      } else if(!strategyThree.get()) {
+        strategy = STRATEGY_OPPOSITE_SCALE;
+      } else if(!strategyTwo.get()) {
+        strategy = STRATEGY_SAME_SIDE_SCALE;
+      } else if(!strategyOne.get()) {
+        strategy = STRATEGY_SAME_SIDE_SWITCH;
+      }
+      return strategy;
+    }
+
+    /*public void getPreferences() {
 		//TODO complete this
 
 //		Robot.oppositeSideAllowed = oppositeSide.get();
@@ -57,7 +84,7 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 		} else if(!strategyTwo.get()) {
 			strategy = STRATEGY_OUR_SCALE;
 		} else if(!strategyOne.get()) {
-			strategy = STRATEGY_SWITCH_ONLY;
+			strategy = STRATEGY_SAME_SIDE_SWITCH;
 		}
 		
 		Timer timer = new Timer();
@@ -101,8 +128,8 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 							break;
 						}
 					}
-					strategy = STRATEGY_SWITCH_ONLY;
-				case STRATEGY_SWITCH_ONLY:
+					strategy = STRATEGY_SAME_SIDE_SWITCH;
+				case STRATEGY_SAME_SIDE_SWITCH:
 					if(!leftPosition.get()) {
 						if(gameMessage.startsWith("L")) {
 							break;
@@ -125,12 +152,12 @@ public class DIOSwitches extends Subsystem implements RobotMap, Constants {
 				System.out.println("ALLOW_OPPOSITE_SIDE");
 			} else if(strategy == STRATEGY_OUR_SCALE) {
 				System.out.println("OUR_SIDE_ONLY");
-			} else if(strategy == STRATEGY_SWITCH_ONLY) {
+			} else if(strategy == STRATEGY_SAME_SIDE_SWITCH) {
 				System.out.println("SWITCH_ONLY");
 			} else if(strategy == STRATEGY_STRAIGHT) {
 				System.out.println("STRAIGHT");
 			}
 		}
-	}
+	}*/
 }
 

@@ -90,16 +90,16 @@ public class DriveTrain extends Subsystem implements MotorSafety {
 		log();
 		frontRight.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
 		backLeft.setStatusFramePeriod(com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_3_Quadrature, RobotMap.ENCODER_STATUS_FRAME_PERIOD, RobotMap.TIMEOUT);
-
-//		 frontRight.reset();
-//		 backLeft.reset();
-		backLeft.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
-		frontRight.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
+		resetEncoders();
 		gyro.reset();
-
 		setLowGear();
-
 	}
+
+	 public void resetEncoders() {
+	    log();
+	    backLeft.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
+	    frontRight.getSensorCollection().setQuadraturePosition(0, RobotMap.ENCODER_TIMEOUT);
+	  }
 
 	public void disable() {
 		frontRight.disable();
