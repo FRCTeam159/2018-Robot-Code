@@ -65,8 +65,6 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
     private PIDSourceType pidType = PIDSourceType.kDisplacement;
 
     private double elevatorTarget = 0;
-    double tolerance = 6;
-
 
     public void initDefaultCommand() {
     	setDefaultCommand(new ElevatorCommands());
@@ -95,7 +93,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
 //	 Put methods for controlling this subsystem here. Call these from Commands.
 
     public double getPosition() {
-    	double pos = (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
+    	double pos= (elevatorMotor.getSensorCollection().getQuadraturePosition() / TICKS_PER_INCH) * 2;
         SmartDashboard.putNumber("Elevator", pos);
         SmartDashboard.putNumber("ElevatorCurrent", elevatorMotor.getOutputCurrent());       
         return pos;
@@ -107,12 +105,7 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
         elevatorTarget = value;
         pidController.setSetpoint(elevatorTarget);
     }
-    public boolean atTarget() {
-      if (Math.abs(getPosition() - elevatorTarget) < tolerance)
-        return true;
-      return false;
-    }
-   
+    
     public double getElevatorTarget() {
         return elevatorTarget;
     }
@@ -140,9 +133,14 @@ public class Elevator extends Subsystem implements PIDSource, PIDOutput, MotorSa
 
     }
     
-    public boolean isAtTarget() {
-    	return getPosition() > elevatorTarget - MOVE_RATE && getPosition() < elevatorTarget + MOVE_RATE;
+    /*public boolean isAtZero() {
+    	// TODO: implement lower limit switch
+    	return	elevatorMotor.getSensorCollection().isRevLimitSwitchClosed(); 
     }
+    
+    public boolean isAtTop() {
+    	return	elevatorMotor.getSensorCollection().isFwdLimitSwitchClosed(); 
+    }*/
 
     public void enable() {
     	if(elevatorMotor.getSensorCollection().getQuadraturePosition() < 0) {

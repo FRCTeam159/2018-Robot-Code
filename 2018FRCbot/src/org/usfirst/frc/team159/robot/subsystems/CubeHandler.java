@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.MotorSafetyHelper;
 
-import org.usfirst.frc.team159.robot.Constants;
 import org.usfirst.frc.team159.robot.RobotMap;
 import org.usfirst.frc.team159.robot.commands.CubeCommands;
 
@@ -12,25 +11,21 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *
  */
-public class CubeHandler extends Subsystem implements MotorSafety, Constants {
+public class CubeHandler extends Subsystem implements MotorSafety {
 
     private WPI_TalonSRX leftIntakeMotor;
     private WPI_TalonSRX rightIntakeMotor;
-    private DoubleSolenoid armPneumatic;
+	private DoubleSolenoid armPneumatic;
 
     private static final double intakePower = 1.0;
     private static final double outputPower = 1.0;
     private static final double holdPower = 0.2;
 
     private boolean armsOpen = false;
-    int state = HOLD;
-    private String which_state[] = { "Hold", "Push", "Grab" };
-
     
 	private MotorSafetyHelper safetyHelper = new MotorSafetyHelper(this);
 
@@ -44,7 +39,6 @@ public class CubeHandler extends Subsystem implements MotorSafety, Constants {
         rightIntakeMotor = new WPI_TalonSRX(RobotMap.RIGHT_INTAKE_MOTOR);
 
         armPneumatic = new DoubleSolenoid(RobotMap.ARM_PISTON_ID, RobotMap.ARM_FORWARD, RobotMap.ARM_REVERSE);
-        armPneumatic.set(DoubleSolenoid.Value.kForward);
 //        closeArms();
 
     }
@@ -63,20 +57,19 @@ public class CubeHandler extends Subsystem implements MotorSafety, Constants {
 
 //	 Put methods for controlling this subsystem here. Call these from Commands.
 
-  private void spinWheels(double power, boolean inwards) {
-    if (inwards) {
-      leftIntakeMotor.set(-power);
-      rightIntakeMotor.set(power);
-    } else {
-      leftIntakeMotor.set(power);
-      rightIntakeMotor.set(-power);
+    private void spinWheels(double power, boolean inwards) {
+        if (inwards) {
+            leftIntakeMotor.set(-power);
+            rightIntakeMotor.set(power);
+        } else {
+            leftIntakeMotor.set(power);
+            rightIntakeMotor.set(-power);
+        }
+		safetyHelper.feed();
     }
-    safetyHelper.feed();
-  }
     
     public void hold() {
     	spinWheels(holdPower, true);
-    	state=HOLD;
     }
 
     public void stop() {
@@ -92,46 +85,21 @@ public class CubeHandler extends Subsystem implements MotorSafety, Constants {
 //    }
 
     public void openArms() {
-        if(!armsOpen) {
-      	  armPneumatic.set(DoubleSolenoid.Value.kReverse);
-          armsOpen = true;
-          logStatus();
-        }
+    	armPneumatic.set(DoubleSolenoid.Value.kReverse);
+        armsOpen = true;
     }
 
     public void closeArms() {
-      if(!armsOpen) {
-    	  armPneumatic.set(DoubleSolenoid.Value.kForward);
+    	armPneumatic.set(DoubleSolenoid.Value.kForward);
         armsOpen = false;
-        logStatus();
-      }
     }
 
     public void intake() {
         spinWheels(intakePower, true);
-        state=GRAB;
     }
 
     public void output() {
         spinWheels(outputPower, false);
-        state=PUSH;
-    }
-
-    public void setState(int s) {
-      int oldState=state;
-      switch(s) {
-      case PUSH: output();break;
-      case GRAB: intake();break;
-      case HOLD: hold();break;
-      case OPEN: openArms();break;
-      case CLOSE: closeArms();break;
-      }
-      if(oldState!=state)
-        logStatus();
-    }
-    void logStatus() {
-       SmartDashboard.putBoolean("ArmsOpen", armsOpen);
-       SmartDashboard.putString("State", which_state[state]);
     }
 
 	@Override

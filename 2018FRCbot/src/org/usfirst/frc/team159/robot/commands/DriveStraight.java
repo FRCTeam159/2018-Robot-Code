@@ -8,149 +8,111 @@ import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.command.TimedCommand;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *
  */
-public class DriveStraight extends TimedCommand implements PIDSource, PIDOutput {
-  Timer mytimer;
+public class DriveStraight extends Command implements PIDSource, PIDOutput {
+	private PIDController pid;
+	private PIDSourceType type = PIDSourceType.kDisplacement;
+	private final double distance;
+	private static final double tolerance = 0.1;
+	private static final boolean lastOntarget = false;
+	private boolean started = false;
+	private static final boolean debug = true;
+	private static final double P = 0.25;
+	private static final double I = 0.002;
+	private static final double D = 0.0;
+	private static final double TOL = 0.05;
+	private static final double intime = 0.025;
+	private Timer timer = new Timer();
 
-  static public double P = 0.5;
-  static public double I = 0.0;
-  static public double D = 0.0;
-  static public double TOL = 0.05;
-  PIDController pid;
-  double distance = 0;
-  double tolerance = TOL;
-  boolean last_target = false;
-  PIDSourceType type = PIDSourceType.kDisplacement;
-  static boolean debug = false;
-  double last_time;
-  int count = 0;
-  double speed=1;
-  double heading;
-  boolean useGyro=false;
+	public DriveStraight(double distance) {
+		this.distance = distance;
+		pid = new PIDController(P, I, D, this, this);
+		pid.setAbsoluteTolerance(TOL);
+		requires(Robot.driveTrain);
+	}
 
-  public DriveStraight(double d, double s, double t) {
-    this(d, s, t, 0.0);
-    useGyro=false;
-  }
-  public DriveStraight(double d, double s, double t,double h) {
-    super(t);
-    requires(Robot.driveTrain);
-    pid = new PIDController(P, I, D, this, this, 0.02);
-    distance = d;
-    speed=s;
-    heading=h;
-    mytimer = new Timer();
-    mytimer.start();
-    mytimer.reset();
-    count = 0;
-    if (debug) {
-      SmartDashboard.putNumber("P", P);
-      SmartDashboard.putNumber("I", I);
-      SmartDashboard.putNumber("D", D);
-      SmartDashboard.putNumber("TOL", tolerance);
-      SmartDashboard.putNumber("DIST", distance);
-    }
-    useGyro=Robot.useGyro;
-  }
+//	 Called just before this Command runs the first time
+	protected void initialize() {
+		System.out.printf("DriveStraight.initialize distance = %f\n", distance);
+		pid.reset();
+		pid.setSetpoint(distance);
+		pid.disable();
+		Robot.driveTrain.enable();
+		Robot.driveTrain.reset();
+		started = false;
+		timer.start();
 
-  // Called just before this Command runs the first time
-  protected void initialize() {
-    System.out.println("DriveStraight::initialize()");
-    last_target = false;
-    mytimer.start();
-    mytimer.reset();
-    if (debug) {
-      double p = SmartDashboard.getNumber("P", P);
-      double i = SmartDashboard.getNumber("I", I);
-      double d = SmartDashboard.getNumber("D", D);
-      tolerance = SmartDashboard.getNumber("TOL", tolerance);
-      distance = SmartDashboard.getNumber("DIST", distance);
-      pid.setPID(p, i, d);
-    }
-    Robot.driveTrain.resetEncoders();
-    pid.reset();
-    pid.setSetpoint(distance);
-    pid.setAbsoluteTolerance(tolerance);
-    pid.enable();
-    Robot.driveTrain.enable();
-    last_time = mytimer.get();
-  }
+	}
 
-  // Called repeatedly when this Command is scheduled to run
-  protected void execute() {
-    // double curtime=0.001*(Math.round(mytimer.get()*1000.0));
-    // double dt=1000.0*(curtime-last_time);
-    // System.out.format("cycle:%1.2f time=%1.2f dt=%2.1f\n",count*0.02,curtime,dt);
-    // last_time=curtime;
-    // count++;
-  }
+//	 Called repeatedly when this Command is scheduled to run
+	protected void execute() {
+		if (!started && timer.get() > intime && !pid.isEnabled()) {
+			pid.reset();
+			pid.enable();
+			started = true;
+		}
+	}
 
-  // Make this return true when this Command no longer needs to run execute()
-  protected boolean isFinished() {
-    if(super.isFinished())
-      return true;
-    boolean new_target = pid.onTarget();
-    if (new_target && last_target)
-      return true;
-    last_target = new_target;
-    return false;
-  }
+//	 Make this return true when this Command no longer needs to run execute()
+	protected boolean isFinished() {
+		if (timer.get() > 3.0) {
+			printFinishedMessage();
+			return true;
+		}
+		return pid.onTarget();
+	}
 
-  // Called once after isFinished returns true
-  protected void end() {
-    System.out.println("DriveStraight::end()");
-    pid.disable();
-  }
-  // Called when another command which requires one or more of the same
-  // subsystems is scheduled to run
-  protected void interrupted() {
-    System.out.println("DriveStraight::interrupted()");
-    end();
-  }
+//	 Called once after isFinished returns true
+	protected void end() {
+		Robot.driveTrain.disable();
+		pid.disable();
+		started = false;
+		
+		printEndMessage();
+	}
 
-  @Override
-  public void pidWrite(double d) {
-    double gh = Robot.driveTrain.getHeading();
-    double herr=heading-gh;
-    double turn=0;
-    if (useGyro)
-      turn = Robot.GFACT * (-1.0 / 180.0) * herr;
+//	 Called when another command which requires one or more of the same subsystems is scheduled to run
+	protected void interrupted() {
+		end();
+	}
 
-    double lval = d + turn;
-    double rval = d - turn;
+	@Override
+	public void setPIDSourceType(PIDSourceType pidSource) {
+		type = pidSource;
+	}
 
-    lval=clamp(lval);
-    rval=clamp(rval);
-    if (debug)
-      System.out.println("DriveStraight::pidWrite(" + d + ","+turn+")");
-    Robot.driveTrain.tankDrive(lval, rval);
-  }
+	@Override
+	public PIDSourceType getPIDSourceType() {
+		return type;
+	}
 
-  double clamp(double d) {
-    if(d>speed)
-      d=speed;
-    else if(d<-speed)
-      d=-speed;
-    return d;
-  }
-  @Override
-  public double pidGet() {
-    double s = 12*Robot.driveTrain.getDistance();
-    return s;
-  }
+	@Override
+	public double pidGet() {
+		if (!started) {
+			return 0;
+		}
+		if (debug) {
+			double time = timer.get();
+			System.out.printf("time=%f leftDistance=%g rightDistance=%g distance=%g\n", time * 1000, Robot.driveTrain.getLeftDistance(), Robot.driveTrain.getRightDistance(), Robot.driveTrain.getDistance());
+		}
+		return Robot.driveTrain.getDistance();
+	}
 
-  @Override
-  public void setPIDSourceType(PIDSourceType pidSource) {
-    type = pidSource;
-  }
-
-  @Override
-  public PIDSourceType getPIDSourceType() {
-    return type;
-  }
+	@Override
+	public void pidWrite(double output) {
+		if (started) {
+			Robot.driveTrain.tankDrive(output, output);
+		}
+	}
+	
+	private void printEndMessage() {
+		System.out.println("drivestraight.end");
+	}
+	
+	private void printFinishedMessage() {
+		System.out.println("timer expired");
+	}
 }
