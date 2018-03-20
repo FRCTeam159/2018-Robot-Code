@@ -29,9 +29,8 @@ public class SetElevator extends TimedCommand {
 
     // Called repeatedly when this Command is scheduled to run
     protected boolean isFinished() {
-      if(super.isFinished()|| Robot.elevator.atTarget())
-        return true;
-      return false;
+    	return true;
+//      return super.isFinished()|| Robot.elevator.atTarget();
     }
 
     // Called once after timeout

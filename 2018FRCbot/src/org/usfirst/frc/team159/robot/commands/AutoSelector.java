@@ -93,13 +93,15 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
         break;
       }// intentional fall-thru
     case STRATEGY_SAME_SIDE_SWITCH:
-      if(allGood || targetObject == OBJECT_SWITCH)
+      if(allGood || targetObject == OBJECT_SWITCH) {
         autoTarget=TARGET_SAME_SWITCH;
+      }
       else {
         autoTarget=TARGET_GO_STRAIGHT;
         targetObject = OBJECT_NONE;
       }
     }
+    addSequential(new DropGrabber());
     addAutoCommand(autoTarget);
   }
 
