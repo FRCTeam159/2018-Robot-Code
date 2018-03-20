@@ -48,7 +48,8 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
       else
         autoTarget=TARGET_CENTER_SWITCH;
       return;
-    } else if (Robot.robotPosition == POSITION_RIGHT) {
+    } // options below are for side position only
+    else if (Robot.robotPosition == POSITION_RIGHT) {
       targetSide = POSITION_RIGHT;
       if (gameMessage.charAt(1) == 'R' && gameMessage.charAt(0) == 'R')
         allGood = true;
@@ -58,7 +59,8 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
         targetObject = OBJECT_SCALE;
       else 
         targetObject = OBJECT_SWITCH;
-    } else { // left position
+    } 
+    else { // left position
       targetSide = POSITION_LEFT;
       if (gameMessage.charAt(1) == 'L' && gameMessage.charAt(0) == 'L')
         allGood = true;
@@ -98,6 +100,7 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
         targetObject = OBJECT_NONE;
       }
     }
+    addAutoCommand(autoTarget);
   }
 
 	private void addAutoCommand(int target) {
@@ -106,7 +109,7 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
 		switch (target) {
 		case TARGET_GO_STRAIGHT:
 			System.out.println("Go Straight");
-			// autoCommand.addSequential(new DrivePath(STRATEGY_STRAIGHT ,false,false));
+			addSequential(new DrivePath(TARGET_GO_STRAIGHT ,false,false));
 			break;
 		case TARGET_CENTER_SWITCH:
 			mirror = (targetSide == POSITION_RIGHT);
@@ -153,7 +156,6 @@ public class AutoSelector extends CommandGroup implements Constants,PhysicalCons
 			addParallel(new SetElevator(SWITCH_DROP_HEIGHT, 2.0));
 			addSequential(new DrivePath(TARGET_CENTER_TWO_CUBES, !mirror, false)); // forward s-turn to switch
 			addSequential(new SetGrabberState(PUSH, 1.0));
-
 			break;
 		case TARGET_SAME_SCALE:
 			System.out.println("Same Scale");
