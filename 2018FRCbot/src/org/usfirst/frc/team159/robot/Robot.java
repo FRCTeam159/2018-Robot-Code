@@ -1,16 +1,18 @@
 package org.usfirst.frc.team159.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team159.robot.commands.Autonomous;
 import org.usfirst.frc.team159.robot.commands.Calibrate;
-import org.usfirst.frc.team159.robot.commands.DrivePath;
+import org.usfirst.frc.team159.robot.commands.DropGrabber;
 import org.usfirst.frc.team159.robot.subsystems.Cameras;
 import org.usfirst.frc.team159.robot.subsystems.CubeHandler;
+import org.usfirst.frc.team159.robot.subsystems.DIOSwitches;
 import org.usfirst.frc.team159.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
@@ -27,15 +29,29 @@ public class Robot extends IterativeRobot implements RobotMap {
 	public static CubeHandler cubeHandler;
 	public static DriveTrain driveTrain;
 	private static Cameras cameras;
+	public static DIOSwitches DIOs;
+
+	public static boolean useGyro = false;
+	public static boolean preferScale=false;
+	public static final boolean useHardware = true;
+
 	public static int robotPosition = -1;
+	public static String fmsData = "LLL";
+	public static double MAX_VEL = 1.5;
+	public static double MAX_ACC = 22.25;
+	public static double MAX_JRK = 4;
+	public static double KP = 4.0;
+	public static double KD = 0.0;
+	public static double GFACT = 2.0;
 
-
-//	private static OI oi;
+	public static boolean calibrate = false;
+	//public static Integer strategyOption = STRATEGY_SAME_SIDE_SCALE;
 	
-	public static final double scale = 0.6;
+	public static double scale = 0.6;
 
-	private Command autonomousCommand;
-	private SendableChooser<Integer> chooser = new SendableChooser<>();
+	private CommandGroup autonomousCommand;
+
+	SendableChooser<Integer> positionChooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -47,8 +63,7 @@ public class Robot extends IterativeRobot implements RobotMap {
 		elevator = new Elevator();
 		cubeHandler = new CubeHandler();
 		cameras = new Cameras();
-
-//		oi = new OI();
+		DIOs = new DIOSwitches();
 		
 		putValuesOnSmartDashboard();
 	}
@@ -75,8 +90,13 @@ public class Robot extends IterativeRobot implements RobotMap {
 
 	@Override
 	public void autonomousInit() {
+	  getDashboardData();
+	  robotPosition=getPosition();
+	  getFMSData();
+	  
 		if(SmartDashboard.getBoolean("Calibrate", false)) {
-			autonomousCommand = new Calibrate();
+		  autonomousCommand = new CommandGroup();
+			autonomousCommand.addSequential(new Calibrate());
 		} else {
 			autonomousCommand = new Autonomous();
 		}
@@ -123,33 +143,62 @@ public class Robot extends IterativeRobot implements RobotMap {
 	public void testPeriodic() {}
 	
 	private void putValuesOnSmartDashboard() {
-		chooser.addObject("Left", 0);
-		chooser.addDefault("Center", 1);
-		chooser.addObject("Right", 2);
-
-		SmartDashboard.putData("Position", chooser);
-		SmartDashboard.putBoolean("Prefer Scale", false);
-		//SmartDashboard.putBoolean("Force Straight Path", false);
-		SmartDashboard.putNumber("Max Velocity", 1.5);
-		SmartDashboard.putNumber("Max Acceleration", 22.25);
-		SmartDashboard.putNumber("Max Jerk", 4);
-		SmartDashboard.putNumber("GFACT", 2.0);
-		SmartDashboard.putBoolean("Use Gyro", false);
+		positionChooser.addObject("Left", 0);
+		positionChooser.addDefault("Center", 1);
+		positionChooser.addObject("Right", 2);
+		SmartDashboard.putData("Position", positionChooser);		
+		SmartDashboard.putNumber("Max Velocity", MAX_VEL);
+		SmartDashboard.putNumber("Max Acceleration", MAX_ACC);
+		SmartDashboard.putNumber("Max Jerk", MAX_JRK);
+    SmartDashboard.putNumber("KP", KP);
+		SmartDashboard.putNumber("GFACT", GFACT);
+		SmartDashboard.putBoolean("Use Gyro", useGyro);
 		SmartDashboard.putString("Target", "Calculating");
 		SmartDashboard.putString("FMS Data", "RLL");
-//		SmartDashboard.putString("Position", "Center");
-
 		SmartDashboard.putBoolean("Calibrate", false);
 		SmartDashboard.putBoolean("Publish Path", false);
-		SmartDashboard.putNumber("P", DrivePath.KP);
-		
-        SmartDashboard.putBoolean("Grabber Intake", false);
-        SmartDashboard.putBoolean("Grabber Output", false);
-        SmartDashboard.putBoolean("Grabber Arms", false);
+	  SmartDashboard.putBoolean("Prefer Scale", preferScale);
+    SmartDashboard.putBoolean("Grabber Intake", false);
+    SmartDashboard.putBoolean("Grabber Output", false);
+    SmartDashboard.putBoolean("Grabber Arms", false);
 	}
-	
-	public static void getPosition() {
-		DigitalInput input1 = new DigitalInput(0);
-		DigitalInput input2 = new DigitalInput(1);
-	}
+  void getDashboardData() {
+    useGyro = SmartDashboard.getBoolean("Use Gyro", useGyro);
+    MAX_VEL = SmartDashboard.getNumber("MAX_VEL", MAX_VEL);
+    MAX_ACC = SmartDashboard.getNumber("MAX_ACC", MAX_ACC);
+    MAX_JRK = SmartDashboard.getNumber("MAX_JRK", MAX_JRK);
+    GFACT = SmartDashboard.getNumber("GFACT", GFACT);
+    KP = SmartDashboard.getNumber("KP", KP);
+    scale = SmartDashboard.getNumber("Auto Scale", scale);
+    calibrate = SmartDashboard.getBoolean("Calibrate", calibrate);
+    preferScale = SmartDashboard.getBoolean("Prefer Scale", preferScale);
+  }
+  private int getPosition() {
+    if (!useHardware) {
+      return positionChooser.getSelected();
+    } else {
+      return  DIOs.getPosition();
+    }
+  }
+  void getFMSData(){
+    fmsData = DriverStation.getInstance().getGameSpecificMessage();   
+    if((fmsData.equals("") || fmsData == null)) {
+      System.out.println("getGameSpecificMessage() not valid at autonomousInit!!");
+      Timer timer = new Timer();
+      timer.start();
+      timer.reset();
+      double tm=0;
+      while((fmsData.equals("") || fmsData == null) && (tm=timer.get() < 2)) {
+        fmsData = DriverStation.getInstance().getGameSpecificMessage();
+        if(tm >=2)
+          System.out.println("getFMSMessage timed out !!");
+      }
+    }    
+    System.out.println("Robot.getFMSData FMS="+fmsData);
+    putFMSDataOnDashboard(fmsData);
+  }
+  private void putFMSDataOnDashboard(String data) {
+    SmartDashboard.putString("FMS Data", data);
+  }
+
 }

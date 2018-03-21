@@ -31,43 +31,16 @@ import jaci.pathfinder.modifiers.TankModifier;
  *
  */
 public class DrivePath extends Command implements PhysicalConstants, RobotMap {
-	
-	private static final boolean forceSetData = false; // Set true to force data
-	
-	private static final boolean preferScale = false;
-	
+
 	private static final boolean forcedStraight = false;
 	
-	private static final boolean forcedDontMove = false;
-	
-	private static final int forcedPosition = CENTER_POSITION;
-	// Options:
-//	LEFT_POSITION
-//	CENTER_POSITION
-//	RIGHT_POSITION
-	
-	
 	private static final double TIME_STEP = 0.02;
-	// double MAX_VEL = 1.3635; //1.8
-	// double MAX_ACC = 18.7; //14
-	// double MAX_JRK = 497.9; //116
-	private static final double MAX_VEL = 2.88; // 2.75 m/s measured, but reduced to avoid exceeding max on outside wheels when turning
-	private static final double MAX_ACC = 26.7;
-	private static final double MAX_JRK = 10;
-	public static double KP = 4;
-	private static final double KI = 0.0;
-	private static final double KD = 0.0;
-	private static double KV = 1.0 / MAX_VEL;
-	private static final double KA = 0.0;
-	private static  double GFACT = 2.0;
 	private static final double wheelbase = inchesToMeters(26);
 	private Trajectory trajectory;
 	private Trajectory leftTrajectory;
 	private Trajectory rightTrajectory;
 	private DistanceFollower leftFollower;
 	private DistanceFollower rightFollower;
-	//private Trajectory.Config config;
-	//TankModifier modifier;
 	private static final boolean printCalculatedTrajectory = false;
 	private static final boolean printCalculatedPath = false;
 	private static boolean useGyro = false;
@@ -93,17 +66,12 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
 	private Timer timer = new Timer();
 	private Timer pushTimer = new Timer();
-	
 	private boolean pushing = false;
-	
 	private final double runtime;
 	private double pushTime = 1;
 
-//	private static final Point hookEndPoint = new Point(ROBOT_TO_SWITCH_CENTER, HOOK_Y_DISTANCE);
-
-//	private static final Point switchCurveEndPoint = new Point(ROBOT_TO_SWITCH, SWITCH_CENTER_TO_PLATE_EDGE);
+  double last_heading = 0;
 	private static final double straightEndPoint = ROBOT_TO_SWITCH;
-//	private static final double scaleEndPoint = SCALE_HOOK_TURN_Y;
 	
 	private static int plotCount = 0;
 
@@ -122,72 +90,37 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		requires(Robot.driveTrain);
 		requires(Robot.elevator);
 		
-		Sendable position = SmartDashboard.getData("Position");
-		SendableChooser<Integer> positionChooser = (SendableChooser<Integer>) position;
-		
 		timer.start();
-		timer.reset();
+		timer.reset();		
 		
-		
-		if(!forceSetData) {
-//			String positionString = SmartDashboard.getString("Position", "?").toLowerCase();
-			
-//			while(positionString.equals("?") && timer.get() < 1) {
-//				positionString = SmartDashboard.getString("Position", "?").toLowerCase();
-//			}
-//			if(positionString.equals("left")) {
-//				robotPosition = LEFT_POSITION;
-//			} else if(positionString.equals("center")) {
-//				robotPosition = CENTER_POSITION;
-//			} else if(positionString.equals("right")) {
-//				robotPosition = RIGHT_POSITION;
-//			}
-			robotPosition = positionChooser.getSelected();
-		} else {
-			robotPosition = forcedPosition;
-		}
-		
-		
+		robotPosition=Robot.robotPosition;
 		System.out.println("Position="+robotPosition);
-		
+
 		timer.start();
 		timer.reset();
 		
-//		String gameMessage;
+    double MAX_VEL = Robot.MAX_VEL;
+    double MAX_ACC = Robot.MAX_ACC;
+    double MAX_JRK = Robot.MAX_JRK;
+    double KP = Robot.KP;
+    double KI = 0.0;
+    double KD = Robot.KP;
+    double KV = 1.0 / MAX_VEL;
+    double KA = 0.0;
 		
-		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
-			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		}
-//		if (gameMessage.equals("")|| gameMessage.equals(null)) {
-//			gameMessage = "???";
-//			SmartDashboard.putBoolean("Force Straight Path", true);		
-//			if (isGameDataEmpty()) {
-//				gameMessage = generateFMSData();
-//			} else {
-//				gameMessage = SmartDashboard.getString("FMS Data", "LLL");
-//			}
+//		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+//		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+//			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
 //		}
-		System.out.println("FMS="+gameMessage);
-
-		putFMSDataOnDashboard(gameMessage);
-		timer.start();
-		timer.reset();
-
-		//System.out.println(System.getProperty("java.library.path"));
-		//System.out.println(wheelbase);
+//
+//		putFMSDataOnDashboard(gameMessage);
+    
+    String gameMessage=Robot.fmsData;
+    System.out.println("FMS="+gameMessage);
 
 		double maxVelocity = MAX_VEL;
 		double maxAcceleration = MAX_ACC;
 		double maxJerk = MAX_JRK;
-		//double maxVelocity = getNumberOnDashboard("Max Velocity", 1);
-		//double maxAcceleration = getNumberOnDashboard("Max Acceleration", 1);
-		//double maxJerk = getNumberOnDashboard("Max Jerk", 1);
-
-		KV = 1 / maxVelocity;
-		KP = getNumberOnDashboard("P", KP);
-		GFACT =getNumberOnDashboard("GFACT", GFACT);
-		useGyro = SmartDashboard.getBoolean("Use Gyro", false);
 		
 		trajectory = calculateTrajectory(gameMessage, robotPosition, maxVelocity, maxAcceleration, maxJerk);
 		
@@ -210,8 +143,6 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		leftTrajectory = modifier.getLeftTrajectory(); // Get the Left Side
 		rightTrajectory = modifier.getRightTrajectory(); // Get the Right Side
 		
-		//Segment seg = leftTrajectory.segments[0];
-
 		leftFollower = new DistanceFollower(leftTrajectory);
 		leftFollower.configurePIDVA(KP, KI, KD, KV, KA);
 		rightFollower = new DistanceFollower(rightTrajectory);
@@ -250,14 +181,8 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		if(!publishPathAllowed()) {
 			plotCount = 0;
 		}
-		
-//		Robot.elevator.setElevatorTarget(6);
-		
-//		if(targetObject == SWITCH) {
+
 		Robot.elevator.setElevatorTarget(Elevator.SWITCH_HEIGHT);
-//		} else if(targetObject == SCALE) {
-//			Robot.elevator.setElevatorTarget(Elevator.SCALE_HEIGHT);
-//		}
 		
 		leftFollower.reset();
 		rightFollower.reset();
@@ -282,13 +207,15 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
 		double turn = 0;
 
-		double gyroHeading = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
-		double pathfinderHeading = Pathfinder.r2d(leftFollower.getHeading()); // Should also be in degrees
+		double gh = Robot.driveTrain.getHeading(); // Assuming the gyro is giving a value in degrees
+		gh = unwrap(last_heading, gh);
+		
+		double th = Pathfinder.r2d(leftFollower.getHeading()); // Should also be in degrees
 
-		pathfinderHeading = pathfinderHeading > 180 ? pathfinderHeading-360 : pathfinderHeading;
-		double headingError = pathfinderHeading - gyroHeading;
-		if (useGyro) {
-			turn = GFACT * (-1.0 / 180.0) * headingError;
+		th = th > 180 ? th-360 : th;
+		double headingError = th - gh;
+		if (Robot.useGyro) {
+			turn = Robot.GFACT * (-1.0 / 180.0) * headingError;
 		}
 		
 		double lval = leftPower - turn;
@@ -298,7 +225,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		rval *= Robot.scale;
 
 		if (debugCommand) {
-			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, pathfinderHeading, gyroHeading, rval, lval);
+			System.out.format("%f %f %f %f %f %f %f\n", timer.get(), leftDistance, rightDistance, th, gh, rval, lval);
 		}
 
 		if (printPath) {
@@ -306,14 +233,11 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		}
 		if (publishPathAllowed()) {
 			addPlotData();
-		}
-		
+		}		
 		pathIndex++;
-
+		last_heading = gh;
 		// this is reversed because we found it to be reversed, don't change unless you know what you're doing
 		Robot.driveTrain.tankDrive(lval, rval);
-		//Robot.driveTrain.tankDrive(leftPower - turn, rightPower + turn);
-
 	}
 
 	// Make this return true when this Command no longer needs to run execute()
@@ -352,12 +276,12 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
     }
 
 	// Called once after isFinished returns true
-	protected void end() {
-		printEndMessage();
-		if(publishPathAllowed()) {
-            publish(pathDataList, 6);
-        }
-	}
+  protected void end() {
+    printEndMessage();
+    if (publishPathAllowed()) {
+      publish(pathDataList, 6);
+    }
+  }
 
 	// Called when another command which requires one or more of the same
 	// subsystems is scheduled to run
@@ -365,17 +289,15 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		end();
 	}
 
+  double unwrap(double previous_angle, double new_angle) {
+    double d = new_angle - previous_angle;
+    d = d >= 180 ? d - 360 : (d <= -180 ? d + 360 : d);
+    return previous_angle + d;
+  }
+
 	private boolean publishPathAllowed(){
 	    return SmartDashboard.getBoolean("Publish Path", false);
     }
-
-	/*private Waypoint[] calculateScalePoints(double y) {
-		Waypoint[] waypoints = new Waypoint[3];
-		waypoints[0] = new Waypoint(0, 0, 0);
-		waypoints[1] = new Waypoint(SCALE_HOOK_TURN_X, 0, Pathfinder.d2r(45));
-		waypoints[2] = new Waypoint(ROBOT_TO_SCALE_CENTER, y, Pathfinder.d2r(90));
-		return waypoints;
-	}*/
 
 	private Waypoint[] calculateCenterSwitchPoints(int targetSide) {
 		double x=ROBOT_TO_SWITCH;
@@ -419,36 +341,9 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 			return waypoints;
 	}
 
-	/*private Waypoint[] calculateHookPoints(double x, double y) {
-		Waypoint[] waypoints = new Waypoint[3];
-		waypoints[0] = new Waypoint(0, 0, 0);
-		waypoints[1] = new Waypoint(x - Math.abs(y), 0, 0);
-		if (y < 0) {
-			waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(-90));
-		} else {
-			waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(90));
-		}
-		return waypoints;
-	}*/
-
 	private Waypoint[] calculateStraightPoints(double x) {
-		if(forcedDontMove) {
-			return null;
-		}
-        return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
+	  return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
 	}
-
-	/*private Waypoint[] calculateSwitchCurvePoints(double x, double y) {
-		Waypoint[] waypoints = new Waypoint[3];
-		waypoints[0] = new Waypoint(0, 0, 0);
-		if (y < 0) {
-			waypoints[1] = new Waypoint(x / 2, y / 2, Pathfinder.d2r(-45));
-		} else {
-			waypoints[1] = new Waypoint(x / 2, y / 2, Pathfinder.d2r(45));
-		}
-		waypoints[2] = new Waypoint(x, y, 0);
-		return waypoints;
-	}*/
 
 	private Waypoint[] mirrorWaypoints(Waypoint[] waypoints) {
 		Waypoint[] newWaypoints = new Waypoint[waypoints.length];
@@ -467,26 +362,27 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		return newWaypoints;
 	}
 	
-	private Trajectory calculateTrajectory(String gameData, int robotPosition, double maxVelocity, double maxAcceleration, double maxJerk) {
-		Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
-		
-		Waypoint[] waypoints = calculatePathWaypoints(gameData, robotPosition);
-		if(waypoints == null) {
-			return null;
-		}
-		Trajectory calculatedTrajectory = Pathfinder.generate(waypoints, config);
-		
-		/*if (calculatedTrajectory == null) {
-			System.out.println("Uh-Oh! Trajectory could not be generated!\n");
-		}*/
-        if (waypoints != null) {
-            for (Waypoint waypoint : waypoints) {
-                System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
-            }
-        }
+  private Trajectory calculateTrajectory(String gameData, int robotPosition, double maxVelocity, double maxAcceleration,
+      double maxJerk) {
+    Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST,
+        TIME_STEP, maxVelocity, maxAcceleration, maxJerk);
 
-		return calculatedTrajectory;
-	}
+    Waypoint[] waypoints = calculatePathWaypoints(gameData, robotPosition);
+    if (waypoints == null) {
+      return null;
+    }
+    Trajectory calculatedTrajectory = Pathfinder.generate(waypoints, config);
+    /*
+     * if (calculatedTrajectory == null) {
+     * System.out.println("Uh-Oh! Trajectory could not be generated!\n"); }
+     */
+    if (waypoints != null) {
+      for (Waypoint waypoint : waypoints) {
+        System.out.println(waypoint.x + " " + waypoint.y + " " + waypoint.angle);
+      }
+    }
+    return calculatedTrajectory;
+  }
 
 	private Waypoint[] calculatePathWaypoints(String gameData, int robotPosition) {
 		Waypoint[] returnWaypoints = null;
@@ -507,15 +403,12 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 					if (isScalePreferredOverSwitch()) {
 						targetObject =SCALE;
 						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-						//returnWaypoints = calculateScalePoints(scaleEndPoint);
 					} else {
 						targetObject =SWITCH;
 						returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-						//returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
 					}
 				} else if (gameData.charAt(0) == 'R') {
 					targetObject =SWITCH;
-					//returnWaypoints = calculateHookPoints(hookEndPoint.x, hookEndPoint.y);
 					returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
 				} else if (gameData.charAt(1) == 'R') {
 					returnWaypoints = calculateSideScaleHookPoints(robotPosition);
@@ -535,17 +428,14 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 				if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
 					if (isScalePreferredOverSwitch()) {
 						returnWaypoints = calculateSideScaleHookPoints(robotPosition);
-						//returnWaypoints = mirrorWaypoints(calculateScalePoints(scaleEndPoint));
 						targetObject =SCALE;
 					} else {
 						returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-						//returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
 						targetObject =SWITCH;
 					}
 				} else if (gameData.charAt(0) == 'L') {
 					targetObject =SWITCH;
 					returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
-					//returnWaypoints = mirrorWaypoints(calculateHookPoints(hookEndPoint.x, hookEndPoint.y));
 				} else if (gameData.charAt(1) == 'L') {
 					returnWaypoints = calculateSideScaleHookPoints(robotPosition);
 					targetObject = SCALE;
@@ -567,7 +457,11 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		}
 	}
 
-	private String generateFMSData() {
+	private boolean isStraightPathForced() {
+    return forcedStraight;
+  }
+
+  private String generateFMSData() {
 		Random random = new Random();
 		StringBuilder data = new StringBuilder();
 		while (data.length() < 3) {
@@ -608,13 +502,13 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		return 2.54 * 12 * feet / 100;
 	}
 
-	private void putFMSDataOnDashboard(String data) {
-		SmartDashboard.putString("FMS Data", data);
-	}
-	
-	private double getNumberOnDashboard(String name, double defaultValue) {
-		return SmartDashboard.getNumber(name, defaultValue);
-	}
+//	private void putFMSDataOnDashboard(String data) {
+//		SmartDashboard.putString("FMS Data", data);
+//	}
+//	
+//	private double getNumberOnDashboard(String name, double defaultValue) {
+//		return SmartDashboard.getNumber(name, defaultValue);
+//	}
 	
 	private void printInitializeMessage() {
 		System.out.println("DrivePath.initialize()");
@@ -625,20 +519,9 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 	}
 
 	private boolean isScalePreferredOverSwitch() {
-		if(forceSetData) {
-			return preferScale;
-		} else {
-			return SmartDashboard.getBoolean("Prefer Scale", false);
-		}
+		return Robot.preferScale;
 	}
 
-	private boolean isStraightPathForced() {
-		if(forceSetData) {
-			return forcedStraight;
-		} else {
-			return SmartDashboard.getBoolean("Force Straight Path", false);
-		}
-	}
 	
 	private void addPlotData() {
 		PathData pathData = new PathData();
@@ -665,7 +548,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
     
     	System.out.println("Publishing Plot Data");
     	//table.putValue("NewPlot", NetworkTableValue.makeDoubleArray(info));
-		table.putNumberArray("NewPlot"+ plotCount, info);
+		  table.putNumberArray("NewPlot"+ plotCount, info);
 
     	for (int i = 0; i < points; i++) {
     		PathData pathData = dataList.get(i);
