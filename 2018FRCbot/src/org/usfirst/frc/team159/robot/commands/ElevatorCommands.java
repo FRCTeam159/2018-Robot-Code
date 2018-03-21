@@ -6,9 +6,7 @@ import org.usfirst.frc.team159.robot.RobotMap;
 import org.usfirst.frc.team159.robot.subsystems.Elevator;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *

@@ -1,12 +1,9 @@
 package org.usfirst.frc.team159.robot.subsystems;
 
 import org.usfirst.frc.team159.robot.Constants;
-import org.usfirst.frc.team159.robot.Robot;
 import org.usfirst.frc.team159.robot.RobotMap;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**

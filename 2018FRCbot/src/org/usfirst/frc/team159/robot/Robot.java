@@ -45,9 +45,9 @@ public class Robot extends IterativeRobot implements RobotMap {
     public static double GFACT = 2.0;
 
     public static boolean calibrate = false;
-    // public static Integer strategyOption = STRATEGY_SAME_SIDE_SCALE;
+    public static OI oi;
 
-    public static double scale = 0.6;
+    public static double scale = 0.7;
 
     private CommandGroup autonomousCommand;
 
@@ -64,7 +64,7 @@ public class Robot extends IterativeRobot implements RobotMap {
         cubeHandler = new CubeHandler();
         cameras = new Cameras();
         DIOs = new DIOSwitches();
-
+        oi = new OI();
         putValuesOnSmartDashboard();
     }
 
