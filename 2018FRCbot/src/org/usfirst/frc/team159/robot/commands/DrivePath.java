@@ -30,6 +30,10 @@ import jaci.pathfinder.modifiers.TankModifier;
 /**
  *
  */
+/**
+ * @author dean
+ *
+ */
 public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 
     private static final boolean forcedStraight = false;
@@ -407,6 +411,21 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
             return waypoints;
     }
 
+    /**
+     * Opposite Side Scale Path (untested)
+     */
+    private Waypoint[] calculateOtherScalePoints(int position) {
+        Waypoint[] waypoints = new Waypoint[5];
+        waypoints[0] = new Waypoint(0, 0, 0);
+        waypoints[1] = new Waypoint(130, 0, 0);
+        waypoints[2] = new Waypoint(220, 90, Pathfinder.d2r(90));
+        waypoints[3] = new Waypoint(220, 135, Pathfinder.d2r(90));
+        waypoints[4] = new Waypoint(270, 175, Pathfinder.d2r(-15));
+        if (position == RIGHT_POSITION)
+          return mirrorWaypoints(waypoints);
+        else
+          return waypoints;
+    }
     private Waypoint[] calculateStraightPoints(double x) {
         return new Waypoint[] { new Waypoint(0, 0, 0), new Waypoint(x, 0, 0) };
     }
