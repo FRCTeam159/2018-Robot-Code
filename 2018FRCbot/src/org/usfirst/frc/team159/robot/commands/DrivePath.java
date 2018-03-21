@@ -74,6 +74,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
     private static final double straightEndPoint = ROBOT_TO_SWITCH;
 
     private static int plotCount = 0;
+    public boolean useCornerSidePaths=false;
 
     private ArrayList<PathData> pathDataList = new ArrayList<>();
     // static NetworkTableInstance ti=NetworkTableInstance.getDefault();
@@ -110,8 +111,8 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
         String gameMessage = Robot.fmsData;
 
         String newgameMessage = DriverStation.getInstance().getGameSpecificMessage();
-        while ((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
-            gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+        while ((newgameMessage.equals("") || newgameMessage == null) && timer.get() < 1) {
+            newgameMessage = DriverStation.getInstance().getGameSpecificMessage();
         }
         if (!newgameMessage.equals(Robot.fmsData)) {
             System.out.println(
@@ -326,6 +327,32 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
             return waypoints;
     }
 
+    private Waypoint[] calculateSideSwitchPoints(int position) {
+        if(useCornerSidePaths)
+            return calculateSideSwitchPointsAlt(position);
+        else
+            return calculateSideSwitchHookPoints(position);
+    }
+    /**
+     * Same Side Switch Path
+     * - Fires cube from Switch plate corner (45 degrees)
+     */
+    private Waypoint[] calculateSideSwitchPointsAlt(int position) {
+      double y = SWITCH_HOOK_Y_DISTANCE - 12;
+      double x = ROBOT_TO_SWITCH;
+      Waypoint[] waypoints = new Waypoint[3];
+      waypoints[0] = new Waypoint(0, 0, 0);
+      waypoints[1] = new Waypoint(x - 2 * y, 0, 0);
+      waypoints[2] = new Waypoint(x, y, Pathfinder.d2r(45));
+      if (position == RIGHT_POSITION)
+        return mirrorWaypoints(waypoints);
+      else
+        return waypoints;
+    }
+    /**
+     * Same Side Switch Path
+     * - Fires cube from Switch plate outside edge (90 degrees)
+     */
     private Waypoint[] calculateSideSwitchHookPoints(int position) {
         double y = SWITCH_HOOK_Y_DISTANCE;
         double x = ROBOT_TO_SWITCH_CENTER + 12;
@@ -339,7 +366,33 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
             return waypoints;
         }
     }
-
+    private Waypoint[] calculateSideScalePoints(int position) {
+        if(useCornerSidePaths)
+            return calculateSideScalePointsAlt(position);
+        else
+            return calculateSideScaleHookPoints(position);
+    }
+    /**
+     * Same Side Scale Path
+     * - Fires cube from Scale plate corner (45 degrees)
+     */
+    private Waypoint[] calculateSideScalePointsAlt(int position) {
+      Waypoint[] waypoints = new Waypoint[4];
+      double y = SCALE_HOOK_Y_DISTANCE;
+      double x = ROBOT_TO_SCALE - 6;
+      waypoints[0] = new Waypoint(0, 0, 0); 
+      waypoints[1] = new Waypoint(x - 6 * y, -6, 0);
+      waypoints[2] = new Waypoint(x - 2 * y, -6, 0);
+      waypoints[3] = new Waypoint(x, y - 6, Pathfinder.d2r(45));
+      if (position == RIGHT_POSITION)
+        return mirrorWaypoints(waypoints);
+      else
+        return waypoints;
+    }
+    /**
+     * Same Side Scale Path
+     * - Fires cube from Scale plate outside edge (90 degrees)
+     */
     private Waypoint[] calculateSideScaleHookPoints(int position) {
         double y = SCALE_HOOK_Y_DISTANCE;
         double x = ROBOT_TO_SCALE_CENTER;
@@ -415,16 +468,16 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
                 if (gameData.charAt(1) == 'R' && gameData.charAt(0) == 'R') {
                     if (isScalePreferredOverSwitch()) {
                         targetObject = SCALE;
-                        returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+                        returnWaypoints = calculateSideScalePoints(robotPosition);
                     } else {
                         targetObject = SWITCH;
-                        returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+                        returnWaypoints = calculateSideSwitchPoints(robotPosition);
                     }
                 } else if (gameData.charAt(0) == 'R') {
                     targetObject = SWITCH;
-                    returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+                    returnWaypoints = calculateSideSwitchPoints(robotPosition);
                 } else if (gameData.charAt(1) == 'R') {
-                    returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+                    returnWaypoints = calculateSideScalePoints(robotPosition);
                     targetObject = SCALE;
                 } else {
                     targetObject = NONE;
@@ -440,17 +493,17 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
             if (!isStraightPathForced()) {
                 if (gameData.charAt(1) == 'L' && gameData.charAt(0) == 'L') {
                     if (isScalePreferredOverSwitch()) {
-                        returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+                        returnWaypoints = calculateSideScalePoints(robotPosition);
                         targetObject = SCALE;
                     } else {
-                        returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+                        returnWaypoints = calculateSideSwitchPoints(robotPosition);
                         targetObject = SWITCH;
                     }
                 } else if (gameData.charAt(0) == 'L') {
                     targetObject = SWITCH;
-                    returnWaypoints = calculateSideSwitchHookPoints(robotPosition);
+                    returnWaypoints = calculateSideSwitchPoints(robotPosition);
                 } else if (gameData.charAt(1) == 'L') {
-                    returnWaypoints = calculateSideScaleHookPoints(robotPosition);
+                    returnWaypoints = calculateSideScalePoints(robotPosition);
                     targetObject = SCALE;
                 } else {
                     returnWaypoints = calculateStraightPoints(straightEndPoint);
