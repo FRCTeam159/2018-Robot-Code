@@ -31,9 +31,9 @@ public class Robot extends IterativeRobot implements RobotMap {
     private static Cameras cameras;
     public static DIOSwitches DIOs;
 
-    public static boolean useGyro = false;
+    public static boolean useGyro = true;
     public static boolean preferScale = false;
-    public static final boolean useHardware = true;
+    public static final boolean useHardware = false;
 
     public static int robotPosition = -1;
     public static String fmsData = "LLL";
@@ -80,7 +80,7 @@ public class Robot extends IterativeRobot implements RobotMap {
      */
     @Override
     public void disabledInit() {
-
+    	putValuesOnSmartDashboard();
     }
 
     @Override
@@ -191,11 +191,12 @@ public class Robot extends IterativeRobot implements RobotMap {
             Timer timer = new Timer();
             timer.start();
             timer.reset();
-            double tm = 0;
-            while ((fmsData.equals("") || fmsData == null) && (tm = timer.get() < 2)) {
+            while ((fmsData.equals("") || fmsData == null)) {
                 fmsData = DriverStation.getInstance().getGameSpecificMessage();
-                if (tm >= 2)
+                if (timer.get() > 1) {
                     System.out.println("WARNING getFMSMessage timed out !!");
+                    break;
+                }
             }
         }
         System.out.println("Robot.getFMSData FMS=" + fmsData);
