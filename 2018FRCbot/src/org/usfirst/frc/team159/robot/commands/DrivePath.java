@@ -107,16 +107,23 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
     double KD = Robot.KP;
     double KV = 1.0 / MAX_VEL;
     double KA = 0.0;
-		
-//		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-//		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
-//			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-//		}
-//
-//		putFMSDataOnDashboard(gameMessage);
-    
+	
     String gameMessage=Robot.fmsData;
+
+		String newgameMessage = DriverStation.getInstance().getGameSpecificMessage();
+		while((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+			gameMessage = DriverStation.getInstance().getGameSpecificMessage();
+		}
+    if(!newgameMessage.equals(Robot.fmsData)) {
+      System.out.println("WARNING DrivePath FMS different from autoInit now:"+newgameMessage+ " was:"+Robot.fmsData);
+      gameMessage=newgameMessage;
+    }
+		putFMSDataOnDashboard(gameMessage);
+    
     System.out.println("FMS="+gameMessage);
+
+    timer.start();
+    timer.reset();
 
 		double maxVelocity = MAX_VEL;
 		double maxAcceleration = MAX_ACC;
@@ -502,9 +509,9 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
 		return 2.54 * 12 * feet / 100;
 	}
 
-//	private void putFMSDataOnDashboard(String data) {
-//		SmartDashboard.putString("FMS Data", data);
-//	}
+	private void putFMSDataOnDashboard(String data) {
+		SmartDashboard.putString("FMS Data", data);
+	}
 //	
 //	private double getNumberOnDashboard(String name, double defaultValue) {
 //		return SmartDashboard.getNumber(name, defaultValue);

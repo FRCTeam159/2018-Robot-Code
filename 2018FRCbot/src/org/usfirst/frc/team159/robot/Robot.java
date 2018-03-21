@@ -183,7 +183,7 @@ public class Robot extends IterativeRobot implements RobotMap {
   void getFMSData(){
     fmsData = DriverStation.getInstance().getGameSpecificMessage();   
     if((fmsData.equals("") || fmsData == null)) {
-      System.out.println("getGameSpecificMessage() not valid at autonomousInit!!");
+      System.out.println("WARNING getGameSpecificMessage() not valid at autonomousInit!!");
       Timer timer = new Timer();
       timer.start();
       timer.reset();
@@ -191,7 +191,7 @@ public class Robot extends IterativeRobot implements RobotMap {
       while((fmsData.equals("") || fmsData == null) && (tm=timer.get() < 2)) {
         fmsData = DriverStation.getInstance().getGameSpecificMessage();
         if(tm >=2)
-          System.out.println("getFMSMessage timed out !!");
+          System.out.println("WARNING getFMSMessage timed out !!");
       }
     }    
     System.out.println("Robot.getFMSData FMS="+fmsData);
