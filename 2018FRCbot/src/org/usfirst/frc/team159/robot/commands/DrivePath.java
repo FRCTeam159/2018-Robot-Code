@@ -47,7 +47,6 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
     private DistanceFollower rightFollower;
     private static final boolean printCalculatedTrajectory = false;
     private static final boolean printCalculatedPath = false;
-    private static boolean useGyro = false;
     private static final boolean debugCommand = false;
     private static final boolean printPath = false;
 
@@ -108,7 +107,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
         double MAX_JRK = Robot.MAX_JRK;
         double KP = Robot.KP;
         double KI = 0.0;
-        double KD = Robot.KP;
+        double KD = 0.0;
         double KV = 1.0 / MAX_VEL;
         double KA = 0.0;
 
@@ -130,11 +129,7 @@ public class DrivePath extends Command implements PhysicalConstants, RobotMap {
         timer.start();
         timer.reset();
 
-        double maxVelocity = MAX_VEL;
-        double maxAcceleration = MAX_ACC;
-        double maxJerk = MAX_JRK;
-
-        trajectory = calculateTrajectory(gameMessage, robotPosition, maxVelocity, maxAcceleration, maxJerk);
+        trajectory = calculateTrajectory(gameMessage, robotPosition, MAX_VEL, MAX_ACC, MAX_JRK);
 
         if (trajectory == null) {
             SmartDashboard.putString("Target", "ERROR");
