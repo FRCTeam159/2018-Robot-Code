@@ -110,12 +110,13 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 
 	@Override
 	public void autonomousInit() {
-		Timer timer = new Timer();
-		timer.start();
 		System.out.println("autonomousInit");
 
+		Timer timer = new Timer();
+		timer.start();
+
 		String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
-		while ((gameMessage.equals("") || gameMessage == null) && timer.get() < 1) {
+		while ((gameMessage.equals("")) && timer.get() < 1) {
 			fmsData = DriverStation.getInstance().getGameSpecificMessage();
 		}
 		System.out.println(fmsData);
@@ -126,19 +127,23 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 		showSwitchesState();
 		// getAutoTargets();
 
-		if (autonomousCommand != null)
-			autonomousCommand.cancel();
+		if (autonomousCommand != null) {
+            autonomousCommand.cancel();
+        }
 
 		SmartDashboard.putBoolean("Error", false);
-		autonomousCommand = new CommandGroup();
-		if (calibrate)
-			autonomousCommand.addSequential(new Calibrate());
-		else
-			autonomousCommand = new AutoSelector();
+		if (calibrate) {
+            autonomousCommand = new CommandGroup();
+            autonomousCommand.addSequential(new Calibrate());
+        } else {
+            autonomousCommand = new AutoSelector();
+        }
 		driveTrain.reset();
 		// schedule the autonomous command (example)
-		if (autonomousCommand != null)
-			autonomousCommand.start();
+		if (autonomousCommand != null) {
+            autonomousCommand.start();
+        }
+        System.out.println("Auto command: " + autonomousCommand);
 	}
 
 	/**
@@ -183,10 +188,6 @@ public class Robot extends IterativeRobot implements RobotMap, Constants {
 	void reset() {
 		driveTrain.reset();
 		elevator.reset();
-		// cubeHandler.reset();
-		// cubeHandler.enable();
-		// elevator.enable();
-		// driveTrain.enable();
 	}
 
 	private void setDashboardData() {
